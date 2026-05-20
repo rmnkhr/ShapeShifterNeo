@@ -15,7 +15,8 @@ type Orientation = 'vertical' | 'horizontal';
 type Edge = 'left' | 'right' | 'top';
 
 @Component({
-  standalone: false,  selector: 'app-splitter',
+  standalone: false,
+  selector: 'app-splitter',
   templateUrl: './splitter.component.html',
   styleUrls: ['./splitter.component.scss'],
   // TODO: use 'OnPush' change detection

@@ -20,7 +20,8 @@ import { map } from 'rxjs/operators';
 declare const ga: Function;
 
 @Component({
-  standalone: false,  selector: 'app-toolbar',
+  standalone: false,
+  selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

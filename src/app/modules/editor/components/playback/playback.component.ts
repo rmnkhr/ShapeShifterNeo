@@ -5,7 +5,8 @@ import { getPlaybackState } from 'app/modules/editor/store/playback/selectors';
 import { Observable } from 'rxjs';
 
 @Component({
-  standalone: false,  selector: 'app-playback',
+  standalone: false,
+  selector: 'app-playback',
   templateUrl: './playback.component.html',
   styleUrls: ['./playback.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

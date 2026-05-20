@@ -4,7 +4,8 @@ import * as $ from 'jquery';
 const GROUPS = new Map<string, JQuery[]>();
 
 @Directive({
-  standalone: false,  selector: '[appScrollGroup]',
+  standalone: false,
+  selector: '[appScrollGroup]',
 })
 export class ScrollGroupDirective implements OnDestroy {
   @Input()

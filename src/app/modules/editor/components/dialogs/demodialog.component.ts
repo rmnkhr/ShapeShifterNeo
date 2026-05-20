@@ -3,7 +3,8 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { DEMO_INFOS } from 'app/modules/editor/scripts/demos';
 
 @Component({
-  standalone: false,  selector: 'app-demodialog',
+  standalone: false,
+  selector: 'app-demodialog',
   template: `
   <span matDialogTitle>Choose a demo</span>
   <mat-radio-group class="dialog-radio-group" [(ngModel)]="this.selectedDemoInfo">

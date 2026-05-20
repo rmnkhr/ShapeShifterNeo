@@ -7,7 +7,9 @@ import * as $ from 'jquery';
 
 import { CanvasLayoutDestroyableMixin } from './CanvasLayoutMixin';
 
-@Directive({ standalone: false, selector: '[appCanvasPaper]' })
+@Directive({
+  standalone: false,
+  selector: '[appCanvasPaper]' })
 export class CanvasPaperDirective extends CanvasLayoutDestroyableMixin()
   implements AfterViewInit, OnDestroy {
   @Input()

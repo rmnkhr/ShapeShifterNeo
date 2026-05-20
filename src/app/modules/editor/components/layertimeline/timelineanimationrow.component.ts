@@ -17,7 +17,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Component({
-  standalone: false,  selector: 'app-timelineanimationrow',
+  standalone: false,
+  selector: 'app-timelineanimationrow',
   templateUrl: './timelineanimationrow.component.html',
   styleUrls: ['./timelineanimationrow.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,7 +2,8 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  standalone: false,  selector: 'app-confirmdialog',
+  standalone: false,
+  selector: 'app-confirmdialog',
   template: `
   <span matDialogTitle>{{ this.data.title }}</span>
   <mat-dialog-content>

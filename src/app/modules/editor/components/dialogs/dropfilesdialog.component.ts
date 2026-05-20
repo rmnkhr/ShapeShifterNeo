@@ -7,7 +7,8 @@ export enum DropFilesAction {
 }
 
 @Component({
-  standalone: false,  selector: 'app-dropfilesdialog',
+  standalone: false,
+  selector: 'app-dropfilesdialog',
   template: `
   <span matDialogTitle>Start from scratch?</span>
   <mat-dialog-content>

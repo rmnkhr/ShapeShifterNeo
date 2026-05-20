@@ -1,6 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, NgModule } from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -77,7 +76,6 @@ import { environment } from 'environments/environment';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    FlexLayoutModule,
     FormsModule,
     HttpClientModule,
     ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),

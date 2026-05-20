@@ -1,0 +1,36 @@
+// Drop-in CSS shim for the legacy @angular/flex-layout attributes still used
+// in templates. Only the patterns actually present in this project are
+// supported. Once templates are rewritten to use classes or inline CSS, this
+// file should be deleted.
+
+[fxLayout='row'] {
+  display: flex;
+  flex-direction: row;
+}
+
+[fxLayout='column'] {
+  display: flex;
+  flex-direction: column;
+}
+
+[fxFlex] {
+  flex: 1 1 0;
+}
+
+[fxFlex='1 1 auto'] {
+  flex: 1 1 auto;
+}
+
+[fxFlex='none'] {
+  flex: none;
+}
+
+[fxLayoutAlign='center center'] {
+  justify-content: center;
+  align-items: center;
+}
+
+[fxLayoutAlign='start center'] {
+  justify-content: flex-start;
+  align-items: center;
+}

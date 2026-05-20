@@ -4,7 +4,8 @@ import { PaperService, ShortcutService } from 'app/modules/editor/services';
 import { Observable } from 'rxjs';
 
 @Component({
-  standalone: false,  selector: 'app-toolpanel',
+  standalone: false,
+  selector: 'app-toolpanel',
   templateUrl: './toolpanel.component.html',
   styleUrls: ['./toolpanel.component.scss'],
 })

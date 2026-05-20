@@ -27,7 +27,9 @@ type Context = CanvasRenderingContext2D;
 /**
  * Directive that draws the current vector layer to the canvas.
  */
-@Directive({ standalone: false, selector: '[appCanvasLayers]' })
+@Directive({
+  standalone: false,
+  selector: '[appCanvasLayers]' })
 export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implements AfterViewInit {
   @Input()
   actionSource: ActionSource;
