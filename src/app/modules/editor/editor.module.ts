@@ -96,7 +96,6 @@ import { environment } from 'environments/environment';
     MatTooltipModule,
   ],
   providers: [{ provide: ErrorHandler, useFactory: errorHandlerFactory }],
-  entryComponents: [ConfirmDialogComponent, DemoDialogComponent, DropFilesDialogComponent],
   bootstrap: [RootComponent],
 })
 export class EditorModule {
