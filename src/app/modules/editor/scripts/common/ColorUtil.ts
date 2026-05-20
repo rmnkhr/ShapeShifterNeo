@@ -3,9 +3,12 @@ import * as tinycolor from 'tinycolor2';
 
 export function parseAndroidColor(val: string): tinycolor.ColorFormats.RGBA | undefined {
   if (typeof val !== 'string') {
-    bugsnagClient.notify(new TypeError(`Argument has incorrect type (${typeof val}): ` + val), {
-      severity: 'warning',
-    });
+    bugsnagClient.notify(
+      new TypeError(`Argument has incorrect type (${typeof val}): ` + val),
+      event => {
+        event.severity = 'warning';
+      },
+    );
     return undefined;
   }
   val = (val || '').replace(/^\s*#?|\s*$/g, '');

@@ -41,8 +41,8 @@ export class ClipboardService {
     const pasteHandlerFn = (event: JQuery.Event) => {
       if (this.actionModeService.isActionMode()) {
         // TODO: make action mode automatically exit when layers/blocks are added in other parts of the app
-        bugsnagClient.notify('Attempt to import files while in action mode', {
-          severity: 'warning',
+        bugsnagClient.notify('Attempt to import files while in action mode', event => {
+          event.severity = 'warning';
         });
         return false;
       }
