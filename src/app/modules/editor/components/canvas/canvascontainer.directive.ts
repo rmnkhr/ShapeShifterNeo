@@ -6,7 +6,7 @@ import { CanvasLayoutMixin, Size } from './CanvasLayoutMixin';
 /**
  * Directive that resizes the canvas container when necessary.
  */
-@Directive({ selector: '[appCanvasContainer]' })
+@Directive({ standalone: false, selector: '[appCanvasContainer]' })
 export class CanvasContainerDirective extends CanvasLayoutMixin() {
   private readonly element: JQuery;
 

@@ -17,7 +17,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-layerlisttree',
+  standalone: false,  selector: 'app-layerlisttree',
   templateUrl: './layerlisttree.component.html',
   styleUrls: ['./layerlisttree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -82,7 +82,7 @@ type Context = CanvasRenderingContext2D;
  * A directive that draws overlay selections and other content on top
  * of the currently active vector layer.
  */
-@Directive({ selector: '[appCanvasOverlay]' })
+@Directive({ standalone: false, selector: '[appCanvasOverlay]' })
 export class CanvasOverlayDirective extends CanvasLayoutDestroyableMixin()
   implements AfterViewInit {
   @Input() actionSource: ActionSource;

@@ -33,7 +33,7 @@ declare const ga: Function;
 
 // TODO: when you enter a 'start time' larger than 'end time', transform 'end time' correctly
 @Component({
-  selector: 'app-propertyinput',
+  standalone: false,  selector: 'app-propertyinput',
   templateUrl: './propertyinput.component.html',
   styleUrls: ['./propertyinput.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -12,7 +12,7 @@ const GRID_INTERVALS_PX: ReadonlyArray<number> = [1, 2, 4, 8, 16, 24, 48, 100, 1
 const LABEL_OFFSET = 12;
 const TICK_SIZE = 6;
 
-@Directive({ selector: '[appCanvasRuler]' })
+@Directive({ standalone: false, selector: '[appCanvasRuler]' })
 export class CanvasRulerDirective extends CanvasLayoutMixin() {
   @Input()
   orientation: Orientation;

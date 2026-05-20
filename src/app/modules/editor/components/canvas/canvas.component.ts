@@ -33,7 +33,7 @@ import { CanvasRulerDirective } from './canvasruler.directive';
 const CANVAS_MARGIN = 36;
 
 @Component({
-  selector: 'app-canvas',
+  standalone: false,  selector: 'app-canvas',
   templateUrl: './canvas.component.html',
   styleUrls: ['./canvas.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

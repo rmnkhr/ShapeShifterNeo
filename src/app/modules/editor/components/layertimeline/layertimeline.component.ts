@@ -76,7 +76,7 @@ enum MouseActions {
 declare const ga: Function;
 
 @Component({
-  selector: 'app-layertimeline',
+  standalone: false,  selector: 'app-layertimeline',
   templateUrl: './layertimeline.component.html',
   styleUrls: ['./layertimeline.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
