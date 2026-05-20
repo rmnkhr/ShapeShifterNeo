@@ -158,8 +158,8 @@
       flex-direction: column;
       margin: 0;
       .slt-timeline-animation-meta {
-        height: $headerHeight / 2 - 4px;
-        line-height: $headerHeight / 2 - 4px;
+        height: calc(#{$headerHeight} / 2 - 4px);
+        line-height: calc(#{$headerHeight} / 2 - 4px);
         margin: 2px -4px;
         padding: 0 4px;
         border-radius: 2px;
