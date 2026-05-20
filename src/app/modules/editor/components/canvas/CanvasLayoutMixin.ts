@@ -16,7 +16,7 @@ export interface ICanvasLayout {
 class EmptyBase {}
 
 export function CanvasLayoutMixin<TBase extends Constructor = typeof EmptyBase>(
-  Base: TBase = EmptyBase as unknown as TBase,
+  Base: TBase = (EmptyBase as unknown) as TBase,
 ): Constructor<ICanvasLayout> & TBase {
   return class CanvasLayout extends Base {
     private bounds = { w: 24, h: 24 };

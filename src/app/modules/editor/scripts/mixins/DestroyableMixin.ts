@@ -8,7 +8,7 @@ export interface IDestroyable extends OnDestroy {
 class EmptyBase {}
 
 export function DestroyableMixin<TBase extends Constructor = typeof EmptyBase>(
-  Base: TBase = EmptyBase as unknown as TBase,
+  Base: TBase = (EmptyBase as unknown) as TBase,
 ): Constructor<IDestroyable> & TBase {
   return class Destroyable extends Base implements OnDestroy {
     private readonly subscriptions: Subscription[] = [];
