@@ -49,7 +49,7 @@ import 'core-js/es7/array';
 /***************************************************************************************************
  * Zone JS is required by Angular itself.
  */
-import 'zone.js/dist/zone';
+import 'zone.js';
 
 import storage from 'local-storage-fallback';
 

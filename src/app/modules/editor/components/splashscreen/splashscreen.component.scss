@@ -1,4 +1,5 @@
-@import '@angular/material/theming';
+@use '@angular/material' as mat;
+
 :host {
     position: absolute;
     left: 0;
@@ -6,7 +7,7 @@
     right: 0;
     bottom: 0;
     user-select: none;
-    background-color: mat-color(mat-palette($mat-grey, 300));
+    background-color: mat.get-color-from-palette(mat.define-palette(mat.$grey-palette, 300));
 }
 
 .splashscreen-logo {

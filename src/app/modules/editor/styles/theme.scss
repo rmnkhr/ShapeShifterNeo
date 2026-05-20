@@ -1,14 +1,15 @@
-@import '@angular/material/theming';
-@import '../components/canvas/_canvas-theme.scss';
-@import '../components/dialogs/_dialog-theme.scss';
-@import '../components/layertimeline/_layerlisttree-theme.scss';
-@import '../components/layertimeline/_layertimeline-theme.scss';
-@import '../components/layertimeline/_timelineanimationrow-theme.scss';
-@import '../components/playback/_playback-theme.scss';
-@import '../components/propertyinput/_propertyinput-theme.scss';
-@import '../components/root/_root-theme.scss';
-@import '../components/toolbar/_toolbar-theme.scss';
-@include mat-core();
+@use '@angular/material' as mat;
+@use '../components/canvas/canvas-theme' as canvasTheme;
+@use '../components/dialogs/dialog-theme' as dialogTheme;
+@use '../components/layertimeline/layerlisttree-theme' as layerlisttreeTheme;
+@use '../components/layertimeline/layertimeline-theme' as layertimelineTheme;
+@use '../components/layertimeline/timelineanimationrow-theme' as timelineanimationrowTheme;
+@use '../components/playback/playback-theme' as playbackTheme;
+@use '../components/propertyinput/propertyinput-theme' as propertyinputTheme;
+@use '../components/root/root-theme' as rootTheme;
+@use '../components/toolbar/toolbar-theme' as toolbarTheme;
+
+@include mat.core();
 
 $ss-light-theme-foreground: (
   divider:                rgba(black, 0.12),
@@ -34,62 +35,74 @@ $ss-dark-theme-foreground: (
 
 $ss-light-theme-background: (
   base: white,
-  base50: map-get($mat-grey, 50),
-  base100: map-get($mat-grey, 100),
-  base200: map-get($mat-grey, 200),
-  base200-inverse: map-get($mat-grey, 900),
-  base300: map-get($mat-grey, 300),
+  base50: map-get(mat.$grey-palette, 50),
+  base100: map-get(mat.$grey-palette, 100),
+  base200: map-get(mat.$grey-palette, 200),
+  base200-inverse: map-get(mat.$grey-palette, 900),
+  base300: map-get(mat.$grey-palette, 300),
 );
 
 $ss-dark-theme-background: (
   base: black,
   base50: #303030,
-  base100: map_get($mat-grey, 800),
-  base200: map_get($mat-grey, 900),
-  base200-inverse: map-get($mat-grey, 200),
+  base100: map_get(mat.$grey-palette, 800),
+  base200: map_get(mat.$grey-palette, 900),
+  base200-inverse: map-get(mat.$grey-palette, 200),
   base300: #101010,
 );
 
-$light-accent: mat-palette($mat-blue, A400, A200, A700);
-$dark-accent: mat-palette($mat-deep-orange, A200, A100, A400);
+$light-accent: mat.define-palette(mat.$blue-palette, A400, A200, A700);
+$dark-accent: mat.define-palette(mat.$deep-orange-palette, A200, A100, A400);
 
-@function ss-light-theme($primary, $accent, $warn: mat-palette($mat-red)) {
-    $base-theme: mat-light-theme($primary, $accent, $warn);
+@function ss-light-theme($primary, $accent, $warn: mat.define-palette(mat.$red-palette)) {
+    $base-theme: mat.define-light-theme((
+      color: (primary: $primary, accent: $accent, warn: $warn),
+    ));
     $result: map_merge($base-theme, (
+      primary: $primary,
+      accent: $accent,
+      warn: $warn,
       accent-inverse: $dark-accent,
       ss-foreground: $ss-light-theme-foreground,
       ss-background: $ss-light-theme-background,
+      is-dark: false,
     ));
     @return $result;
 }
 
-@function ss-dark-theme($primary, $accent, $warn: mat-palette($mat-red)) {
-    $base-theme: mat-dark-theme($primary, $accent, $warn);
+@function ss-dark-theme($primary, $accent, $warn: mat.define-palette(mat.$red-palette)) {
+    $base-theme: mat.define-dark-theme((
+      color: (primary: $primary, accent: $accent, warn: $warn),
+    ));
     $result: map_merge($base-theme, (
+      primary: $primary,
+      accent: $accent,
+      warn: $warn,
       accent-inverse: $light-accent,
       ss-foreground: $ss-dark-theme-foreground,
       ss-background: $ss-dark-theme-background,
+      is-dark: true,
     ));
     @return $result;
 }
 
 @mixin build-custom-theme($theme) {
-    @include angular-material-theme($theme);
-    @include ss-canvas-theme($theme);
-    @include ss-dialog-theme($theme);
-    @include ss-layerlisttree-theme($theme);
-    @include ss-layertimeline-theme($theme);
-    @include ss-timelineanimationrow-theme($theme);
-    @include ss-playback-theme($theme);
-    @include ss-propertyinput-theme($theme);
-    @include ss-root-theme($theme);
-    @include ss-toolbar-theme($theme);
+    @include mat.all-component-themes($theme);
+    @include canvasTheme.ss-canvas-theme($theme);
+    @include dialogTheme.ss-dialog-theme($theme);
+    @include layerlisttreeTheme.ss-layerlisttree-theme($theme);
+    @include layertimelineTheme.ss-layertimeline-theme($theme);
+    @include timelineanimationrowTheme.ss-timelineanimationrow-theme($theme);
+    @include playbackTheme.ss-playback-theme($theme);
+    @include propertyinputTheme.ss-propertyinput-theme($theme);
+    @include rootTheme.ss-root-theme($theme);
+    @include toolbarTheme.ss-toolbar-theme($theme);
 }
 
-$light-primary: mat-palette($mat-blue-grey, 500);
-$light-warn: mat-palette($mat-red);
-$dark-primary: mat-palette($mat-indigo, 700);
-$dark-warn: mat-palette($mat-red);
+$light-primary: mat.define-palette(mat.$blue-grey-palette, 500);
+$light-warn: mat.define-palette(mat.$red-palette);
+$dark-primary: mat.define-palette(mat.$indigo-palette, 700);
+$dark-warn: mat.define-palette(mat.$red-palette);
 $light-theme: ss-light-theme($light-primary, $light-accent, $light-warn);
 $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
 @include build-custom-theme($light-theme);
@@ -115,12 +128,12 @@ $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
         @include theme-animation-properties;
     }
     @keyframes lightToDark#{$animName} {
-        0% { background-color: mat-color($light, $paletteKey); }
-        100% { background-color: mat-color($dark, $paletteKey); }
+        0% { background-color: mat.get-color-from-palette($light, $paletteKey); }
+        100% { background-color: mat.get-color-from-palette($dark, $paletteKey); }
     }
     @keyframes darkToLight#{$animName} {
-        0% { background-color: mat-color($dark, $paletteKey); }
-        100% { background-color: mat-color($light, $paletteKey); }
+        0% { background-color: mat.get-color-from-palette($dark, $paletteKey); }
+        100% { background-color: mat.get-color-from-palette($light, $paletteKey); }
     }
 }
 
@@ -148,18 +161,18 @@ $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
     @include theme-animation-properties;
 }
 @keyframes actionModeOnToOffDark {
-    0% { background-color: mat-color(map-get($dark-theme, accent)); }
-    100% { background-color: mat-color(map-get($dark-theme, primary)); }
+    0% { background-color: mat.get-color-from-palette(map-get($dark-theme, accent)); }
+    100% { background-color: mat.get-color-from-palette(map-get($dark-theme, primary)); }
 }
 @keyframes actionModeOffToOnDark {
-    0% { background-color: mat-color(map-get($dark-theme, primary)); }
-    100% { background-color: mat-color(map-get($dark-theme, accent)); }
+    0% { background-color: mat.get-color-from-palette(map-get($dark-theme, primary)); }
+    100% { background-color: mat.get-color-from-palette(map-get($dark-theme, accent)); }
 }
 @keyframes actionModeOnToOffLight {
-    0% { background-color: mat-color(map-get($light-theme, accent)); }
-    100% { background-color: mat-color(map-get($light-theme, primary)); }
+    0% { background-color: mat.get-color-from-palette(map-get($light-theme, accent)); }
+    100% { background-color: mat.get-color-from-palette(map-get($light-theme, primary)); }
 }
 @keyframes actionModeOffToOnLight {
-    0% { background-color: mat-color(map-get($light-theme, primary)); }
-    100% { background-color: mat-color(map-get($light-theme, accent)); }
+    0% { background-color: mat.get-color-from-palette(map-get($light-theme, primary)); }
+    100% { background-color: mat.get-color-from-palette(map-get($light-theme, accent)); }
 }
