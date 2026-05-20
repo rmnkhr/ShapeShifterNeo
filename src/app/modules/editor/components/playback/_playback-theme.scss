@@ -10,15 +10,15 @@
         button {
             &[mat-icon-button] {
                 mat-icon {
-                    color: mat.get-color-from-palette($foreground, secondary-text);
+                    color: mat.m2-get-color-from-palette($foreground, secondary-text);
                 }
                 mat-icon.activated {
-                    color: mat.get-color-from-palette(mat.define-palette(mat.$orange-palette, A700));
+                    color: mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-orange-palette, A700));
                 }
             }
             &[maticon-button][disabled] {
                 mat-icon {
-                    color: mat.get-color-from-palette($foreground, disabled-text);
+                    color: mat.m2-get-color-from-palette($foreground, disabled-text);
                 }
             }
         }

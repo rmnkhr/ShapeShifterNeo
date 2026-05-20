@@ -6,18 +6,18 @@
     $accent-inverse: map-get($theme, accent-inverse);
     $is-dark: map-get($theme, is-dark);
     .toolbar {
-        background-color: mat.get-color-from-palette($primary);
-        color: mat.get-contrast-color-from-palette($primary, default);
+        background-color: mat.m2-get-color-from-palette($primary);
+        color: mat.m2-get-contrast-color-from-palette($primary, default);
         button {
             &[mat-icon-button][disabled] {
                 mat-icon {
-                    color: mat.get-color-from-palette($foreground, if($is-dark, disabled-text, disabled-text-inverse));
+                    color: mat.m2-get-color-from-palette($foreground, if($is-dark, disabled-text, disabled-text-inverse));
                 }
             }
         }
         button.activated {
             mat-icon {
-                color: mat.get-color-from-palette($accent-inverse);
+                color: mat.m2-get-color-from-palette($accent-inverse);
             }
         }
     }

@@ -5,10 +5,10 @@
     $foreground: map-get($theme, ss-foreground);
     mat-dialog-actions {
         button {
-            color: mat.get-color-from-palette($accent);
+            color: mat.m2-get-color-from-palette($accent);
         }
     }
     mat-dialog-content {
-        color: mat.get-color-from-palette($foreground, secondary-text);
+        color: mat.m2-get-color-from-palette($foreground, secondary-text);
     }
 }

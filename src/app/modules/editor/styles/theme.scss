@@ -35,27 +35,27 @@ $ss-dark-theme-foreground: (
 
 $ss-light-theme-background: (
   base: white,
-  base50: map-get(mat.$grey-palette, 50),
-  base100: map-get(mat.$grey-palette, 100),
-  base200: map-get(mat.$grey-palette, 200),
-  base200-inverse: map-get(mat.$grey-palette, 900),
-  base300: map-get(mat.$grey-palette, 300),
+  base50: map-get(mat.$m2-grey-palette, 50),
+  base100: map-get(mat.$m2-grey-palette, 100),
+  base200: map-get(mat.$m2-grey-palette, 200),
+  base200-inverse: map-get(mat.$m2-grey-palette, 900),
+  base300: map-get(mat.$m2-grey-palette, 300),
 );
 
 $ss-dark-theme-background: (
   base: black,
   base50: #303030,
-  base100: map_get(mat.$grey-palette, 800),
-  base200: map_get(mat.$grey-palette, 900),
-  base200-inverse: map-get(mat.$grey-palette, 200),
+  base100: map_get(mat.$m2-grey-palette, 800),
+  base200: map_get(mat.$m2-grey-palette, 900),
+  base200-inverse: map-get(mat.$m2-grey-palette, 200),
   base300: #101010,
 );
 
-$light-accent: mat.define-palette(mat.$blue-palette, A400, A200, A700);
-$dark-accent: mat.define-palette(mat.$deep-orange-palette, A200, A100, A400);
+$light-accent: mat.m2-define-palette(mat.$m2-blue-palette, A400, A200, A700);
+$dark-accent: mat.m2-define-palette(mat.$m2-deep-orange-palette, A200, A100, A400);
 
-@function ss-light-theme($primary, $accent, $warn: mat.define-palette(mat.$red-palette)) {
-    $base-theme: mat.define-light-theme((
+@function ss-light-theme($primary, $accent, $warn: mat.m2-define-palette(mat.$m2-red-palette)) {
+    $base-theme: mat.m2-define-light-theme((
       color: (primary: $primary, accent: $accent, warn: $warn),
     ));
     $result: map_merge($base-theme, (
@@ -70,8 +70,8 @@ $dark-accent: mat.define-palette(mat.$deep-orange-palette, A200, A100, A400);
     @return $result;
 }
 
-@function ss-dark-theme($primary, $accent, $warn: mat.define-palette(mat.$red-palette)) {
-    $base-theme: mat.define-dark-theme((
+@function ss-dark-theme($primary, $accent, $warn: mat.m2-define-palette(mat.$m2-red-palette)) {
+    $base-theme: mat.m2-define-dark-theme((
       color: (primary: $primary, accent: $accent, warn: $warn),
     ));
     $result: map_merge($base-theme, (
@@ -99,10 +99,10 @@ $dark-accent: mat.define-palette(mat.$deep-orange-palette, A200, A100, A400);
     @include toolbarTheme.ss-toolbar-theme($theme);
 }
 
-$light-primary: mat.define-palette(mat.$blue-grey-palette, 500);
-$light-warn: mat.define-palette(mat.$red-palette);
-$dark-primary: mat.define-palette(mat.$indigo-palette, 700);
-$dark-warn: mat.define-palette(mat.$red-palette);
+$light-primary: mat.m2-define-palette(mat.$m2-blue-grey-palette, 500);
+$light-warn: mat.m2-define-palette(mat.$m2-red-palette);
+$dark-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 700);
+$dark-warn: mat.m2-define-palette(mat.$m2-red-palette);
 $light-theme: ss-light-theme($light-primary, $light-accent, $light-warn);
 $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
 @include build-custom-theme($light-theme);
@@ -128,12 +128,12 @@ $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
         @include theme-animation-properties;
     }
     @keyframes lightToDark#{$animName} {
-        0% { background-color: mat.get-color-from-palette($light, $paletteKey); }
-        100% { background-color: mat.get-color-from-palette($dark, $paletteKey); }
+        0% { background-color: mat.m2-get-color-from-palette($light, $paletteKey); }
+        100% { background-color: mat.m2-get-color-from-palette($dark, $paletteKey); }
     }
     @keyframes darkToLight#{$animName} {
-        0% { background-color: mat.get-color-from-palette($dark, $paletteKey); }
-        100% { background-color: mat.get-color-from-palette($light, $paletteKey); }
+        0% { background-color: mat.m2-get-color-from-palette($dark, $paletteKey); }
+        100% { background-color: mat.m2-get-color-from-palette($light, $paletteKey); }
     }
 }
 
@@ -161,18 +161,18 @@ $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
     @include theme-animation-properties;
 }
 @keyframes actionModeOnToOffDark {
-    0% { background-color: mat.get-color-from-palette(map-get($dark-theme, accent)); }
-    100% { background-color: mat.get-color-from-palette(map-get($dark-theme, primary)); }
+    0% { background-color: mat.m2-get-color-from-palette(map-get($dark-theme, accent)); }
+    100% { background-color: mat.m2-get-color-from-palette(map-get($dark-theme, primary)); }
 }
 @keyframes actionModeOffToOnDark {
-    0% { background-color: mat.get-color-from-palette(map-get($dark-theme, primary)); }
-    100% { background-color: mat.get-color-from-palette(map-get($dark-theme, accent)); }
+    0% { background-color: mat.m2-get-color-from-palette(map-get($dark-theme, primary)); }
+    100% { background-color: mat.m2-get-color-from-palette(map-get($dark-theme, accent)); }
 }
 @keyframes actionModeOnToOffLight {
-    0% { background-color: mat.get-color-from-palette(map-get($light-theme, accent)); }
-    100% { background-color: mat.get-color-from-palette(map-get($light-theme, primary)); }
+    0% { background-color: mat.m2-get-color-from-palette(map-get($light-theme, accent)); }
+    100% { background-color: mat.m2-get-color-from-palette(map-get($light-theme, primary)); }
 }
 @keyframes actionModeOffToOnLight {
-    0% { background-color: mat.get-color-from-palette(map-get($light-theme, primary)); }
-    100% { background-color: mat.get-color-from-palette(map-get($light-theme, accent)); }
+    0% { background-color: mat.m2-get-color-from-palette(map-get($light-theme, primary)); }
+    100% { background-color: mat.m2-get-color-from-palette(map-get($light-theme, accent)); }
 }

@@ -6,12 +6,12 @@
   $accent: map-get($theme, accent);
   $is-dark: map-get($theme, is-dark);
   .slt-layer {
-    color: mat.get-color-from-palette($foreground, secondary-text);
+    color: mat.m2-get-color-from-palette($foreground, secondary-text);
     &:focus {
-      box-shadow: 0 0 0 1px mat.get-color-from-palette($accent) inset;
+      box-shadow: 0 0 0 1px mat.m2-get-color-from-palette($accent) inset;
     }
     &.is-selected {
-      background-color: mat.get-color-from-palette($accent);
+      background-color: mat.m2-get-color-from-palette($accent);
       color: #fff;
       &,
       & mat-icon {
@@ -19,35 +19,35 @@
       }
     }
     &.is-hovered {
-      box-shadow: 0 0 0 1px mat.get-color-from-palette($accent) inset;
+      box-shadow: 0 0 0 1px mat.m2-get-color-from-palette($accent) inset;
     }
   }
   .slt-properties {
-    background-color: mat.get-color-from-palette($background, if($is-dark, base50, base));
-    box-shadow: 0 0 0 1px mat.get-color-from-palette($foreground, divider) inset;
+    background-color: mat.m2-get-color-from-palette($background, if($is-dark, base50, base));
+    box-shadow: 0 0 0 1px mat.m2-get-color-from-palette($foreground, divider) inset;
   }
   .slt-property {
-    color: mat.get-color-from-palette($foreground, secondary-text);
+    color: mat.m2-get-color-from-palette($foreground, secondary-text);
     &:not(:last-child) {
-      box-shadow: 0 -1px 0 mat.get-color-from-palette($foreground, divider) inset;
+      box-shadow: 0 -1px 0 mat.m2-get-color-from-palette($foreground, divider) inset;
     }
     button {
       &[mat-icon-button] {
         mat-icon {
-          color: mat.get-color-from-palette($foreground, disabled-text);
+          color: mat.m2-get-color-from-palette($foreground, disabled-text);
         }
       }
       &[mat-icon-button][disabled] {
         mat-icon {
-          color: mat.get-color-from-palette($foreground, disabled-text, 0.5);
+          color: mat.m2-get-color-from-palette($foreground, disabled-text, 0.5);
         }
       }
     }
   }
   .slt-layers-list-drag-indicator {
-    background-color: mat.get-color-from-palette($accent);
+    background-color: mat.m2-get-color-from-palette($accent);
     &::before {
-      background-color: mat.get-color-from-palette($accent);
+      background-color: mat.m2-get-color-from-palette($accent);
     }
   }
 }
