@@ -70,24 +70,24 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ShapeShifter:build"
+            "buildTarget": "ShapeShifter:build"
           },
           "configurations": {
             "development-beta": {
-              "browserTarget": "ShapeShifter:build:development-beta"
+              "buildTarget": "ShapeShifter:build:development-beta"
             },
             "production": {
-              "browserTarget": "ShapeShifter:build:production"
+              "buildTarget": "ShapeShifter:build:production"
             },
             "production-beta": {
-              "browserTarget": "ShapeShifter:build:production-beta"
+              "buildTarget": "ShapeShifter:build:production-beta"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ShapeShifter:build"
+            "buildTarget": "ShapeShifter:build"
           }
         },
         "test": {
@@ -127,7 +127,6 @@
       }
     }
   },
-  "defaultProject": "ShapeShifter",
   "schematics": {
     "@schematics/angular:component": {
       "spec": false,
