@@ -43,7 +43,7 @@ export class PropertyInputComponent implements OnInit {
 
   // Map used to track user state that has been entered into textfields
   // but may not have been saved in the store.
-  private readonly enteredValueMap = new Map<string>();
+  private readonly enteredValueMap = new Map<string, any>();
 
   themeState$: Observable<{ prevThemeType: ThemeType; currThemeType: ThemeType }>;
 

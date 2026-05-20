@@ -54,7 +54,7 @@ export class RootComponent extends DestroyableMixin() implements OnInit, AfterVi
 
   @HostBinding('class.ss-dark-theme')
   isDarkThemeHostBinding: boolean;
-  @ViewChild('displayContainer')
+  @ViewChild('displayContainer', { static: false })
   displayContainerRef: ElementRef;
   private $displayContainer: JQuery;
 

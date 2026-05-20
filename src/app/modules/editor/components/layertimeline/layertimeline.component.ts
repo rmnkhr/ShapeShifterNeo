@@ -83,11 +83,11 @@ declare const ga: Function;
 })
 export class LayerTimelineComponent extends DestroyableMixin()
   implements OnInit, AfterViewInit, TimelineAnimationRowCallbacks, LayerListTreeCallbacks {
-  @ViewChild('timeline')
+  @ViewChild('timeline', { static: false })
   private timelineRef: ElementRef;
   private $timeline: JQuery;
 
-  @ViewChild('timelineAnimation')
+  @ViewChild('timelineAnimation', { static: false })
   private timelineAnimationRef: ElementRef;
   @ViewChildren(LayerTimelineGridDirective)
   timelineDirectives: QueryList<LayerTimelineGridDirective>;
