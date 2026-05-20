@@ -1,1 +1,1 @@
-export { DestroyableMixin } from './DestroyableMixin';
+export { DestroyableMixin, IDestroyable } from './DestroyableMixin';

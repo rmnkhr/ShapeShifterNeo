@@ -1,16 +1,24 @@
 import { OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-export function DestroyableMixin<T extends Constructor>(Base = class {} as T) {
-  return class extends Base implements OnDestroy {
+export interface IDestroyable extends OnDestroy {
+  registerSubscription(sub: Subscription): void;
+}
+
+class EmptyBase {}
+
+export function DestroyableMixin<TBase extends Constructor = typeof EmptyBase>(
+  Base: TBase = EmptyBase as unknown as TBase,
+): Constructor<IDestroyable> & TBase {
+  return class Destroyable extends Base implements OnDestroy {
     private readonly subscriptions: Subscription[] = [];
 
-    protected registerSubscription(sub: Subscription) {
+    registerSubscription(sub: Subscription) {
       this.subscriptions.push(sub);
     }
 
     ngOnDestroy() {
       this.subscriptions.forEach(x => x.unsubscribe());
     }
-  };
+  } as Constructor<IDestroyable> & TBase;
 }

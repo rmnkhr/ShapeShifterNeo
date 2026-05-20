@@ -909,15 +909,16 @@ export class LayerTimelineComponent extends DestroyableMixin()
             return;
           }
 
-          let rect = element.getBoundingClientRect();
+          let rect: DOMRect = element.getBoundingClientRect();
           rect = {
+            ...rect,
             left: rect.left,
             top: rect.top + scrollTop - scrollerRect.top,
             bottom: rect.bottom + scrollTop - scrollerRect.top,
             height: rect.height,
             right: rect.right,
             width: rect.width,
-          };
+          } as DOMRect;
 
           const layer = this.vectorLayer.findLayerById(layerId);
           orderedLayerInfos.push({ layer, element, localRect: rect });

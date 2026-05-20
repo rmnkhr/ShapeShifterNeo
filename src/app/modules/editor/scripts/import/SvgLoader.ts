@@ -318,7 +318,7 @@ function buildClipPathIdMap(rootNode: Element) {
  */
 function buildPathInfosForClipPath(node: SVGClipPathElement) {
   // TODO: make sure that transforms from parent clip-paths aren't inherited...
-  const clipPathTransforms = getNodeTransforms(node).reverse();
+  const clipPathTransforms = getNodeTransforms(node as unknown as SVGGraphicsElement).reverse();
 
   const pathInfos: PathInfo[] = [];
   if (node.childNodes) {

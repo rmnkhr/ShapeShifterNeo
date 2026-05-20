@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { ActionSource } from 'app/modules/editor/model/actionmode';
 import { MathUtil, Matrix } from 'app/modules/editor/scripts/common';
-import { DestroyableMixin } from 'app/modules/editor/scripts/mixins';
 import { ThemeService } from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import { isActionMode } from 'app/modules/editor/store/actionmode/selectors';
@@ -25,7 +24,7 @@ import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { CanvasContainerDirective } from './canvascontainer.directive';
 import { CanvasLayersDirective } from './canvaslayers.directive';
-import { CanvasLayoutMixin, Size } from './CanvasLayoutMixin';
+import { CanvasLayoutDestroyableMixin, Size } from './CanvasLayoutMixin';
 import { CanvasOverlayDirective } from './canvasoverlay.directive';
 import { CanvasPaperDirective } from './canvaspaper.directive';
 import { CanvasRulerDirective } from './canvasruler.directive';
@@ -39,7 +38,7 @@ const CANVAS_MARGIN = 36;
   styleUrls: ['./canvas.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CanvasComponent extends CanvasLayoutMixin(DestroyableMixin())
+export class CanvasComponent extends CanvasLayoutDestroyableMixin()
   implements OnInit, AfterViewInit {
   readonly IS_BETA = environment.beta;
 

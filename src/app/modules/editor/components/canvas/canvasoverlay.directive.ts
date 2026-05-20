@@ -18,7 +18,6 @@ import {
 } from 'app/modules/editor/model/layers';
 import { Command, HitResult, Path, SubPath } from 'app/modules/editor/model/paths';
 import { MathUtil, Matrix, Point } from 'app/modules/editor/scripts/common';
-import { DestroyableMixin } from 'app/modules/editor/scripts/mixins';
 import {
   ActionModeService,
   LayerTimelineService,
@@ -39,7 +38,7 @@ import * as _ from 'lodash';
 import { combineLatest ,  merge } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CanvasLayoutMixin } from './CanvasLayoutMixin';
+import { CanvasLayoutDestroyableMixin } from './CanvasLayoutMixin';
 import * as CanvasUtil from './CanvasUtil';
 import { PairSubPathHelper } from './PairSubPathHelper';
 import { SegmentSplitter } from './SegmentSplitter';
@@ -84,7 +83,7 @@ type Context = CanvasRenderingContext2D;
  * of the currently active vector layer.
  */
 @Directive({ selector: '[appCanvasOverlay]' })
-export class CanvasOverlayDirective extends CanvasLayoutMixin(DestroyableMixin())
+export class CanvasOverlayDirective extends CanvasLayoutDestroyableMixin()
   implements AfterViewInit {
   @Input() actionSource: ActionSource;
 
