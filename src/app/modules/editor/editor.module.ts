@@ -45,7 +45,8 @@ import { SplitterComponent } from 'app/modules/editor/components/splitter/splitt
 import { ToolbarComponent } from 'app/modules/editor/components/toolbar/toolbar.component';
 import { ToolPanelComponent } from 'app/modules/editor/components/toolpanel/toolpanel.component';
 import { errorHandlerFactory } from 'app/modules/editor/scripts/bugsnag';
-import { StoreModule, metaReducers, reducers } from 'app/modules/editor/store';
+import { StoreModule } from '@ngrx/store';
+import { metaReducers, reducers } from 'app/modules/editor/store';
 import { environment } from 'environments/environment';
 
 @NgModule({
