@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  beta: false,
+  beta: true,
   analyticsTrackingId: 'UA-92075411-1',
 };

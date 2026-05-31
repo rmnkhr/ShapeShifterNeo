@@ -39,17 +39,36 @@ li {
     width: 16px;
     height: 16px;
     font-size: 16px;
-  }
-  button {
     line-height: 16px;
-    height: 20px;
+  }
+  button[mat-icon-button],
+  .mat-mdc-icon-button {
+    // Override Angular Material's MDC icon button defaults (40px state layer
+    // with internal padding) so the icons stay compact and centered.
+    --mdc-icon-button-state-layer-size: 20px;
+    --mdc-icon-button-icon-size: 16px;
     width: 20px;
+    height: 20px;
     min-height: 20px;
-    &[mat-icon-button] {
-      mat-icon {
-        line-height: normal;
-        vertical-align: top;
-      }
+    padding: 2px;
+    line-height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    // The MDC icon button injects a 48px absolutely-centered touch-target span
+    // that overflows these compact 20px buttons and overlaps neighbors (e.g.
+    // clicking the visibility eye would trigger the adjacent animate button).
+    // Shrink it to the button bounds so each icon only catches its own clicks.
+    ::ng-deep .mat-mdc-button-touch-target {
+      width: 100%;
+      height: 100%;
+    }
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      line-height: 16px;
+      vertical-align: top;
     }
   }
 }
@@ -65,13 +84,22 @@ li {
 }
 
 @mixin layer-list-button {
+  --mdc-icon-button-state-layer-size: 20px;
+  --mdc-icon-button-icon-size: 16px;
   margin: 0;
   padding: 2px;
   height: 20px;
   width: 20px;
   line-height: 16px;
   min-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    line-height: 16px;
     vertical-align: top;
   }
 }
@@ -155,21 +183,29 @@ mat-menu {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  button {
+  button[mat-icon-button],
+  .mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 20px;
+    --mdc-icon-button-icon-size: 16px;
     margin: 2px;
     padding: 2px;
     line-height: 16px;
     height: 20px;
     width: 20px;
     min-height: 20px;
-    &[mat-icon-button] {
-      mat-icon {
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-        line-height: normal;
-        vertical-align: top;
-      }
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    ::ng-deep .mat-mdc-button-touch-target {
+      width: 100%;
+      height: 100%;
+    }
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      line-height: 16px;
+      vertical-align: top;
     }
   }
 }

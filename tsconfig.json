@@ -9,6 +9,7 @@
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
+    "skipLibCheck": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "noImplicitReturns": true,
