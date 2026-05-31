@@ -1,5 +1,7 @@
 // Core page layouts and common stuff.
 @import 'root';
+// Kinetic Editor System design tokens (CSS custom properties, light + dark).
+@import 'tokens';
 // Material design theme.
 @import 'theme';
 // Legacy @angular/flex-layout attribute shim.
