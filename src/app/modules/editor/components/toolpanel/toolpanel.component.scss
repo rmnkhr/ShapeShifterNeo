@@ -1,21 +1,77 @@
-.tool-panel {
-  background-color: var(--ss-surface-container);
-  color: var(--ss-on-surface-variant);
-  position: relative;
+// Floating tool palette (Kinetic Editor System). Overlays the left edge of the
+// canvas as a vertically-centered rounded pill — flat (no elevation), so the
+// canvas shows around it. See Design.md.
+:host {
+  position: absolute;
+  left: var(--ss-gutter, 16px);
+  // Anchored to .editor-body, so top: 0 is already just below the toolbar.
+  // Inset the bottom past the playback bar so the pill centers between the two.
+  top: 0;
+  bottom: 56px;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  align-items: center; // vertical-center the pill within the editor body
+  // Let canvas interactions pass through the empty area around the pill.
+  pointer-events: none;
+}
 
-  .tool-button {
-    margin: 4px;
-    border-radius: var(--ss-radius);
-    color: inherit;
+.tool-panel {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background-color: var(--ss-surface-container);
+  border: 1px solid var(--ss-outline-variant);
+  border-radius: var(--ss-radius-full, 9999px);
+}
+
+.tool-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: none;
+  border-radius: var(--ss-radius-full, 9999px);
+  background-color: transparent;
+  color: var(--ss-on-surface-variant);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    line-height: 20px;
+  }
+
+  &:hover {
+    background-color: var(--ss-surface-container-high);
+  }
+
+  // Active tool: filled circle using the inverse surface (light circle on the
+  // dark panel / dark circle on the light panel), matching the reference.
+  &.is-checked {
+    background-color: var(--ss-inverse-surface);
+    color: var(--ss-inverse-on-surface);
+  }
+
+  &[disabled] {
+    opacity: 0.38;
+    cursor: default;
     background-color: transparent;
-    &:hover {
-      cursor: pointer;
-      background-color: var(--ss-surface-container-high);
-    }
-    &.is-checked {
-      background-color: var(--ss-primary-container);
-      color: var(--ss-on-primary-container);
-    }
   }
 }
 
+.tool-divider {
+  width: 24px;
+  height: 1px;
+  margin: 4px 0;
+  background-color: var(--ss-outline-variant);
+}
