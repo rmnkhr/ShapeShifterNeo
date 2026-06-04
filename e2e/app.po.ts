@@ -1,6 +1,6 @@
 import { browser, element, by } from 'protractor';
 
-export class ShapeShifterPage {
+export class NeoShapeShifterPage {
   navigateTo() {
     return browser.get('/');
   }

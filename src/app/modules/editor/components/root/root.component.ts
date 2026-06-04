@@ -169,7 +169,7 @@ export class RootComponent extends DestroyableMixin() implements OnInit, AfterVi
         })
         .catch(e => {
           this.snackBarService.show(
-            `There was a problem loading the Shape Shifter project`,
+            `There was a problem loading the NeoShapeShifter project`,
             'Dismiss',
             Duration.Long,
           );

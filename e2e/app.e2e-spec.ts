@@ -1,10 +1,10 @@
-import { ShapeShifterPage } from './app.po';
+import { NeoShapeShifterPage } from './app.po';
 
-describe('Shape Shifter App', function() {
-  let page: ShapeShifterPage;
+describe('NeoShapeShifter App', function() {
+  let page: NeoShapeShifterPage;
 
   beforeEach(() => {
-    page = new ShapeShifterPage();
+    page = new NeoShapeShifterPage();
   });
 
   it('should display message saying app works', () => {

@@ -94,7 +94,7 @@ export class CanvasOverlayDirective extends CanvasLayoutDestroyableMixin()
   // Normal mode variables.
   private hiddenLayerIds: ReadonlySet<string> = new Set<string>();
   private selectedLayerIds: ReadonlySet<string> = new Set<string>();
-  // Shape Shifter mode variables.
+  // NeoShapeShifter mode variables.
   private blockLayerId: string;
   actionMode: ActionMode;
   private actionHover: Hover;

@@ -297,7 +297,7 @@ class ToolbarData {
     } else if (this.mode === ActionMode.Selection) {
       return 'Edit path morphing animation';
     }
-    return 'Shape Shifter';
+    return 'NeoShapeShifter';
   }
 
   getToolbarSubtitle() {
