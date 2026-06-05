@@ -150,7 +150,7 @@ export class LayerTimelineComponent extends DestroyableMixin()
       ),
       fromEvent(window, 'resize').pipe(startWith(undefined), debounceTime(50)),
     ]).pipe(
-      map(() => this.isTimelineUnderfilled()),
+      map(() => this.isTimelineZoomedIn()),
       distinctUntilChanged(),
     );
     let currActionMode: ActionMode;
@@ -207,6 +207,17 @@ export class LayerTimelineComponent extends DestroyableMixin()
       }),
     );
     setTimeout(() => this.autoZoomToAnimation());
+    // On resize, never let the zoom fall below the new fit level (keeps the
+    // timeline filling the width; zooming out past fit isn't allowed).
+    this.registerSubscription(
+      fromEvent(window, 'resize')
+        .pipe(debounceTime(50))
+        .subscribe(() => {
+          if (this.$timeline && this.animation && this.horizZoom < this.getFitZoom()) {
+            this.horizZoom = this.getFitZoom();
+          }
+        }),
+    );
   }
 
   private get horizZoom() {
@@ -1113,7 +1124,9 @@ export class LayerTimelineComponent extends DestroyableMixin()
 
       event.preventDefault();
       this.targetHorizZoom *= 1.01 ** -event.deltaY;
-      this.targetHorizZoom = _.clamp(this.targetHorizZoom, MIN_ZOOM, MAX_ZOOM);
+      // Don't allow zooming out past "fit to width" — the fit zoom is the
+      // minimum, so the timeline always fills at least the visible width.
+      this.targetHorizZoom = _.clamp(this.targetHorizZoom, this.getFitZoom(), MAX_ZOOM);
       if (this.targetHorizZoom !== this.horizZoom) {
         // Zoom has changed.
         if (this.performZoomRAF) {
@@ -1142,23 +1155,33 @@ export class LayerTimelineComponent extends DestroyableMixin()
    * Zooms the timeline to fit the first animation.
    */
   private autoZoomToAnimation() {
-    // Shave off 48 pixels for safety.
-    this.horizZoom = (this.$timeline.width() - 48) / this.animation.duration;
+    this.horizZoom = this.getFitZoom();
   }
 
   /**
-   * Whether the animation content is narrower than the visible timeline width
-   * (i.e. there's empty space to the right). Drives the floating "fit" button.
+   * The horizontal zoom at which the animation fits the visible timeline width.
+   * This doubles as the minimum zoom (no zooming out past fit). Shaves 48px for
+   * safety, matching the original auto-zoom behavior.
    */
-  private isTimelineUnderfilled(): boolean {
+  private getFitZoom(): number {
+    if (!this.$timeline || !this.animation) {
+      return MIN_ZOOM;
+    }
+    return (this.$timeline.width() - 48) / this.animation.duration;
+  }
+
+  /**
+   * Whether the animation content is wider than the visible timeline width
+   * (i.e. the user has zoomed in and the timeline scrolls). Drives the floating
+   * "fit to width" button.
+   */
+  private isTimelineZoomedIn(): boolean {
     if (!this.$timeline || !this.animation) {
       return false;
     }
     const contentWidth =
       this.animation.duration * this.horizZoom + 2 * TimelineConsts.TIMELINE_ANIMATION_PADDING;
-    // 48px deadzone matches the shave in autoZoomToAnimation(), so the button
-    // hides once the content is fitted and only reappears on a real underfill.
-    return contentWidth < this.$timeline.width() - 48;
+    return contentWidth > this.$timeline.width() + 1;
   }
 
   // Proxies a button click to the <input> tag that opens the file picker.

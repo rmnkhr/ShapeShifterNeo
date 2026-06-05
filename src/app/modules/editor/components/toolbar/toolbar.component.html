@@ -239,33 +239,6 @@
             <span>Getting started</span>
           </button>
         </a>
-        <a href="https://github.com/alexjlockwood/ShapeShifter"
-          target="_blank"
-          class="toolbar-overflow-link-item">
-          <button mat-menu-item
-            (click)="this.onContributeClick()">
-            <mat-icon style="line-height: 1"
-              svgIcon="contribute"></mat-icon>
-            <span>Contribute</span>
-          </button>
-        </a>
-        <a href="https://github.com/alexjlockwood/ShapeShifter/issues"
-          target="_blank"
-          class="toolbar-overflow-link-item">
-          <button mat-menu-item
-            (click)="this.onSendFeedbackClick()">
-            <mat-icon>bug_report</mat-icon>
-            <span>Send feedback</span>
-          </button>
-        </a>
-        <a href="{{ this.isBeta() ? 'https://shapeshifter.design' : 'https://beta.shapeshifter.design' }}"
-          target="_blank"
-          class="toolbar-overflow-link-item">
-          <button mat-menu-item>
-            <mat-icon>open_in_new</mat-icon>
-            <span>Switch to {{ this.isBeta() ? 'stable' : 'beta' }} </span>
-          </button>
-        </a>
       </mat-menu>
     </ng-container>
   </div>
