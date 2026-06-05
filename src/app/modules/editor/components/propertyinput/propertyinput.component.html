@@ -1,4 +1,4 @@
-<div class="property-input mat-elevation-z4"
+<div class="property-input"
   *ngIf="(this.themeState$ | async) as theme"
   [class.dark-to-light-base200]="theme.prevThemeType === 'dark' && theme.currThemeType === 'light'"
   [class.light-to-dark-base200]="theme.prevThemeType === 'light' && theme.currThemeType === 'dark'"

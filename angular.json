@@ -16,7 +16,7 @@
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
-            "assets": ["src/assets", "src/demos", "src/manifest.json", "src/favicon.ico"],
+            "assets": ["src/assets", "src/demos", "src/manifest.json"],
             "styles": ["src/styles.scss"],
             "scripts": []
           },
@@ -99,7 +99,7 @@
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [],
             "styles": ["src/styles.scss"],
-            "assets": ["src/assets", "src/demos", "src/manifest.json", "src/favicon.ico"]
+            "assets": ["src/assets", "src/demos", "src/manifest.json"]
           }
         },
         "lint": {
@@ -135,5 +135,8 @@
     "@schematics/angular:directive": {
       "prefix": "app"
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

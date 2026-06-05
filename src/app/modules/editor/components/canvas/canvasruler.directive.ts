@@ -97,7 +97,7 @@ export class CanvasRulerDirective extends CanvasLayoutMixin() {
 
     // Text labels.
     ctx.fillStyle = this.themeService.getDisabledTextColor();
-    ctx.font = '10px Roboto, Helvetica Neue, sans-serif';
+    ctx.font = '10px Inter, Roboto, Helvetica Neue, sans-serif';
     if (isHorizontal) {
       ctx.textBaseline = 'alphabetic';
       ctx.textAlign = 'center';

@@ -1,22 +1,7 @@
 <ng-container *ngIf="(this.toolbarData$ | async) as toolbarData">
   <div fxLayout="row"
-    fxLayoutAlign="center center"
-    *ngIf="(this.themeState$ | async) as state"
-    [class.dark-to-light-primary]="state.prevThemeType === 'dark' && state.currThemeType === 'light' && !state.currIsActionMode"
-
-    [class.light-to-dark-primary]="state.prevThemeType === 'light' && state.currThemeType === 'dark' && !state.currIsActionMode"
-
-    [class.dark-to-light-accent]="state.prevThemeType === 'dark' && state.currThemeType === 'light' && state.currIsActionMode"
-
-    [class.light-to-dark-accent]="state.prevThemeType === 'light' && state.currThemeType === 'dark' && state.currIsActionMode"
-
-    [class.action-mode-on-to-off-dark]="state.hasActionModeBeenEnabled && !state.currIsActionMode && state.currThemeType === 'dark'"
-
-    [class.action-mode-off-to-on-dark]="state.currIsActionMode && state.currThemeType === 'dark'"
-    [class.action-mode-on-to-off-light]="state.hasActionModeBeenEnabled && !state.currIsActionMode && state.currThemeType === 'light'"
-
-    [class.action-mode-off-to-on-light]="state.currIsActionMode && state.currThemeType === 'light'"
-    class="toolbar mat-elevation-z2">
+    fxLayoutAlign="start center"
+    class="toolbar">
 
     <ng-container *ngIf="{
       showActionMode: toolbarData.shouldShowActionMode(),
@@ -38,161 +23,205 @@
       showAutoFix: toolbarData.shouldShowAutoFix()
     } as data">
 
-      <!-- NeoShapeShifter logo. -->
-      <mat-icon *ngIf="!data.showActionMode"
-        class="toolbar-logo"
-        svgIcon="shapeshifter">
-      </mat-icon>
+      <!-- Brand pill: NeoShapeShifter logo + title (floating, matches tool panel). -->
+      <div class="topbar-pill topbar-brand">
+        <!-- NeoShapeShifter logo. -->
+        <mat-icon *ngIf="!data.showActionMode"
+          class="toolbar-logo"
+          svgIcon="shapeshifter">
+        </mat-icon>
 
-      <!-- Action mode close button. -->
-      <button mat-icon-button
-        *ngIf="data.showActionMode"
-        class="action-mode-close-icon"
-        (click)="onCloseActionModeClick($event)">
-        <mat-icon>{{ toolbarData.isSelectionMode() ? 'arrow_back' : 'close' }}</mat-icon>
-      </button>
+        <!-- Action mode close button (replaces the logo while editing). -->
+        <button *ngIf="data.showActionMode"
+          class="pill-icon-button action-mode-close"
+          (click)="onCloseActionModeClick($event)">
+          <mat-icon>{{ toolbarData.isSelectionMode() ? 'arrow_back' : 'close' }}</mat-icon>
+        </button>
 
-      <!-- Toolbar text. -->
-      <div fxLayout="column">
-        <span class="toolbar-title">{{ data.toolbarTitle }}</span>
-        <span *ngIf="data.toolbarSubtitle"
-          class="toolbar-subtitle">
-          {{ data.toolbarSubtitle }}
-        </span>
+        <!-- Toolbar text. -->
+        <div class="toolbar-text"
+          fxLayout="column">
+          <span class="toolbar-title">{{ data.toolbarTitle }}</span>
+          <span *ngIf="data.toolbarSubtitle"
+            class="toolbar-subtitle">
+            {{ data.toolbarSubtitle }}
+          </span>
+        </div>
       </div>
 
-      <span fxFlex="1 1 auto"></span>
+      <span class="topbar-spacer"
+        fxFlex="1 1 auto"></span>
 
-      <button mat-icon-button
-        class="toolbar-action-button"
-        (click)="onAutoFixClick($event)"
-        matTooltip="Auto fix"
-        matTooltipShowDelay="500"
-        *ngIf="data.showAutoFix"
-        matTooltipPosition="below">
-        <mat-icon svgIcon="autofix"></mat-icon>
-      </button>
+      <!-- Composition (animation) name + duration bubbles. Click to edit. -->
+      <ng-container *ngIf="!data.showActionMode && (animation$ | async) as animation">
+        <div class="topbar-pill topbar-comp"
+          (click)="startEditName(animation, $event)">
+          <span *ngIf="!isEditingName"
+            class="comp-text">{{ animation.name }}</span>
+          <input *ngIf="isEditingName"
+            #nameInput
+            class="comp-input"
+            [(ngModel)]="nameDraft"
+            (click)="$event.stopPropagation()"
+            (keydown.enter)="commitName(animation)"
+            (keydown.escape)="isEditingName = false"
+            (blur)="commitName(animation)">
+        </div>
+        <div class="topbar-pill topbar-comp"
+          (click)="startEditDuration(animation, $event)">
+          <span *ngIf="!isEditingDuration"
+            class="comp-text">{{ animation.duration }}ms</span>
+          <ng-container *ngIf="isEditingDuration">
+            <input #durationInput
+              type="number"
+              [min]="100"
+              [max]="60000"
+              class="comp-input comp-input-duration"
+              [(ngModel)]="durationDraft"
+              (click)="$event.stopPropagation()"
+              (keydown.enter)="commitDuration(animation)"
+              (keydown.escape)="isEditingDuration = false"
+              (blur)="commitDuration(animation)">
+            <span class="comp-unit">ms</span>
+          </ng-container>
+        </div>
+      </ng-container>
 
-      <!-- SubPath mode. -->
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltip="Add points (A)"
-        matTooltipPosition="below"
-        *ngIf="data.showAddPoints"
-        matTooltipShowDelay="500"
-        (click)="onAddPointsClick($event)"
-        [class.activated]="toolbarData.isAddPointsMode()">
-        <mat-icon>add_circle_outline</mat-icon>
-      </button>
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltip="Split subpaths (S)"
-        matTooltipPosition="below"
-        *ngIf="data.showSplitSubPaths"
-        matTooltipShowDelay="500"
-        (click)="onSplitSubPathsClick($event)"
-        [class.activated]="toolbarData.isSplitSubPathsMode()">
-        <mat-icon>content_cut</mat-icon>
-      </button>
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltip="Pair subpaths (D)"
-        matTooltipPosition="below"
-        *ngIf="data.showPairSubPaths"
-        matTooltipShowDelay="500"
-        (click)="onPairSubPathsClick($event)"
-        [class.activated]="toolbarData.isPairSubPathsMode()">
-        <mat-icon>compare_arrows</mat-icon>
-      </button>
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltip="Reverse points (R)"
-        matTooltipPosition="below"
-        *ngIf="data.showReverseSubPaths"
-        matTooltipShowDelay="500"
-        (click)="onReversePointsClick($event)"
-        [disabled]="!toolbarData.isSelectionMode()">
-        <mat-icon svgIcon="reverse"></mat-icon>
-      </button>
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltip="Shift back points (B)"
-        matTooltipPosition="below"
-        *ngIf="data.showShiftSubPath"
-        matTooltipShowDelay="500"
-        (click)="onShiftBackPointsClick($event)"
-        [disabled]="!toolbarData.isSelectionMode()">
-        <mat-icon>skip_previous</mat-icon>
-      </button>
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltip="Shift forward points (F)"
-        matTooltipPosition="below"
-        *ngIf="data.showShiftSubPath"
-        matTooltipShowDelay="500"
-        (click)="onShiftForwardPointsClick($event)"
-        [disabled]="!toolbarData.isSelectionMode()">
-        <mat-icon>skip_next</mat-icon>
-      </button>
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltipPosition="below"
-        matTooltip="Delete subpath{{data.numSubPaths === 1 ? '' : 's'}}"
-        matTooltipShowDelay="500"
-        *ngIf="data.showDeleteSubPaths"
-        (click)="onDeleteSubPathsClick($event)">
-        <mat-icon>delete</mat-icon>
-      </button>
+      <span class="topbar-spacer"
+        fxFlex="1 1 auto"></span>
 
-      <!-- Segment mode. -->
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltipPosition="below"
-        matTooltip="Delete segment{{data.numSegments === 1 ? '' : 's'}}"
-        matTooltipShowDelay="500"
-        *ngIf="data.showDeleteSegments"
-        (click)="onDeleteSegmentsClick($event)">
-        <mat-icon>delete</mat-icon>
-      </button>
+      <!-- Actions pill: contextual action buttons grouped with the menu. -->
+      <div class="topbar-pill topbar-actions">
 
-      <!-- Point mode. -->
-      <button mat-icon-button
-        matTooltip="Add point (A)"
-        matTooltipPosition="below"
-        matTooltipShowDelay="500"
-        *ngIf="data.showSplitInHalf"
-        (mouseenter)="onSplitInHalfHoverEvent(true)"
-        (mouseleave)="onSplitInHalfHoverEvent(false)"
-        (click)="onSplitInHalfClick($event)">
-        <mat-icon>add_circle_outline</mat-icon>
-      </button>
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltip="Set first point (F)"
-        matTooltipPosition="below"
-        matTooltipShowDelay="500"
-        *ngIf="data.showSetFirstPosition"
-        (click)="onSetFirstPositionClick($event)">
-        <mat-icon>looks_one</mat-icon>
-      </button>
-      <button mat-icon-button
-        class="toolbar-action-button"
-        matTooltipPosition="below"
-        matTooltip="Delete point{{data.numPoints === 1 ? '' : 's'}}"
-        matTooltipShowDelay="500"
-        *ngIf="data.showDeletePoints"
-        (click)="onDeletePointsClick($event)">
-        <mat-icon>delete</mat-icon>
-      </button>
+        <button class="pill-icon-button"
+          (click)="onAutoFixClick($event)"
+          matTooltip="Auto fix"
+          matTooltipShowDelay="500"
+          *ngIf="data.showAutoFix"
+          matTooltipPosition="below">
+          <mat-icon svgIcon="autofix"></mat-icon>
+        </button>
 
-      <!-- Overflow menu buttons. -->
-      <button class="toolbar-action-button"
-        mat-icon-button
-        (click)="$event.stopPropagation()"
-        [matMenuTriggerFor]="overflowMenu">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      <mat-menu #overflowMenu="matMenu">
+        <!-- SubPath mode. -->
+        <button class="pill-icon-button"
+          matTooltip="Add points (A)"
+          matTooltipPosition="below"
+          *ngIf="data.showAddPoints"
+          matTooltipShowDelay="500"
+          (click)="onAddPointsClick($event)"
+          [class.activated]="toolbarData.isAddPointsMode()">
+          <mat-icon>add_circle_outline</mat-icon>
+        </button>
+        <button class="pill-icon-button"
+          matTooltip="Split subpaths (S)"
+          matTooltipPosition="below"
+          *ngIf="data.showSplitSubPaths"
+          matTooltipShowDelay="500"
+          (click)="onSplitSubPathsClick($event)"
+          [class.activated]="toolbarData.isSplitSubPathsMode()">
+          <mat-icon>content_cut</mat-icon>
+        </button>
+        <button class="pill-icon-button"
+          matTooltip="Pair subpaths (D)"
+          matTooltipPosition="below"
+          *ngIf="data.showPairSubPaths"
+          matTooltipShowDelay="500"
+          (click)="onPairSubPathsClick($event)"
+          [class.activated]="toolbarData.isPairSubPathsMode()">
+          <mat-icon>compare_arrows</mat-icon>
+        </button>
+        <button class="pill-icon-button"
+          matTooltip="Reverse points (R)"
+          matTooltipPosition="below"
+          *ngIf="data.showReverseSubPaths"
+          matTooltipShowDelay="500"
+          (click)="onReversePointsClick($event)"
+          [disabled]="!toolbarData.isSelectionMode()">
+          <mat-icon svgIcon="reverse"></mat-icon>
+        </button>
+        <button class="pill-icon-button"
+          matTooltip="Shift back points (B)"
+          matTooltipPosition="below"
+          *ngIf="data.showShiftSubPath"
+          matTooltipShowDelay="500"
+          (click)="onShiftBackPointsClick($event)"
+          [disabled]="!toolbarData.isSelectionMode()">
+          <mat-icon>skip_previous</mat-icon>
+        </button>
+        <button class="pill-icon-button"
+          matTooltip="Shift forward points (F)"
+          matTooltipPosition="below"
+          *ngIf="data.showShiftSubPath"
+          matTooltipShowDelay="500"
+          (click)="onShiftForwardPointsClick($event)"
+          [disabled]="!toolbarData.isSelectionMode()">
+          <mat-icon>skip_next</mat-icon>
+        </button>
+        <button class="pill-icon-button"
+          matTooltipPosition="below"
+          matTooltip="Delete subpath{{data.numSubPaths === 1 ? '' : 's'}}"
+          matTooltipShowDelay="500"
+          *ngIf="data.showDeleteSubPaths"
+          (click)="onDeleteSubPathsClick($event)">
+          <mat-icon>delete</mat-icon>
+        </button>
+
+        <!-- Segment mode. -->
+        <button class="pill-icon-button"
+          matTooltipPosition="below"
+          matTooltip="Delete segment{{data.numSegments === 1 ? '' : 's'}}"
+          matTooltipShowDelay="500"
+          *ngIf="data.showDeleteSegments"
+          (click)="onDeleteSegmentsClick($event)">
+          <mat-icon>delete</mat-icon>
+        </button>
+
+        <!-- Point mode. -->
+        <button class="pill-icon-button"
+          matTooltip="Add point (A)"
+          matTooltipPosition="below"
+          matTooltipShowDelay="500"
+          *ngIf="data.showSplitInHalf"
+          (mouseenter)="onSplitInHalfHoverEvent(true)"
+          (mouseleave)="onSplitInHalfHoverEvent(false)"
+          (click)="onSplitInHalfClick($event)">
+          <mat-icon>add_circle_outline</mat-icon>
+        </button>
+        <button class="pill-icon-button"
+          matTooltip="Set first point (F)"
+          matTooltipPosition="below"
+          matTooltipShowDelay="500"
+          *ngIf="data.showSetFirstPosition"
+          (click)="onSetFirstPositionClick($event)">
+          <mat-icon>looks_one</mat-icon>
+        </button>
+        <button class="pill-icon-button"
+          matTooltipPosition="below"
+          matTooltip="Delete point{{data.numPoints === 1 ? '' : 's'}}"
+          matTooltipShowDelay="500"
+          *ngIf="data.showDeletePoints"
+          (click)="onDeletePointsClick($event)">
+          <mat-icon>delete</mat-icon>
+        </button>
+
+        <!-- Divider between contextual actions and the menu. -->
+        <div class="pill-divider"
+          *ngIf="data.showActionMode"></div>
+
+        <!-- Menu (hamburger) — opens the frosted-glass menu. -->
+        <button class="pill-icon-button"
+          (click)="$event.stopPropagation()"
+          [matMenuTriggerFor]="overflowMenu"
+          matTooltip="Menu"
+          matTooltipShowDelay="500"
+          matTooltipPosition="below">
+          <mat-icon>menu</mat-icon>
+        </button>
+      </div>
+
+      <mat-menu #overflowMenu="matMenu"
+        class="ss-glass-menu"
+        xPosition="before">
         <div mat-menu-item
           (click)="this.darkTheme = !this.darkTheme">
           <mat-slide-toggle (click)="this.darkTheme = !this.darkTheme; $event.stopPropagation()"

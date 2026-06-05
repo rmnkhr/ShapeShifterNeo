@@ -44,8 +44,8 @@ import { getAnimation } from 'app/modules/editor/store/timeline/selectors';
 import { environment } from 'environments/environment';
 import * as $ from 'jquery';
 import * as _ from 'lodash';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, combineLatest, fromEvent } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, first, map, startWith } from 'rxjs/operators';
 
 import * as TimelineConsts from './constants';
 import { Callbacks as LayerListTreeCallbacks } from './layerlisttree.component';
@@ -112,6 +112,10 @@ export class LayerTimelineComponent extends DestroyableMixin()
 
   layerTimelineModel$: Observable<LayerTimelineModel>;
 
+  // True when the timeline content is narrower than the visible area (so the
+  // floating "fit" button is offered to fill the width).
+  showFillButton$: Observable<boolean>;
+
   // Mouse wheel zoom variables.
   private $zoomStartActiveAnimation: JQuery;
   private targetHorizZoom: number;
@@ -136,6 +140,19 @@ export class LayerTimelineComponent extends DestroyableMixin()
   }
 
   ngOnInit() {
+    // Show the floating "fit" button whenever the animation content doesn't
+    // fill the timeline's visible width. Recompute on zoom, duration, and resize.
+    this.showFillButton$ = combineLatest([
+      this.horizZoomObservable,
+      this.store.select(getAnimation).pipe(
+        map(a => a.duration),
+        distinctUntilChanged(),
+      ),
+      fromEvent(window, 'resize').pipe(startWith(undefined), debounceTime(50)),
+    ]).pipe(
+      map(() => this.isTimelineUnderfilled()),
+      distinctUntilChanged(),
+    );
     let currActionMode: ActionMode;
     this.layerTimelineModel$ = this.store.select(getLayerTimelineState).pipe(
       map(
@@ -1127,6 +1144,19 @@ export class LayerTimelineComponent extends DestroyableMixin()
   private autoZoomToAnimation() {
     // Shave off 48 pixels for safety.
     this.horizZoom = (this.$timeline.width() - 48) / this.animation.duration;
+  }
+
+  /**
+   * Whether the animation content is narrower than the visible timeline width
+   * (i.e. there's empty space to the right). Drives the floating "fit" button.
+   */
+  private isTimelineUnderfilled(): boolean {
+    if (!this.$timeline || !this.animation) {
+      return false;
+    }
+    const contentWidth =
+      this.animation.duration * this.horizZoom + 2 * TimelineConsts.TIMELINE_ANIMATION_PADDING;
+    return contentWidth + 1 < this.$timeline.width();
   }
 
   // Proxies a button click to the <input> tag that opens the file picker.

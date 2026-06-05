@@ -2,25 +2,10 @@
 
 @mixin ss-toolbar-theme($theme) {
     $foreground: map-get($theme, ss-foreground);
-    $background: map-get($theme, ss-background);
-    $accent-inverse: map-get($theme, accent-inverse);
-    // The toolbar is a surface (Kinetic Editor System), not a colored bar:
-    // surface-container background with on-surface text and a 1px outline.
+    // The toolbar is now a transparent row that holds floating pills (see
+    // toolbar.component.scss, which colors the pills via --ss-* tokens). Only the
+    // default text color is themed here; pill fills/borders/states use tokens.
     .toolbar {
-        background-color: mat.m2-get-color-from-palette($background, base100);
         color: mat.m2-get-color-from-palette($foreground, primary-text);
-        box-shadow: 0 1px 0 mat.m2-get-color-from-palette($foreground, divider);
-        button {
-            &[mat-icon-button][disabled] {
-                mat-icon {
-                    color: mat.m2-get-color-from-palette($foreground, disabled-text);
-                }
-            }
-        }
-        button.activated {
-            mat-icon {
-                color: mat.m2-get-color-from-palette($accent-inverse);
-            }
-        }
     }
 }

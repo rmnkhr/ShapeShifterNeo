@@ -1,0 +1,40 @@
+// ─────────────────────────────────────────────────────────────────────────
+// Frosted-glass dropdown menu (Kinetic Editor System). Shared by the top bar
+// (hamburger) menu and the timeline's File / Import / Export / Add-layer menus.
+//
+// mat-menu renders inside the CDK overlay (appended to the overlay container,
+// outside any component's view), so these rules are global. ThemeService adds
+// .ss-dark-theme to the overlay container, so the --ss-* tokens resolve to the
+// correct scheme here too.
+// ─────────────────────────────────────────────────────────────────────────
+.ss-glass-menu.mat-mdc-menu-panel {
+    // Translucent surface + blur = frosted glass. The translucency is what lets
+    // the backdrop-filter blur show through.
+    background-color: color-mix(in srgb, var(--ss-surface-container) 72%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid var(--ss-outline-variant);
+    border-radius: var(--ss-radius-md, 0.75rem);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+
+    .mat-mdc-menu-content {
+        background: transparent;
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+
+    .mat-mdc-menu-item {
+        color: var(--ss-on-surface);
+
+        .mat-icon {
+            color: var(--ss-on-surface-variant);
+        }
+
+        &:hover:not([disabled]),
+        &.cdk-keyboard-focused:not([disabled]),
+        &.cdk-program-focused:not([disabled]) {
+            background-color: color-mix(in srgb, var(--ss-surface-container-high) 72%, transparent);
+        }
+    }
+}

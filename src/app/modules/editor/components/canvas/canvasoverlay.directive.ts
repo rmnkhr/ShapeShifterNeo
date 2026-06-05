@@ -1042,7 +1042,7 @@ function executeLabeledPoint(
   if (text) {
     ctx.beginPath();
     ctx.fillStyle = POINT_TEXT_COLOR;
-    ctx.font = radius + 'px Roboto, Helvetica Neue, sans-serif';
+    ctx.font = radius + 'px Inter, Roboto, Helvetica Neue, sans-serif';
     const width = ctx.measureText(text).width;
     // TODO: is there a better way to get the height?
     const height = ctx.measureText('o').width;

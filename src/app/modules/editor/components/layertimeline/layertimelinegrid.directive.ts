@@ -136,7 +136,7 @@ export class LayerTimelineGridDirective extends DestroyableMixin() implements On
       ctx.fillStyle = this.themeService.getSecondaryTextColor();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = '10px Roboto';
+      ctx.font = `10px Inter, Roboto, 'Helvetica Neue', sans-serif`;
       for (let x = 0, t = 0; round(x) <= round(width); x += spacingPx, t += spacingMs) {
         ctx.fillText(`${t / 1000}s`, x, height / 2);
       }

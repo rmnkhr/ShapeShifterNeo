@@ -5,6 +5,14 @@
     user-select: none;
     cursor: default;
     position: relative;
+    // Floating panel (Kinetic Editor System): detached from the viewport edges
+    // with a gutter, rounded corners + 1px outline — matching the top bar and
+    // left tool panel. overflow:hidden clips the header/body to the radius.
+    margin: var(--ss-gutter, 16px);
+    border: 1px solid var(--ss-outline-variant);
+    border-radius: var(--ss-radius-lg, 1rem);
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .spi-header {

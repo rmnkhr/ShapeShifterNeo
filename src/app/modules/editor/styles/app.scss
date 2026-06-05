@@ -6,3 +6,7 @@
 @import 'theme';
 // Legacy @angular/flex-layout attribute shim.
 @import 'flex-shim';
+// Frosted-glass dropdown for the top bar menu (rendered in the CDK overlay).
+@import 'glass-menu';
+// Material 3 switch styling (restores M3 geometry over the M2 theme defaults).
+@import 'm3-switch';

@@ -1,0 +1,76 @@
+// ─────────────────────────────────────────────────────────────────────────
+// Material 3 switch (https://m3.material.io/components/switch/overview).
+//
+// Angular Material's slide-toggle CSS already implements the full M3 switch
+// (52×32 track, 16→24px handle, 2px outline, selected checkmark) — but the
+// app's M2 theme overrides the geometry tokens down to the older thin 36×14
+// switch. Here we restore the M3 geometry and map colors to the Kinetic Editor
+// System (--ss-*) tokens. Global because the switch renders in the menu overlay.
+// ─────────────────────────────────────────────────────────────────────────
+.mat-mdc-slide-toggle {
+    // Geometry — restore the M3 sizes the M2 theme shrank.
+    --mdc-switch-track-width: 52px;
+    --mdc-switch-track-height: 32px;
+    --mdc-switch-track-shape: 16px;
+    --mdc-switch-handle-width: 24px;
+    --mdc-switch-handle-height: 24px;
+    --mdc-switch-handle-shape: 16px;
+    --mdc-switch-state-layer-size: 40px;
+    --mat-switch-unselected-handle-size: 16px;
+    --mat-switch-selected-handle-size: 24px;
+    --mat-switch-with-icon-handle-size: 24px;
+    --mat-switch-pressed-handle-size: 28px;
+    --mat-switch-unselected-handle-horizontal-margin: 0 8px;
+    --mat-switch-selected-handle-horizontal-margin: 0 4px;
+    --mat-switch-track-outline-width: 2px;
+
+    // Off state: light track + 2px outline, muted handle.
+    --mat-switch-track-outline-color: var(--ss-outline);
+    --mdc-switch-unselected-track-color: var(--ss-surface-container-highest);
+    --mdc-switch-unselected-hover-track-color: var(--ss-surface-container-highest);
+    --mdc-switch-unselected-focus-track-color: var(--ss-surface-container-highest);
+    --mdc-switch-unselected-pressed-track-color: var(--ss-surface-container-highest);
+    --mdc-switch-unselected-handle-color: var(--ss-on-surface-variant);
+    --mdc-switch-unselected-hover-handle-color: var(--ss-on-surface-variant);
+    --mdc-switch-unselected-focus-handle-color: var(--ss-on-surface-variant);
+    --mdc-switch-unselected-pressed-handle-color: var(--ss-on-surface-variant);
+
+    // On state: primary track, white handle, primary-container checkmark.
+    --mdc-switch-selected-track-color: var(--ss-primary);
+    --mdc-switch-selected-hover-track-color: var(--ss-primary);
+    --mdc-switch-selected-focus-track-color: var(--ss-primary);
+    --mdc-switch-selected-pressed-track-color: var(--ss-primary);
+    --mdc-switch-selected-handle-color: var(--ss-on-primary);
+    --mdc-switch-selected-hover-handle-color: var(--ss-on-primary);
+    --mdc-switch-selected-focus-handle-color: var(--ss-on-primary);
+    --mdc-switch-selected-pressed-handle-color: var(--ss-on-primary);
+    --mdc-switch-selected-icon-color: var(--ss-on-primary-container);
+
+    // The reference off-state has no icon — just a plain dot. Hide the "off"
+    // (X) glyph; keep the selected checkmark.
+    .mdc-switch__icon--off {
+        display: none;
+    }
+
+    // The icons element is always in the DOM, so Material's
+    // `.mdc-switch__handle:has(.mdc-switch__icons)` rule forces a 24px handle
+    // even when unselected. Re-assert the M3 16px off-state dot (higher
+    // specificity than the library rule).
+    .mdc-switch--unselected .mdc-switch__handle:has(.mdc-switch__icons) {
+        width: 16px;
+        height: 16px;
+        // Nudge the off dot 8px in from the track edge. The handle is absolutely
+        // positioned (left:0) so margin is unreliable; transform is deterministic.
+        // translateY(-50%) preserves the library's vertical centering.
+        transform: translate(8px, -50%);
+    }
+
+    // Off-state track outline (2px). Driven directly so it doesn't depend on
+    // M2 vs M3 token wiring. Only the unselected track (::before) is visible
+    // when off; the selected track (::after) keeps a transparent outline.
+    .mdc-switch__track::before {
+        border-style: solid;
+        border-width: 2px;
+        border-color: var(--ss-outline);
+    }
+}

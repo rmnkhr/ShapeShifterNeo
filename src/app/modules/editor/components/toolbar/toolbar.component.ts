@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import {
   ActionMode,
   ActionSource,
@@ -6,11 +6,14 @@ import {
   SelectionType,
 } from 'app/modules/editor/model/actionmode';
 import { MorphableLayer } from 'app/modules/editor/model/layers';
-import { PathAnimationBlock } from 'app/modules/editor/model/timeline';
+import { NameProperty } from 'app/modules/editor/model/properties';
+import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { ActionModeUtil } from 'app/modules/editor/scripts/actionmode';
 import { ActionModeService, ThemeService } from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import { getToolbarState } from 'app/modules/editor/store/actionmode/selectors';
+import { SetAnimation } from 'app/modules/editor/store/timeline/actions';
+import { getAnimation } from 'app/modules/editor/store/timeline/selectors';
 import { ThemeType } from 'app/modules/editor/store/theme/reducer';
 import { environment } from 'environments/environment';
 import * as _ from 'lodash';
@@ -18,6 +21,11 @@ import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 declare const ga: Function;
+
+// Duration bounds mirror the NumberProperty('duration', { min, max }) registered
+// on the Animation model.
+const MIN_DURATION = 100;
+const MAX_DURATION = 60000;
 
 @Component({
   standalone: false,
@@ -35,6 +43,26 @@ export class ToolbarComponent implements OnInit {
     currIsActionMode: boolean;
   }>;
 
+  // Composition (animation) name + duration, shown as editable bubbles.
+  animation$: Observable<Animation>;
+  isEditingName = false;
+  isEditingDuration = false;
+  nameDraft = '';
+  durationDraft = '';
+
+  @ViewChild('nameInput') set nameInput(ref: ElementRef<HTMLInputElement> | undefined) {
+    if (ref) {
+      ref.nativeElement.focus();
+      ref.nativeElement.select();
+    }
+  }
+  @ViewChild('durationInput') set durationInput(ref: ElementRef<HTMLInputElement> | undefined) {
+    if (ref) {
+      ref.nativeElement.focus();
+      ref.nativeElement.select();
+    }
+  }
+
   constructor(
     private readonly actionModeService: ActionModeService,
     readonly themeService: ThemeService,
@@ -42,6 +70,7 @@ export class ToolbarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.animation$ = this.store.select(getAnimation);
     let hasActionModeBeenEnabled = false;
     let prevThemeType: ThemeType;
     let currThemeType = this.themeService.getThemeType().themeType;
@@ -80,6 +109,52 @@ export class ToolbarComponent implements OnInit {
 
   set darkTheme(isDark: boolean) {
     this.themeService.setTheme(isDark ? 'dark' : 'light');
+  }
+
+  // ─── Composition name / duration bubbles ───────────────────────────────
+
+  startEditName(animation: Animation, event: MouseEvent) {
+    event.stopPropagation();
+    this.nameDraft = animation.name;
+    this.isEditingName = true;
+  }
+
+  commitName(animation: Animation) {
+    if (!this.isEditingName) {
+      return;
+    }
+    this.isEditingName = false;
+    const name = NameProperty.sanitize(this.nameDraft);
+    if (!name || name === animation.name) {
+      return;
+    }
+    const cloned = animation.clone();
+    cloned.name = name;
+    this.store.dispatch(new SetAnimation(cloned));
+  }
+
+  startEditDuration(animation: Animation, event: MouseEvent) {
+    event.stopPropagation();
+    this.durationDraft = `${animation.duration}`;
+    this.isEditingDuration = true;
+  }
+
+  commitDuration(animation: Animation) {
+    if (!this.isEditingDuration) {
+      return;
+    }
+    this.isEditingDuration = false;
+    const parsed = parseFloat(this.durationDraft);
+    if (isNaN(parsed)) {
+      return;
+    }
+    const duration = _.clamp(Math.round(parsed), MIN_DURATION, MAX_DURATION);
+    if (duration === animation.duration) {
+      return;
+    }
+    const cloned = animation.clone();
+    cloned.duration = duration;
+    this.store.dispatch(new SetAnimation(cloned));
   }
 
   onSendFeedbackClick(event: MouseEvent) {

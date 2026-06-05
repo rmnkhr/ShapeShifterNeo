@@ -1,5 +1,5 @@
 <ng-container *ngIf="(this.layerTimelineModel$ | async) as model">
-  <div class="studio-layer-timeline mat-elevation-z8"
+  <div class="studio-layer-timeline"
     *ngIf="(this.themeService.asObservable() | async) as theme"
     [class.dark-to-light-base100]="!theme.isInitialPageLoad && theme.themeType === 'light'"
     [class.light-to-dark-base100]="!theme.isInitialPageLoad && theme.themeType === 'dark'">
@@ -23,7 +23,8 @@
         fxLayoutAlign="start center">
 
         <!-- File menu. -->
-        <mat-menu #fileMenu="matMenu">
+        <mat-menu #fileMenu="matMenu"
+          class="ss-glass-menu">
           <button mat-menu-item
             (click)="this.onNewWorkspaceClick()">
             New
@@ -53,7 +54,8 @@
         </button>
 
         <!-- Import menu. -->
-        <mat-menu #importMenu="matMenu">
+        <mat-menu #importMenu="matMenu"
+          class="ss-glass-menu">
           <button mat-menu-item
             (click)="this.onLaunchFilePickerClick($event, 'addPathsFromSvgButton')">
             SVG
@@ -84,7 +86,8 @@
         </button>
 
         <!-- Export menu. -->
-        <mat-menu #exportMenu="matMenu">
+        <mat-menu #exportMenu="matMenu"
+          class="ss-glass-menu">
           <button mat-menu-item
             (click)="this.onExportSvgClick()">
             SVG
@@ -118,7 +121,8 @@
         <div fxFlex></div>
 
         <!-- Add layer menu. -->
-        <mat-menu #addLayerMenu="matMenu">
+        <mat-menu #addLayerMenu="matMenu"
+          class="ss-glass-menu">
           <button mat-menu-item
             (click)="this.onAddPathLayerClick()">
             New path
@@ -190,30 +194,10 @@
         class="slt-timeline-animation is-active"
         [ngStyle]="{'width': (model.animation.duration * animationData.horizZoom + 40) + 'px'}"
         fxLayout="column">
-        <div class="slt-header mat-elevation-z2">
-          <div fxLayout="row"
-            fxLayoutAlign="start center">
-            <div class="slt-timeline-animation-meta"
-              [class.is-disabled]="model.isActionMode"
-              [class.is-selected]="model.isAnimationSelected"
-              (click)="this.onAnimationHeaderTextClick($event)">
-              <span class="slt-timeline-animation-name"
-                [class.is-disabled]="model.isActionMode">
-                {{ model.animation.name }}
-              </span>
-              <span class="slt-timeline-animation-duration"
-                [class.is-disabled]="model.isActionMode">
-                {{ model.animation.duration }}ms
-              </span>
-            </div>
-            <button mat-icon-button
-              (click)="this.onZoomToFitClick($event)"
-              matTooltip="Zoom to fit ({{ this.shortcutService.getZoomToFitText() }})"
-              matTooltipPosition="below"
-              matTooltipShowDelay="500">
-              <mat-icon>zoom_out_map</mat-icon>
-            </button>
-          </div>
+        <!-- Composition name + duration moved to the top toolbar. This header
+             now holds only the time ruler. -->
+        <div class="slt-header mat-elevation-z2"
+          (click)="this.onAnimationHeaderTextClick($event)">
           <canvas appLayerTimelineGrid
             class="slt-timeline-header-grid"
             [class.dark-to-light-base100]="!theme.isInitialPageLoad && theme.themeType === 'light'"
@@ -248,5 +232,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Floating "fit to width" button — shown when the timeline content
+         doesn't fill the visible width. -->
+    <button class="timeline-fill-fab"
+      *ngIf="this.showFillButton$ | async"
+      (click)="this.onZoomToFitClick($event)"
+      matTooltip="Fit to width ({{ this.shortcutService.getZoomToFitText() }})"
+      matTooltipPosition="above"
+      matTooltipShowDelay="500">
+      <mat-icon>fit_screen</mat-icon>
+      <span>Fit</span>
+    </button>
   </div>
 </ng-container>
