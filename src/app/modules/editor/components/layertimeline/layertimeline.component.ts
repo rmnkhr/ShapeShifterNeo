@@ -1156,7 +1156,9 @@ export class LayerTimelineComponent extends DestroyableMixin()
     }
     const contentWidth =
       this.animation.duration * this.horizZoom + 2 * TimelineConsts.TIMELINE_ANIMATION_PADDING;
-    return contentWidth + 1 < this.$timeline.width();
+    // 48px deadzone matches the shave in autoZoomToAnimation(), so the button
+    // hides once the content is fitted and only reappears on a real underfill.
+    return contentWidth < this.$timeline.width() - 48;
   }
 
   // Proxies a button click to the <input> tag that opens the file picker.
