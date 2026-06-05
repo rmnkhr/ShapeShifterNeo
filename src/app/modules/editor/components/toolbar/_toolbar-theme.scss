@@ -1,21 +1,25 @@
+@use '@angular/material' as mat;
+
 @mixin ss-toolbar-theme($theme) {
-    $primary: map-get($theme, primary);
     $foreground: map-get($theme, ss-foreground);
+    $background: map-get($theme, ss-background);
     $accent-inverse: map-get($theme, accent-inverse);
-    $is-dark: map-get($theme, is-dark);
+    // The toolbar is a surface (Kinetic Editor System), not a colored bar:
+    // surface-container background with on-surface text and a 1px outline.
     .toolbar {
-        background-color: mat-color($primary);
-        color: mat-color($primary, default-contrast);
+        background-color: mat.m2-get-color-from-palette($background, base100);
+        color: mat.m2-get-color-from-palette($foreground, primary-text);
+        box-shadow: 0 1px 0 mat.m2-get-color-from-palette($foreground, divider);
         button {
             &[mat-icon-button][disabled] {
                 mat-icon {
-                    color: mat-color($foreground, if($is-dark, disabled-text, disabled-text-inverse));
+                    color: mat.m2-get-color-from-palette($foreground, disabled-text);
                 }
             }
         }
         button.activated {
             mat-icon {
-                color: mat-color($accent-inverse);
+                color: mat.m2-get-color-from-palette($accent-inverse);
             }
         }
     }

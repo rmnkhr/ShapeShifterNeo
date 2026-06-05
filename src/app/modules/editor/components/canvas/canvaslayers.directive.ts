@@ -8,7 +8,6 @@ import {
   VectorLayer,
 } from 'app/modules/editor/model/layers';
 import { ColorUtil } from 'app/modules/editor/scripts/common';
-import { DestroyableMixin } from 'app/modules/editor/scripts/mixins';
 import { PlaybackService } from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import {
@@ -20,7 +19,7 @@ import * as $ from 'jquery';
 import { combineLatest, merge } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CanvasLayoutMixin, Size } from './CanvasLayoutMixin';
+import { CanvasLayoutDestroyableMixin, Size } from './CanvasLayoutMixin';
 import * as CanvasUtil from './CanvasUtil';
 
 type Context = CanvasRenderingContext2D;
@@ -28,9 +27,10 @@ type Context = CanvasRenderingContext2D;
 /**
  * Directive that draws the current vector layer to the canvas.
  */
-@Directive({ selector: '[appCanvasLayers]' })
-export class CanvasLayersDirective extends CanvasLayoutMixin(DestroyableMixin())
-  implements AfterViewInit {
+@Directive({
+  standalone: false,
+  selector: '[appCanvasLayers]' })
+export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implements AfterViewInit {
   @Input()
   actionSource: ActionSource;
 

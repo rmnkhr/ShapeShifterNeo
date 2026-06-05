@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef } from '@angular/material/dialog';
 
 export enum DropFilesAction {
   AddToWorkspace = 1,
@@ -7,6 +7,7 @@ export enum DropFilesAction {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-dropfilesdialog',
   template: `
   <span matDialogTitle>Start from scratch?</span>

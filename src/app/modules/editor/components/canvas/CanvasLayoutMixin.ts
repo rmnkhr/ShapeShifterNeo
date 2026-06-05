@@ -1,7 +1,24 @@
 import * as _ from 'lodash';
 
-export function CanvasLayoutMixin<T extends Constructor>(Base = class {} as T) {
-  return class extends Base {
+import { DestroyableMixin, IDestroyable } from 'app/modules/editor/scripts/mixins';
+
+export interface ICanvasLayout {
+  readonly cssScale: number;
+  readonly attrScale: number;
+  getBounds(): Size;
+  getViewport(): Size;
+  getZoom(): number;
+  getTranslation(): { tx: number; ty: number };
+  setDimensions(bounds: Size, viewport: Size): void;
+  setZoomPan(zoom: number, translation: Readonly<{ tx: number; ty: number }>): void;
+}
+
+class EmptyBase {}
+
+export function CanvasLayoutMixin<TBase extends Constructor = typeof EmptyBase>(
+  Base: TBase = (EmptyBase as unknown) as TBase,
+): Constructor<ICanvasLayout> & TBase {
+  return class CanvasLayout extends Base {
     private bounds = { w: 24, h: 24 };
     private viewport = { w: 24, h: 24 };
     private zoom = 1;
@@ -64,7 +81,7 @@ export function CanvasLayoutMixin<T extends Constructor>(Base = class {} as T) {
     }
 
     protected onZoomPanChanged(zoom: number, translation: Readonly<{ tx: number; ty: number }>) {}
-  };
+  } as Constructor<ICanvasLayout> & TBase;
 }
 
 export interface Size {
@@ -72,11 +89,9 @@ export interface Size {
   readonly h: number;
 }
 
-export interface CanvasLayoutMixin {
-  readonly cssScale: number;
-  readonly attrScale: number;
-  getViewport(): Size;
-  getBounds(): Size;
-  setDimensions(bounds: Size, viewport: Size): void;
-  onDimensionsChanged(bounds: Size, viewport: Size): void;
-}
+/**
+ * Combined Canvas + Destroyable mixin. Type-safe alternative to chaining mixin
+ * calls, which TypeScript 3.8+ fails to infer correctly.
+ */
+export const CanvasLayoutDestroyableMixin = (): Constructor<ICanvasLayout & IDestroyable> =>
+  CanvasLayoutMixin(DestroyableMixin()) as any;

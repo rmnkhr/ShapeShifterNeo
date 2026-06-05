@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ShapeShifter": {
+    "NeoShapeShifter": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -33,13 +33,13 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": true,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
               "serviceWorker": true,
+              "ngswConfigPath": "ngsw-config.json",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -51,13 +51,13 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": true,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
               "serviceWorker": true,
+              "ngswConfigPath": "ngsw-config.json",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -70,24 +70,24 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ShapeShifter:build"
+            "buildTarget": "NeoShapeShifter:build"
           },
           "configurations": {
             "development-beta": {
-              "browserTarget": "ShapeShifter:build:development-beta"
+              "buildTarget": "NeoShapeShifter:build:development-beta"
             },
             "production": {
-              "browserTarget": "ShapeShifter:build:production"
+              "buildTarget": "NeoShapeShifter:build:production"
             },
             "production-beta": {
-              "browserTarget": "ShapeShifter:build:production-beta"
+              "buildTarget": "NeoShapeShifter:build:production-beta"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ShapeShifter:build"
+            "buildTarget": "NeoShapeShifter:build"
           }
         },
         "test": {
@@ -103,16 +103,14 @@
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": ["src/tsconfig.app.json", "src/tsconfig.spec.json"],
-            "exclude": [],
-            "typeCheck": true
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }
     },
-    "ShapeShifter-e2e": {
+    "NeoShapeShifter-e2e": {
       "root": "",
       "sourceRoot": "",
       "projectType": "application",
@@ -121,13 +119,12 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "ShapeShifter:serve"
+            "devServerTarget": "NeoShapeShifter:serve"
           }
         }
       }
     }
   },
-  "defaultProject": "ShapeShifter",
   "schematics": {
     "@schematics/angular:component": {
       "spec": false,

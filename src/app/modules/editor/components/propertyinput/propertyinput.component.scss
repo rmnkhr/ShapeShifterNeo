@@ -18,7 +18,7 @@
         height: 32px;
     }
     .spi-selection-description-container {
-        padding: (32px - 24px) / 2 0;
+        padding: calc((32px - 24px) / 2) 0;
     }
     .spi-selection-description {
         font-weight: 500;

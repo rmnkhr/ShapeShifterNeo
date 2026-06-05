@@ -20,6 +20,7 @@ import { map } from 'rxjs/operators';
 declare const ga: Function;
 
 @Component({
+  standalone: false,
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss'],
@@ -296,7 +297,7 @@ class ToolbarData {
     } else if (this.mode === ActionMode.Selection) {
       return 'Edit path morphing animation';
     }
-    return 'Shape Shifter';
+    return 'NeoShapeShifter';
   }
 
   getToolbarSubtitle() {

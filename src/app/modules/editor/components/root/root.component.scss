@@ -53,9 +53,16 @@ div.display-container {
   user-select: none;
 }
 
+// Positioning context for the floating tool panel, so it centers within the
+// editor body (below the toolbar) rather than the whole viewport.
+.editor-body {
+  position: relative;
+}
+
 app-toolpanel {
-  // TODO: make this color theme dependent
-  background-color: white;
+  // The tool panel is a floating overlay pill; the host stays transparent so
+  // the canvas shows around it.
+  background-color: transparent;
 }
 
 .cursor-default {

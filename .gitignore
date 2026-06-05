@@ -1,11 +1,20 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# Local secrets / Firebase config (copy firebase.config.example.ts -> firebase.config.ts)
+/src/environments/firebase.config.ts
+
+# Firebase deploy cache
+/.firebase
+
 # compiled output
 /dist
 /tmp
 
 # dependencies
 /node_modules
+
+# Angular build cache
+/.angular
 
 # IDEs and editors
 /.idea

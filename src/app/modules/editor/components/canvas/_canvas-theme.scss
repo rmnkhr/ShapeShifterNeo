@@ -1,9 +1,11 @@
+@use '@angular/material' as mat;
+
 @mixin ss-canvas-theme($theme) {
     $background: map-get($theme, ss-background);
     .app-canvas-container {
         .canvas-container {
             canvas.rendering-canvas {
-                // background-color: mat-color($background, base);
+                // background-color: mat.m2-get-color-from-palette($background, base);
                 background-color: #fff;
             }
         }

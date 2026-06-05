@@ -8,6 +8,7 @@ enum DragState {
 }
 
 @Directive({
+  standalone: false,
   selector: '[appDropTarget]',
 })
 export class DropTargetDirective implements OnInit {

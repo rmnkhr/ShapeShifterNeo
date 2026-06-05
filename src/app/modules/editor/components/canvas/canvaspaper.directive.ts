@@ -1,15 +1,16 @@
 import { AfterViewInit, Directive, ElementRef, Input, OnDestroy } from '@angular/core';
 import { ActionSource } from 'app/modules/editor/model/actionmode';
-import { DestroyableMixin } from 'app/modules/editor/scripts/mixins';
 import { PaperProject } from 'app/modules/editor/scripts/paper';
 import { PaperService } from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import * as $ from 'jquery';
 
-import { CanvasLayoutMixin } from './CanvasLayoutMixin';
+import { CanvasLayoutDestroyableMixin } from './CanvasLayoutMixin';
 
-@Directive({ selector: '[appCanvasPaper]' })
-export class CanvasPaperDirective extends CanvasLayoutMixin(DestroyableMixin())
+@Directive({
+  standalone: false,
+  selector: '[appCanvasPaper]' })
+export class CanvasPaperDirective extends CanvasLayoutDestroyableMixin()
   implements AfterViewInit, OnDestroy {
   @Input()
   actionSource: ActionSource;

@@ -1,66 +1,68 @@
+@use '@angular/material' as mat;
+
 @mixin ss-propertyinput-theme($theme) {
     $foreground: map-get($theme, ss-foreground);
     $background: map-get($theme, ss-background);
     $accent: map-get($theme, accent);
     $is-dark: map-get($theme, is-dark);
     .property-input {
-        background-color: mat-color($background, base200);
+        background-color: mat.m2-get-color-from-palette($background, base200);
     }
     .spi-header {
-        background-color: mat-color($background, base100);
+        background-color: mat.m2-get-color-from-palette($background, base100);
         .spi-selection-icon {
-            color: mat-color($foreground, secondary-text);
+            color: mat.m2-get-color-from-palette($foreground, secondary-text);
         }
         button.spi-secondary-icon {
-            color: mat-color($foreground, secondary-text);
+            color: mat.m2-get-color-from-palette($foreground, secondary-text);
             &[mat-icon-button][disabled] {
                 mat-icon {
-                    color: mat-color($foreground, disabled-text);
+                    color: mat.m2-get-color-from-palette($foreground, disabled-text);
                 }
             }
         }
         .spi-selection-description {
-            color: mat-color($foreground, primary-text);
+            color: mat.m2-get-color-from-palette($foreground, primary-text);
         }
         .spi-selection-sub-description {
-            color: mat-color($foreground, secondary-text);
+            color: mat.m2-get-color-from-palette($foreground, secondary-text);
         }
     }
     .spi-body {
         .spi-property-name {
-            color: mat-color($foreground, secondary-text);
+            color: mat.m2-get-color-from-palette($foreground, secondary-text);
         }
         .spi-property-value-static,
         .spi-property-value-editor input,
         .spi-property-value-menu-target {
-            box-shadow: 0 0 0 1px mat-color($foreground, divider) inset;
+            box-shadow: 0 0 0 1px mat.m2-get-color-from-palette($foreground, divider) inset;
             &.has-input-error {
-                border-left: 4px solid mat-color(mat-palette($mat-red, A700));
+                border-left: 4px solid mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-red-palette, A700));
             }
         }
         .spi-property-value-editor input,
         .spi-property-value-menu-target {
-            background-color: mat-color($background, base);
-            color: mat-color($foreground, primary-text);
+            background-color: mat.m2-get-color-from-palette($background, base);
+            color: mat.m2-get-color-from-palette($foreground, primary-text);
             &:focus {
-                box-shadow: 0 0 0 1px mat-color($accent) inset;
+                box-shadow: 0 0 0 1px mat.m2-get-color-from-palette($accent) inset;
             }
         }
         .spi-property-value-menu-target {
             &::after {
-                color: mat-color($foreground, disabled-text);
+                color: mat.m2-get-color-from-palette($foreground, disabled-text);
             }
         }
         .spi-property-color-preview {
-            box-shadow: 0 0 0 1px mat-color($foreground, divider) inset;
+            box-shadow: 0 0 0 1px mat.m2-get-color-from-palette($foreground, divider) inset;
         }
     }
     .spi-empty {
-        color: mat-color($foreground, disabled-text);
+        color: mat.m2-get-color-from-palette($foreground, disabled-text);
     }
     .alert-danger {
-        color: mat-color(mat-palette($mat-red, A700));
-        background-color: mat-color(mat-palette($mat-red, 50));
-        border-color: mat-color(mat-palette($mat-red, 100));
+        color: mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-red-palette, A700));
+        background-color: mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-red-palette, 50));
+        border-color: mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-red-palette, 100));
     }
 }

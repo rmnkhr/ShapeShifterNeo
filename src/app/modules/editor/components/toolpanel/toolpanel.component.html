@@ -1,14 +1,12 @@
 <div *ngIf="(this.model$ | async) as model"
-  class="tool-panel mat-elevation-z4"
-  fxLayout="column"
-  fxFlex>
+  class="tool-panel">
   <button class="tool-button"
     matTooltip="Select"
     matTooltipPosition="right"
     matTooltipShowDelay="500"
     [class.is-checked]="model.isDefaultClick"
     (click)="onDefaultClick($event)">
-    <mat-icon svgIcon="tool_select"></mat-icon>
+    <mat-icon>near_me</mat-icon>
   </button>
   <button class="tool-button"
     matTooltip="Rotate"
@@ -34,7 +32,7 @@
     matTooltipShowDelay="500"
     [class.is-checked]="model.toolMode === this.TOOL_MODE_PENCIL"
     (click)="onPencilClick($event)">
-    <mat-icon svgIcon="tool_pencil"></mat-icon>
+    <mat-icon>edit</mat-icon>
   </button>
   <button class="tool-button"
     matTooltip="Vector"
@@ -42,7 +40,7 @@
     matTooltipShowDelay="500"
     [class.is-checked]="model.isEditPathChecked"
     (click)="onEditPathClick($event)">
-    <mat-icon svgIcon="tool_vector"></mat-icon>
+    <mat-icon>gesture</mat-icon>
   </button>
   <button class="tool-button"
     matTooltip="Oval"
@@ -50,7 +48,7 @@
     matTooltipShowDelay="500"
     [class.is-checked]="model.toolMode === this.TOOL_MODE_ELLIPSE"
     (click)="onEllipseClick($event)">
-    <mat-icon svgIcon="tool_ellipse"></mat-icon>
+    <mat-icon>radio_button_unchecked</mat-icon>
   </button>
   <button class="tool-button"
     matTooltip="Rectangle"
@@ -58,8 +56,9 @@
     matTooltipShowDelay="500"
     [class.is-checked]="model.toolMode === this.TOOL_MODE_RECTANGLE"
     (click)="onRectangleClick($event)">
-    <mat-icon svgIcon="tool_rectangle"></mat-icon>
+    <mat-icon>crop_square</mat-icon>
   </button>
+  <div class="tool-divider"></div>
   <!-- TODO: set the tooltip delay back to 500 once we have a better way of telling the user about zooming out -->
   <button class="tool-button"
     matTooltip="Zoom (hold {{ this.isMac() ? 'option' : 'alt' }} to zoom out)"

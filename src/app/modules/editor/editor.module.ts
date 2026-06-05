@@ -1,21 +1,17 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, NgModule } from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule } from '@angular/forms';
-import {
-  MatButtonModule,
-  MatDialogModule,
-  MatIconModule,
-  MatIconRegistry,
-  MatInputModule,
-  MatMenuModule,
-  MatOptionModule,
-  MatRadioModule,
-  MatSlideToggleModule,
-  MatSnackBarModule,
-  MatToolbarModule,
-  MatTooltipModule,
-} from '@angular/material';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatOptionModule } from '@angular/material/core';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -48,7 +44,8 @@ import { SplitterComponent } from 'app/modules/editor/components/splitter/splitt
 import { ToolbarComponent } from 'app/modules/editor/components/toolbar/toolbar.component';
 import { ToolPanelComponent } from 'app/modules/editor/components/toolpanel/toolpanel.component';
 import { errorHandlerFactory } from 'app/modules/editor/scripts/bugsnag';
-import { StoreModule, metaReducers, reducers } from 'app/modules/editor/store';
+import { StoreModule } from '@ngrx/store';
+import { metaReducers, reducers } from 'app/modules/editor/store';
 import { environment } from 'environments/environment';
 
 @NgModule({
@@ -79,7 +76,6 @@ import { environment } from 'environments/environment';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    FlexLayoutModule,
     FormsModule,
     HttpClientModule,
     ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
@@ -98,7 +94,6 @@ import { environment } from 'environments/environment';
     MatTooltipModule,
   ],
   providers: [{ provide: ErrorHandler, useFactory: errorHandlerFactory }],
-  entryComponents: [ConfirmDialogComponent, DemoDialogComponent, DropFilesDialogComponent],
   bootstrap: [RootComponent],
 })
 export class EditorModule {

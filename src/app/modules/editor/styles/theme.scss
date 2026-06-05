@@ -1,14 +1,15 @@
-@import '~@angular/material/theming';
-@import '../components/canvas/_canvas-theme.scss';
-@import '../components/dialogs/_dialog-theme.scss';
-@import '../components/layertimeline/_layerlisttree-theme.scss';
-@import '../components/layertimeline/_layertimeline-theme.scss';
-@import '../components/layertimeline/_timelineanimationrow-theme.scss';
-@import '../components/playback/_playback-theme.scss';
-@import '../components/propertyinput/_propertyinput-theme.scss';
-@import '../components/root/_root-theme.scss';
-@import '../components/toolbar/_toolbar-theme.scss';
-@include mat-core();
+@use '@angular/material' as mat;
+@use '../components/canvas/canvas-theme' as canvasTheme;
+@use '../components/dialogs/dialog-theme' as dialogTheme;
+@use '../components/layertimeline/layerlisttree-theme' as layerlisttreeTheme;
+@use '../components/layertimeline/layertimeline-theme' as layertimelineTheme;
+@use '../components/layertimeline/timelineanimationrow-theme' as timelineanimationrowTheme;
+@use '../components/playback/playback-theme' as playbackTheme;
+@use '../components/propertyinput/propertyinput-theme' as propertyinputTheme;
+@use '../components/root/root-theme' as rootTheme;
+@use '../components/toolbar/toolbar-theme' as toolbarTheme;
+
+@include mat.core();
 
 $ss-light-theme-foreground: (
   divider:                rgba(black, 0.12),
@@ -32,64 +33,107 @@ $ss-dark-theme-foreground: (
   primary-text-inverse:   rgba(black, 0.87),
 );
 
+// Surface tiers mapped to the Kinetic Editor System (see Design.md / _tokens.scss).
+// base = lowest surface (inputs / artboard), base50/100/200 = panel container
+// tiers, base300 = the deepest backdrop behind the canvas/viewport.
 $ss-light-theme-background: (
-  base: white,
-  base50: map-get($mat-grey, 50),
-  base100: map-get($mat-grey, 100),
-  base200: map-get($mat-grey, 200),
-  base200-inverse: map-get($mat-grey, 900),
-  base300: map-get($mat-grey, 300),
+  base: #ffffff,             // surface-container-lowest
+  base50: #f3f3fa,           // surface-container-low
+  base100: #ededf4,          // surface-container (panels, toolbar)
+  base200: #e7e8ee,          // surface-container-high (property panel)
+  base200-inverse: #1d2024,
+  base300: #d9d9e0,          // surface-dim (canvas backdrop)
 );
 
 $ss-dark-theme-background: (
-  base: black,
-  base50: #303030,
-  base100: map_get($mat-grey, 800),
-  base200: map_get($mat-grey, 900),
-  base200-inverse: map-get($mat-grey, 200),
-  base300: #101010,
+  base: #0b0e12,             // surface-container-lowest
+  base50: #191c20,           // surface-container-low (layer rows)
+  base100: #1d2024,          // surface-container (panels, toolbar)
+  base200: #272a2e,          // surface-container-high (property panel)
+  base200-inverse: #e1e2e8,
+  base300: #0b0e12,          // deepest backdrop behind the canvas/viewport
 );
 
-$light-accent: mat-palette($mat-blue, A400, A200, A700);
-$dark-accent: mat-palette($mat-deep-orange, A200, A100, A400);
+// Kinetic Editor System primary blue (M2 palette built around the MD3 blue
+// seed: light primary #2662c5 @ 500, dark primary #afc6ff @ 200). Used for
+// Material primary components and for the active/selection accent.
+$ss-blue-palette: (
+  50: #eaf1ff,
+  100: #d6e3ff,
+  200: #afc6ff,
+  300: #84a9f0,
+  400: #5685dd,
+  500: #2662c5,
+  600: #1f59bb,
+  700: #154797,
+  800: #0a305f,
+  900: #002d6c,
+  A100: #d6e3ff,
+  A200: #afc6ff,
+  A400: #2662c5,
+  A700: #154797,
+  contrast: (
+    50: #001b3e, 100: #001b3e, 200: #002d6c, 300: #002d6c,
+    400: #ffffff, 500: #ffffff, 600: #ffffff, 700: #ffffff,
+    800: #d6e3ff, 900: #d6e3ff,
+    A100: #001b3e, A200: #002d6c, A400: #ffffff, A700: #ffffff,
+  ),
+);
 
-@function ss-light-theme($primary, $accent, $warn: mat-palette($mat-red)) {
-    $base-theme: mat-light-theme($primary, $accent, $warn);
+// Selection / active-state accent: the vibrant #2662c5 blue in both themes so
+// the hard-coded white text on selected rows keeps strong contrast.
+$light-accent: mat.m2-define-palette($ss-blue-palette, 500, 200, 700);
+$dark-accent: mat.m2-define-palette($ss-blue-palette, 500, 200, 700);
+
+@function ss-light-theme($primary, $accent, $warn: mat.m2-define-palette(mat.$m2-red-palette)) {
+    $base-theme: mat.m2-define-light-theme((
+      color: (primary: $primary, accent: $accent, warn: $warn),
+    ));
     $result: map_merge($base-theme, (
+      primary: $primary,
+      accent: $accent,
+      warn: $warn,
       accent-inverse: $dark-accent,
       ss-foreground: $ss-light-theme-foreground,
       ss-background: $ss-light-theme-background,
+      is-dark: false,
     ));
     @return $result;
 }
 
-@function ss-dark-theme($primary, $accent, $warn: mat-palette($mat-red)) {
-    $base-theme: mat-dark-theme($primary, $accent, $warn);
+@function ss-dark-theme($primary, $accent, $warn: mat.m2-define-palette(mat.$m2-red-palette)) {
+    $base-theme: mat.m2-define-dark-theme((
+      color: (primary: $primary, accent: $accent, warn: $warn),
+    ));
     $result: map_merge($base-theme, (
+      primary: $primary,
+      accent: $accent,
+      warn: $warn,
       accent-inverse: $light-accent,
       ss-foreground: $ss-dark-theme-foreground,
       ss-background: $ss-dark-theme-background,
+      is-dark: true,
     ));
     @return $result;
 }
 
 @mixin build-custom-theme($theme) {
-    @include angular-material-theme($theme);
-    @include ss-canvas-theme($theme);
-    @include ss-dialog-theme($theme);
-    @include ss-layerlisttree-theme($theme);
-    @include ss-layertimeline-theme($theme);
-    @include ss-timelineanimationrow-theme($theme);
-    @include ss-playback-theme($theme);
-    @include ss-propertyinput-theme($theme);
-    @include ss-root-theme($theme);
-    @include ss-toolbar-theme($theme);
+    @include mat.all-component-themes($theme);
+    @include canvasTheme.ss-canvas-theme($theme);
+    @include dialogTheme.ss-dialog-theme($theme);
+    @include layerlisttreeTheme.ss-layerlisttree-theme($theme);
+    @include layertimelineTheme.ss-layertimeline-theme($theme);
+    @include timelineanimationrowTheme.ss-timelineanimationrow-theme($theme);
+    @include playbackTheme.ss-playback-theme($theme);
+    @include propertyinputTheme.ss-propertyinput-theme($theme);
+    @include rootTheme.ss-root-theme($theme);
+    @include toolbarTheme.ss-toolbar-theme($theme);
 }
 
-$light-primary: mat-palette($mat-blue-grey, 500);
-$light-warn: mat-palette($mat-red);
-$dark-primary: mat-palette($mat-indigo, 700);
-$dark-warn: mat-palette($mat-red);
+$light-primary: mat.m2-define-palette($ss-blue-palette, 500, 200, 700);
+$light-warn: mat.m2-define-palette(mat.$m2-red-palette);
+$dark-primary: mat.m2-define-palette($ss-blue-palette, 200, 100, 500);
+$dark-warn: mat.m2-define-palette(mat.$m2-red-palette);
 $light-theme: ss-light-theme($light-primary, $light-accent, $light-warn);
 $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
 @include build-custom-theme($light-theme);
@@ -115,12 +159,12 @@ $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
         @include theme-animation-properties;
     }
     @keyframes lightToDark#{$animName} {
-        0% { background-color: mat-color($light, $paletteKey); }
-        100% { background-color: mat-color($dark, $paletteKey); }
+        0% { background-color: mat.m2-get-color-from-palette($light, $paletteKey); }
+        100% { background-color: mat.m2-get-color-from-palette($dark, $paletteKey); }
     }
     @keyframes darkToLight#{$animName} {
-        0% { background-color: mat-color($dark, $paletteKey); }
-        100% { background-color: mat-color($light, $paletteKey); }
+        0% { background-color: mat.m2-get-color-from-palette($dark, $paletteKey); }
+        100% { background-color: mat.m2-get-color-from-palette($light, $paletteKey); }
     }
 }
 
@@ -148,18 +192,18 @@ $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
     @include theme-animation-properties;
 }
 @keyframes actionModeOnToOffDark {
-    0% { background-color: mat-color(map-get($dark-theme, accent)); }
-    100% { background-color: mat-color(map-get($dark-theme, primary)); }
+    0% { background-color: mat.m2-get-color-from-palette(map-get($dark-theme, accent)); }
+    100% { background-color: mat.m2-get-color-from-palette(map-get($dark-theme, primary)); }
 }
 @keyframes actionModeOffToOnDark {
-    0% { background-color: mat-color(map-get($dark-theme, primary)); }
-    100% { background-color: mat-color(map-get($dark-theme, accent)); }
+    0% { background-color: mat.m2-get-color-from-palette(map-get($dark-theme, primary)); }
+    100% { background-color: mat.m2-get-color-from-palette(map-get($dark-theme, accent)); }
 }
 @keyframes actionModeOnToOffLight {
-    0% { background-color: mat-color(map-get($light-theme, accent)); }
-    100% { background-color: mat-color(map-get($light-theme, primary)); }
+    0% { background-color: mat.m2-get-color-from-palette(map-get($light-theme, accent)); }
+    100% { background-color: mat.m2-get-color-from-palette(map-get($light-theme, primary)); }
 }
 @keyframes actionModeOffToOnLight {
-    0% { background-color: mat-color(map-get($light-theme, primary)); }
-    100% { background-color: mat-color(map-get($light-theme, accent)); }
+    0% { background-color: mat.m2-get-color-from-palette(map-get($light-theme, primary)); }
+    100% { background-color: mat.m2-get-color-from-palette(map-get($light-theme, accent)); }
 }

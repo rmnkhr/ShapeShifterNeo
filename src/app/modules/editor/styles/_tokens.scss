@@ -1,0 +1,89 @@
+// ─────────────────────────────────────────────────────────────────────────
+// Kinetic Editor System — design tokens (see Design.md at the repo root).
+//
+// Material 3 style color tokens exposed as CSS custom properties for both
+// themes. Light scheme on :root (default), dark scheme under .ss-dark-theme
+// (the class ThemeService toggles on the host + overlay container).
+//
+// The SCSS Material theme in theme.scss consumes the same values via its
+// background/foreground maps; these custom properties are the canonical
+// reference and are used directly by components that aren't wired through the
+// Material theme maps (e.g. the tool panel).
+// ─────────────────────────────────────────────────────────────────────────
+
+:root {
+  // Light scheme (Material 3 blue-seed scheme, matches the reference app).
+  --ss-primary: #2662c5;
+  --ss-on-primary: #ffffff;
+  --ss-primary-container: #d6e3ff;
+  --ss-on-primary-container: #154797;
+  --ss-secondary: #565f71;
+  --ss-secondary-container: #dae2f9;
+  --ss-on-secondary-container: #3e4759;
+  --ss-error: #ba1a1a;
+  --ss-on-error: #ffffff;
+  --ss-error-container: #ffdad6;
+
+  --ss-background: #f9f9ff;
+  --ss-on-background: #191c20;
+  --ss-surface: #f9f9ff;
+  --ss-on-surface: #191c20;
+  --ss-on-surface-variant: #44474e;
+  --ss-surface-variant: #e0e2ec;
+  --ss-outline: #74777f;
+  --ss-outline-variant: #c4c6d0;
+  --ss-inverse-surface: #2e3036;
+  --ss-inverse-on-surface: #f0f0f7;
+
+  --ss-surface-dim: #d9d9e0;
+  --ss-surface-bright: #f9f9ff;
+  --ss-surface-container-lowest: #ffffff;
+  --ss-surface-container-low: #f3f3fa;
+  --ss-surface-container: #ededf4;
+  --ss-surface-container-high: #e7e8ee;
+  --ss-surface-container-highest: #e2e2e9;
+
+  // Shape / spacing rhythm.
+  --ss-radius-sm: 0.25rem;
+  --ss-radius: 0.5rem;
+  --ss-radius-md: 0.75rem;
+  --ss-radius-lg: 1rem;
+  --ss-radius-full: 9999px;
+  --ss-panel-padding: 12px;
+  --ss-control-gap: 8px;
+  --ss-toolbar-height: 48px;
+  --ss-gutter: 16px;
+}
+
+.ss-dark-theme {
+  // Dark scheme (Kinetic Editor System, from Design.md).
+  --ss-primary: #afc6ff;
+  --ss-on-primary: #002d6c;
+  --ss-primary-container: #2662c5;
+  --ss-on-primary-container: #dbe4ff;
+  --ss-secondary: #c4c6d0;
+  --ss-secondary-container: #43474f;
+  --ss-on-secondary-container: #b2b5be;
+  --ss-error: #ffb4ab;
+  --ss-on-error: #690005;
+  --ss-error-container: #93000a;
+
+  --ss-background: #111417;
+  --ss-on-background: #e1e2e8;
+  --ss-surface: #111417;
+  --ss-on-surface: #e1e2e8;
+  --ss-on-surface-variant: #c3c6d5;
+  --ss-surface-variant: #323539;
+  --ss-outline: #8c909e;
+  --ss-outline-variant: #424753;
+  --ss-inverse-surface: #e1e2e8;
+  --ss-inverse-on-surface: #2e3135;
+
+  --ss-surface-dim: #111417;
+  --ss-surface-bright: #36393e;
+  --ss-surface-container-lowest: #0b0e12;
+  --ss-surface-container-low: #191c20;
+  --ss-surface-container: #1d2024;
+  --ss-surface-container-high: #272a2e;
+  --ss-surface-container-highest: #323539;
+}

@@ -40,6 +40,7 @@ const ELEMENT_RESIZE_DETECTOR = erd({ strategy: 'scroll' });
 const STORAGE_KEY_FIRST_TIME_USER = 'storage_key_first_time_user';
 
 @Component({
+  standalone: false,
   selector: 'app-root',
   templateUrl: './root.component.html',
   styleUrls: ['./root.component.scss'],
@@ -54,7 +55,7 @@ export class RootComponent extends DestroyableMixin() implements OnInit, AfterVi
 
   @HostBinding('class.ss-dark-theme')
   isDarkThemeHostBinding: boolean;
-  @ViewChild('displayContainer')
+  @ViewChild('displayContainer', { static: false })
   displayContainerRef: ElementRef;
   private $displayContainer: JQuery;
 
@@ -168,7 +169,7 @@ export class RootComponent extends DestroyableMixin() implements OnInit, AfterVi
         })
         .catch(e => {
           this.snackBarService.show(
-            `There was a problem loading the Shape Shifter project`,
+            `There was a problem loading the NeoShapeShifter project`,
             'Dismiss',
             Duration.Long,
           );
@@ -190,8 +191,8 @@ export class RootComponent extends DestroyableMixin() implements OnInit, AfterVi
   onDropFiles(fileList: FileList) {
     if (this.actionModeService.isActionMode()) {
       // TODO: make action mode automatically exit when layers/blocks are added in other parts of the app
-      bugsnagClient.notify('Attempt to import files while in action mode', {
-        severity: 'warning',
+      bugsnagClient.notify('Attempt to import files while in action mode', event => {
+        event.severity = 'warning';
       });
       return;
     }
