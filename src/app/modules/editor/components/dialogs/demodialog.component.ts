@@ -6,24 +6,23 @@ import { DEMO_INFOS } from 'app/modules/editor/scripts/demos';
   standalone: false,
   selector: 'app-demodialog',
   template: `
-  <span matDialogTitle>Choose a demo</span>
-  <mat-radio-group class="dialog-radio-group" [(ngModel)]="this.selectedDemoInfo">
-    <mat-radio-button class="dialog-radio-button"
-      *ngFor="let demoInfo of this.demoInfos" [value]="demoInfo">
+  <h2 matDialogTitle
+    class="demo-title">Choose a demo</h2>
+  <mat-dialog-content class="demo-list">
+    <button *ngFor="let demoInfo of this.demoInfos"
+      class="demo-item"
+      (click)="this.dialogRef.close(demoInfo)">
       {{ demoInfo.title }}
-    </mat-radio-button>
-  </mat-radio-group>
-  <mat-dialog-actions fxLayout="row">
-    <!-- The ordering here matters (it ensures that 'OK' gets focus first). -->
-    <span fxFlex></span>
-    <button fxFlexOrder="2" mat-button (click)="this.dialogRef.close(this.selectedDemoInfo)">OK</button>
-    <button fxFlexOrder="1" mat-button matDialogClose>Cancel</button>
+    </button>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button
+      matDialogClose>Cancel</button>
   </mat-dialog-actions>`,
   styleUrls: ['./demodialog.component.scss'],
 })
 export class DemoDialogComponent {
   readonly demoInfos = DEMO_INFOS;
-  selectedDemoInfo = DEMO_INFOS[0];
 
   constructor(readonly dialogRef: MatDialogRef<DemoDialogComponent>) {}
 }

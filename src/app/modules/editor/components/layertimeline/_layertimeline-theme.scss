@@ -43,8 +43,9 @@
         }
         .slt-timeline {
             .slt-timeline-animation {
-                box-shadow: 4px 0 0 mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-grey-palette, 500)),
-                            -4px 0 0 mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-grey-palette, 500));
+                // Start-of-animation marker only; the end-of-timeline grey line
+                // has been removed.
+                box-shadow: -4px 0 0 mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-grey-palette, 500));
                 &.is-selected {
                     background-color: mat.m2-get-color-from-palette($accent);
                 }

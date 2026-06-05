@@ -20,7 +20,9 @@ export class DialogService {
   }
 
   pickDemo(): Observable<DemoInfo> {
-    return this.dialog.open(DemoDialogComponent, new MatDialogConfig()).afterClosed();
+    const config = new MatDialogConfig();
+    config.panelClass = 'ss-glass-dialog';
+    return this.dialog.open(DemoDialogComponent, config).afterClosed();
   }
 
   dropFiles(): Observable<DropFilesAction> {

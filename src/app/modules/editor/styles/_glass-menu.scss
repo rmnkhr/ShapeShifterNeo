@@ -38,3 +38,15 @@
         }
     }
 }
+
+// Frosted-glass dialog surface (same recipe as the menu) — used by the demo
+// picker. Applied via panelClass: 'ss-glass-dialog'.
+.ss-glass-dialog .mat-mdc-dialog-surface {
+    background-color: color-mix(in srgb, var(--ss-surface-container) 80%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid var(--ss-outline-variant);
+    border-radius: var(--ss-radius-lg, 1rem);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+    color: var(--ss-on-surface);
+}
