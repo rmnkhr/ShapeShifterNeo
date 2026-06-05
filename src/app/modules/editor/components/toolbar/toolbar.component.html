@@ -67,8 +67,13 @@
             (keydown.escape)="isEditingName = false"
             (blur)="commitName(animation)">
         </div>
+
+        <span class="topbar-spacer"
+          fxFlex="1 1 auto"></span>
+
         <div class="topbar-pill topbar-comp"
           (click)="startEditDuration(animation, $event)">
+          <mat-icon class="comp-icon">timer</mat-icon>
           <span *ngIf="!isEditingDuration"
             class="comp-text">{{ animation.duration }}ms</span>
           <ng-container *ngIf="isEditingDuration">
@@ -86,9 +91,6 @@
           </ng-container>
         </div>
       </ng-container>
-
-      <span class="topbar-spacer"
-        fxFlex="1 1 auto"></span>
 
       <!-- Actions pill: contextual action buttons grouped with the menu. -->
       <div class="topbar-pill topbar-actions">

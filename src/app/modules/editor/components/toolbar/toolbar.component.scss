@@ -71,6 +71,14 @@
     cursor: pointer;
     transition: background-color 120ms ease;
 
+    .comp-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+        line-height: 18px;
+        color: var(--ss-on-surface-variant);
+    }
+
     .comp-text {
         white-space: nowrap;
     }
