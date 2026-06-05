@@ -47,6 +47,7 @@
     "bezier-js": "^2.2.14",
     "core-js": "^2.5.7",
     "element-resize-detector": "^1.1.14",
+    "firebase": "^12.14.0",
     "hammerjs": "^2.0.8",
     "jquery": "^3.3.1",
     "jszip": "^3.1.5",
