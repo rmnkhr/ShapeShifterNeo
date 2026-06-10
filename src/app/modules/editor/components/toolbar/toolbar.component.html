@@ -225,9 +225,9 @@
         class="ss-glass-menu"
         xPosition="before">
         <div mat-menu-item
-          (click)="this.darkTheme = !this.darkTheme">
-          <mat-slide-toggle (click)="this.darkTheme = !this.darkTheme; $event.stopPropagation()"
-            [(ngModel)]="darkTheme"></mat-slide-toggle>
+          (click)="darkTheme = !darkTheme; $event.stopPropagation()">
+          <mat-slide-toggle [(ngModel)]="darkTheme"
+            (click)="$event.stopPropagation()"></mat-slide-toggle>
           <span>Dark theme</span>
         </div>
         <a href="http://www.androiddesignpatterns.com/2016/11/introduction-to-icon-animation-techniques.html"

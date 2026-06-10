@@ -31,6 +31,42 @@ import { InspectedProperty } from './InspectedProperty';
 
 declare const ga: Function;
 
+// Section grouping for the property inspector. Properties are listed under these
+// headers (in this order); anything not matched falls into a leading, unlabeled
+// group so it renders first (e.g. 'name', 'pathData').
+const PROPERTY_GROUPS: ReadonlyArray<{ label: string; properties: ReadonlyArray<string> }> = [
+  { label: 'Fill', properties: ['fillColor', 'fillAlpha', 'fillType'] },
+  {
+    label: 'Stroke',
+    properties: [
+      'strokeColor',
+      'strokeAlpha',
+      'strokeWidth',
+      'strokeLinecap',
+      'strokeLinejoin',
+      'strokeMiterLimit',
+    ],
+  },
+  { label: 'Trim Path', properties: ['trimPathStart', 'trimPathEnd', 'trimPathOffset'] },
+];
+
+// Friendly labels shown in the inspector. The section header (Fill / Stroke /
+// Trim Path) already gives context, so the per-row labels can be short.
+const PROPERTY_DISPLAY_NAMES: { readonly [propertyName: string]: string } = {
+  fillColor: 'Color',
+  fillAlpha: 'Alpha',
+  fillType: 'Type',
+  strokeColor: 'Color',
+  strokeAlpha: 'Alpha',
+  strokeWidth: 'Width',
+  strokeLinecap: 'Linecap',
+  strokeLinejoin: 'Linejoin',
+  strokeMiterLimit: 'Miter limit',
+  trimPathStart: 'Start',
+  trimPathEnd: 'End',
+  trimPathOffset: 'Offset',
+};
+
 // TODO: when you enter a 'start time' larger than 'end time', transform 'end time' correctly
 @Component({
   standalone: false,
@@ -241,6 +277,7 @@ export class PropertyInputComponent implements OnInit {
       model: layer,
       numSelections,
       inspectedProperties,
+      propertyGroups: this.groupInspectedProperties(inspectedProperties),
       icon,
       description,
       availablePropertyNames,
@@ -287,6 +324,7 @@ export class PropertyInputComponent implements OnInit {
       model: block,
       numSelections,
       inspectedProperties,
+      propertyGroups: this.groupInspectedProperties(inspectedProperties),
       icon,
       description,
       subDescription,
@@ -323,6 +361,7 @@ export class PropertyInputComponent implements OnInit {
       model: animation,
       numSelections: 1,
       inspectedProperties,
+      propertyGroups: this.groupInspectedProperties(inspectedProperties),
       icon,
       description,
       availablePropertyNames: [],
@@ -334,8 +373,83 @@ export class PropertyInputComponent implements OnInit {
     return ColorUtil.androidToCssHexColor(color);
   }
 
+  // The opaque #rrggbb value fed to the native <input type="color"> swatch
+  // (the native picker has no alpha channel).
+  colorToInputValue(androidColor: string) {
+    const d = ColorUtil.parseAndroidColor(androidColor);
+    if (!d) {
+      return '#000000';
+    }
+    const hex = (n: number) => (n < 16 ? '0' : '') + n.toString(16);
+    return '#' + hex(d.r) + hex(d.g) + hex(d.b);
+  }
+
+  // Fill width / handle position (%) for the bold fraction slider.
+  fractionPercent(ip: InspectedProperty<any>) {
+    const v = typeof ip.value === 'number' ? ip.value : 0;
+    return _.clamp(v, 0, 1) * 100;
+  }
+
+  // The 0..1 slider for a FractionProperty moved. Native range events only fire
+  // on user interaction (never on a programmatic [value] set), so a finer value
+  // typed into the text field — e.g. 0.14 — is left untouched until the user
+  // actually drags the slider, which then commits a clean 0.1-step value.
+  onFractionSliderChange(ip: InspectedProperty<any>, event: Event) {
+    const value = parseFloat((event.target as HTMLInputElement).value);
+    if (isNaN(value)) {
+      return;
+    }
+    // Discard any half-entered text value so the slider's value is what sticks.
+    ip.resolveEnteredValue();
+    ip.value = _.clamp(value, 0, 1);
+  }
+
+  // The color circle was used to pick a new color: apply the chosen rgb while
+  // preserving the property's existing alpha.
+  onColorPickerChange(ip: InspectedProperty<any>, event: Event) {
+    const picked = ColorUtil.parseAndroidColor((event.target as HTMLInputElement).value);
+    if (!picked) {
+      return;
+    }
+    const existing = ColorUtil.parseAndroidColor(ip.value);
+    const a = existing ? existing.a : 255;
+    ip.value = ColorUtil.toAndroidString({ r: picked.r, g: picked.g, b: picked.b, a });
+  }
+
+  // Splits the flat inspected-property list into ordered, labeled sections.
+  // Unmatched properties form a leading group with no header.
+  private groupInspectedProperties(
+    inspectedProperties: ReadonlyArray<InspectedProperty<any>>,
+  ): PropertyGroup[] {
+    const byName = new Map(inspectedProperties.map(ip => [ip.propertyName, ip]));
+    const grouped = new Set<string>();
+    const groups: PropertyGroup[] = [];
+    for (const { label, properties } of PROPERTY_GROUPS) {
+      const props = properties.map(name => byName.get(name)).filter(ip => !!ip);
+      if (props.length) {
+        props.forEach(ip => grouped.add(ip.propertyName));
+        groups.push({ label, inspectedProperties: props });
+      }
+    }
+    // Everything not claimed by a named group, kept in original order, leads.
+    const ungrouped = inspectedProperties.filter(ip => !grouped.has(ip.propertyName));
+    if (ungrouped.length) {
+      groups.unshift({ label: undefined, inspectedProperties: ungrouped });
+    }
+    return groups;
+  }
+
+  // Friendly per-row label (falls back to the raw property name).
+  displayName(ip: InspectedProperty<any>) {
+    return PROPERTY_DISPLAY_NAMES[ip.propertyName] || ip.propertyName;
+  }
+
   trackInspectedPropertyFn(index: number, ip: InspectedProperty<any>) {
     return ip.propertyName;
+  }
+
+  trackPropertyGroupFn(index: number, group: PropertyGroup) {
+    return group.label || '__ungrouped__';
   }
 
   trackEnumOptionFn(index: number, option: Option) {
@@ -360,10 +474,16 @@ export class PropertyInputComponent implements OnInit {
 //   return shared;
 // }
 
+interface PropertyGroup {
+  readonly label: string | undefined;
+  readonly inspectedProperties: ReadonlyArray<InspectedProperty<any>>;
+}
+
 interface PropertyInputModel {
   readonly model?: any;
   readonly numSelections: number;
   readonly inspectedProperties: ReadonlyArray<InspectedProperty<any>>;
+  readonly propertyGroups?: ReadonlyArray<PropertyGroup>;
   // TODO: use a union type here for better type safety?
   readonly icon?: string;
   readonly description?: string;

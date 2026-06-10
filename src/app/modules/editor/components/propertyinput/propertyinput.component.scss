@@ -45,12 +45,138 @@
 .spi-body {
     overflow-y: auto;
     padding: 8px 0;
+    // Section header for grouped properties (Fill / Stroke / Trim Path), with a
+    // separator line between categories (skipped on the first header).
+    .spi-property-group-header {
+        padding: 14px 16px 4px;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 16px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ss-on-surface-variant);
+
+        &:not(:first-child) {
+            margin-top: 8px;
+            padding-top: 16px;
+            border-top: 1px solid color-mix(in srgb, var(--ss-outline-variant) 55%, transparent);
+        }
+    }
+
     .spi-property {
         display: flex;
         flex-direction: row;
+        align-items: center;
+        // The body scrolls (overflow-y: auto); without this, rows shrink to their
+        // min-height and the taller bold-slider control spills over the next row.
+        flex-shrink: 0;
         padding: 4px 16px;
         min-height: 24px;
+
     }
+
+    // ── Fraction slider (0..1) ─────────────────────────────────────────────
+    // Inline control inside the value column: a thin rounded track with a fill
+    // and round handle, plus a compact editable value field on the right. The
+    // property label stays in the name column like every other row.
+    .spi-slider {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+
+        // Clickable track area; the visible rail is its ::before.
+        .spi-slider-track {
+            position: relative;
+            flex: 1 1 auto;
+            height: 24px;
+            min-width: 0;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 50%;
+                height: 4px;
+                transform: translateY(-50%);
+                border-radius: var(--ss-radius-full, 9999px);
+                background-color: var(--ss-surface-variant);
+            }
+        }
+
+        // Filled portion from the left up to the value.
+        .spi-slider-fill {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            height: 4px;
+            transform: translateY(-50%);
+            border-radius: var(--ss-radius-full, 9999px);
+            background-color: var(--ss-primary);
+            pointer-events: none;
+            transition: width 60ms linear;
+        }
+
+        // Round handle at the value position.
+        .spi-slider-handle {
+            position: absolute;
+            top: 50%;
+            width: 14px;
+            height: 14px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background-color: var(--ss-primary);
+            border: 2px solid var(--ss-surface-container-lowest);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+            pointer-events: none;
+            transition: left 60ms linear;
+        }
+
+        // Transparent native range over the track for drag interaction.
+        .spi-slider-range {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            opacity: 0;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+        }
+
+        // Compact editable value on the right.
+        .spi-slider-value {
+            flex: 0 0 44px;
+            width: 44px;
+            height: 24px;
+            padding: 2px 6px;
+            border: 0;
+            outline: 0;
+            border-radius: var(--ss-radius, 0.5rem);
+            background-color: var(--ss-surface-container-lowest);
+            box-shadow: 0 0 0 1px var(--ss-outline-variant) inset;
+            text-align: right;
+            font-size: 14px;
+            color: var(--ss-on-surface);
+            &:focus {
+                box-shadow: 0 0 0 1px var(--ss-primary) inset;
+            }
+        }
+
+        &.is-disabled {
+            .spi-slider-range {
+                cursor: default;
+            }
+            .spi-slider-handle,
+            .spi-slider-fill {
+                background-color: var(--ss-outline);
+            }
+        }
+    }
+
     .spi-property-name {
         font-size: 14px;
         line-height: 24px;
@@ -66,7 +192,7 @@
     .spi-property-value-editor input,
     .spi-property-value-menu-target {
         border: 0;
-        border-radius: 2px;
+        border-radius: var(--ss-radius, 0.5rem);
         font-size: 14px;
         line-height: 20px;
         height: 24px;
@@ -107,13 +233,79 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+    // Segmented control for small enums (<= 3 options). Right-aligned rounded
+    // pills; the selected option is filled with the primary color.
+    .spi-segmented {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 6px;
+        width: 100%;
+    }
+    .spi-segmented-option {
+        border: 0;
+        padding: 5px 14px;
+        border-radius: var(--ss-radius, 0.5rem);
+        font-size: 14px;
+        line-height: 18px;
+        font-weight: 500;
+        cursor: pointer;
+        background-color: var(--ss-surface-container-highest);
+        color: var(--ss-on-surface-variant);
+        transition: background-color 120ms ease, color 120ms ease;
+
+        &:hover:not(.is-selected) {
+            background-color: var(--ss-surface-variant);
+            color: var(--ss-on-surface);
+        }
+
+        &.is-selected {
+            background-color: var(--ss-primary);
+            color: var(--ss-on-primary);
+        }
+    }
+
     .spi-property-color-preview {
+        position: relative;
         width: 16px;
         height: 16px;
         min-width: 16px;
         min-height: 16px;
         margin: 4px 8px 4px 4px;
         border-radius: 50%;
+        // 1px ring so light/white swatches stay visible against the panel.
+        box-shadow: inset 0 0 0 1px var(--ss-outline-variant);
+        cursor: pointer;
+        transition: transform 120ms ease, box-shadow 120ms ease;
+
+        &:hover {
+            transform: scale(1.12);
+            box-shadow: inset 0 0 0 1px var(--ss-outline-variant),
+                0 0 0 2px var(--ss-outline-variant);
+        }
+
+        &.is-disabled {
+            cursor: default;
+            &:hover {
+                transform: none;
+                box-shadow: inset 0 0 0 1px var(--ss-outline-variant);
+            }
+        }
+
+        // The native color picker fills the circle but is invisible — the swatch
+        // background and ring above are the visible UI; clicking anywhere on the
+        // circle opens the OS color picker.
+        .spi-color-picker-input {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            opacity: 0;
+            cursor: inherit;
+        }
     }
 }
 

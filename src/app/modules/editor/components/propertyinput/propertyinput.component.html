@@ -68,15 +68,27 @@
           fxFlex>
           No shared properties to view or edit
         </div>
+        <ng-container *ngFor="let group of model.propertyGroups; trackBy: trackPropertyGroupFn">
+        <div class="spi-property-group-header"
+          *ngIf="group.label">{{ group.label }}</div>
         <div class="spi-property"
-          *ngFor="let ip of model.inspectedProperties; trackBy: trackInspectedPropertyFn">
-          <div class="spi-property-name">{{ ip.propertyName }}</div>
+          *ngFor="let ip of group.inspectedProperties; trackBy: trackInspectedPropertyFn">
+          <div class="spi-property-name">{{ this.displayName(ip) }}</div>
           <div class="spi-property-value"
             fxLayout="row">
-            <div *ngIf="ip.typeName === 'ColorProperty'"
+            <label *ngIf="ip.typeName === 'ColorProperty'"
               class="spi-property-color-preview"
-              [style.background-color]="this.androidToCssColor(ip.value)">
-            </div>
+              [class.is-disabled]="!ip.isEditable()"
+              [style.background-color]="this.androidToCssColor(ip.value)"
+              matTooltip="Pick a color"
+              matTooltipPosition="below"
+              matTooltipShowDelay="500">
+              <input type="color"
+                class="spi-color-picker-input"
+                [disabled]="!ip.isEditable()"
+                [value]="this.colorToInputValue(ip.value)"
+                (input)="this.onColorPickerChange(ip, $event)">
+            </label>
             <span *ngIf="!ip.isEditable()"
               class="spi-property-value-static"
               fxFlex>
@@ -87,6 +99,34 @@
               class="spi-property-value-editor"
               fxLayout="column"
               fxFlex>
+              <!-- Fraction (0..1): inline slider + value field (label stays in the
+                   name column like other rows). Slider steps by 0.1; the value
+                   field still accepts finer manual values (e.g. 0.14). -->
+              <div *ngIf="ip.typeName === 'FractionProperty'"
+                class="spi-slider"
+                [class.is-disabled]="!ip.isEditable()">
+                <div class="spi-slider-track">
+                  <div class="spi-slider-fill"
+                    *ngIf="this.fractionPercent(ip) > 0"
+                    [style.width.%]="this.fractionPercent(ip)"></div>
+                  <div class="spi-slider-handle"
+                    [style.left.%]="this.fractionPercent(ip)"></div>
+                  <input type="range"
+                    class="spi-slider-range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    [value]="ip.value"
+                    [disabled]="!ip.isEditable()"
+                    (input)="this.onFractionSliderChange(ip, $event)">
+                </div>
+                <input class="spi-slider-value"
+                  (keydown)="this.onValueEditorKeyDown($event, ip)"
+                  (blur)="ip.resolveEnteredValue()"
+                  name="{{ip.propertyName}}"
+                  [(ngModel)]="ip.editableValue"
+                  [disabled]="!ip.isEditable()">
+              </div>
               <input (keydown)="this.onValueEditorKeyDown($event, ip)"
                 [ngClass]="{
                   'has-input-error': ip.typeName === 'PathProperty' && this.shouldShowInvalidPathAnimationBlockMsg(model)
@@ -97,26 +137,41 @@
                 *ngIf="ip.typeName === 'NameProperty'
                 || ip.typeName === 'PathProperty'
                 || ip.typeName === 'ColorProperty'
-                || ip.typeName === 'NumberProperty'
-                || ip.typeName === 'FractionProperty'">
+                || ip.typeName === 'NumberProperty'">
               <ng-container *ngIf="ip.typeName === 'EnumProperty'">
-                <mat-menu #enumMenu="matMenu">
-                  <button mat-menu-item
-                    *ngFor="let option of ip.property.options; trackBy: trackEnumOptionFn"
-                    (click)="ip.value = option.value;">
-                  {{ option.label }}
-                </button>
-                </mat-menu>
-                <button class="spi-property-value-menu-target"
-                  [matMenuTriggerFor]="enumMenu">
-                  <span class="spi-property-value-menu-current-value">
-                    {{ ip.getDisplayValue() }}
-                  </span>
-                </button>
+                <!-- Small enums (<= 3 options): inline segmented buttons. -->
+                <div *ngIf="ip.property.options.length <= 3"
+                  class="spi-segmented">
+                  <button *ngFor="let option of ip.property.options; trackBy: trackEnumOptionFn"
+                    type="button"
+                    class="spi-segmented-option"
+                    [class.is-selected]="ip.value === option.value"
+                    (click)="ip.value = option.value">
+                    {{ option.label }}
+                  </button>
+                </div>
+                <!-- Larger enums: keep the frosted-glass dropdown menu. -->
+                <ng-container *ngIf="ip.property.options.length > 3">
+                  <mat-menu #enumMenu="matMenu"
+                    class="ss-glass-menu">
+                    <button mat-menu-item
+                      *ngFor="let option of ip.property.options; trackBy: trackEnumOptionFn"
+                      (click)="ip.value = option.value;">
+                    {{ option.label }}
+                  </button>
+                  </mat-menu>
+                  <button class="spi-property-value-menu-target"
+                    [matMenuTriggerFor]="enumMenu">
+                    <span class="spi-property-value-menu-current-value">
+                      {{ ip.getDisplayValue() }}
+                    </span>
+                  </button>
+                </ng-container>
               </ng-container>
             </div>
           </div>
         </div>
+        </ng-container>
         <div *ngIf="this.shouldShowInvalidPathAnimationBlockMsg(model)"
           class="alert alert-danger"
           fxLayout="row">
