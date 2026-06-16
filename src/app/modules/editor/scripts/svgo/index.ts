@@ -104,6 +104,12 @@ for (const plugin of Object.values(pluginsData)) {
 // Tweak plugin params.
 cleanupIDs.params.minify = false;
 convertPathData.params.makeArcs = undefined;
+// Keep a separator after the arc large-arc/sweep flags. With the default
+// (noSpaceAfterFlags: true) SVGO emits e.g. `a4 4 0 010 8`, gluing the two
+// single-digit flags to the next coordinate ('0 1 0' -> '010'). ShapeShifter's
+// path parser reads numbers greedily, so it would see '010' as 10 — leaving the
+// arc one short of its 7 params and producing a broken (NaN-endpoint) segment.
+convertPathData.params.noSpaceAfterFlags = false;
 convertPathData.params.transformPrecision = floatPrecision;
 convertShapeToPath.params.convertArcs = true;
 convertTransform.params.transformPrecision = floatPrecision;
