@@ -1,0 +1,144 @@
+<div class="ipc-root">
+  <!-- Preset trigger + Custom toggle -->
+  <div class="ipc-controls">
+    <mat-menu #presetMenu="matMenu"
+      class="ss-glass-menu">
+      <button mat-menu-item
+        *ngFor="let interp of INTERPOLATORS"
+        [class.is-active]="value === interp.value"
+        (click)="onPresetSelect(interp.value)">
+        {{ interp.label }}
+      </button>
+    </mat-menu>
+    <button class="ipc-preset-trigger"
+      [disabled]="disabled"
+      [matMenuTriggerFor]="presetMenu">
+      <span class="ipc-preset-label">{{ currentLabel }}</span>
+      <mat-icon class="ipc-chevron">expand_more</mat-icon>
+    </button>
+    <button class="ipc-custom-btn"
+      type="button"
+      [class.is-active]="showCustomEditor"
+      [disabled]="disabled"
+      (click)="toggleCustomEditor()"
+      matTooltip="Custom cubic-bezier"
+      matTooltipPosition="below"
+      matTooltipShowDelay="500">
+      <mat-icon>timeline</mat-icon>
+    </button>
+  </div>
+
+  <!-- Custom cubic-bezier editor -->
+  <div class="ipc-custom-editor"
+    *ngIf="showCustomEditor">
+
+    <!-- SVG canvas -->
+    <svg #bezierCanvas
+      class="ipc-canvas"
+      [attr.width]="CANVAS_SIZE"
+      [attr.height]="CANVAS_SIZE"
+      [attr.viewBox]="'0 0 ' + CANVAS_SIZE + ' ' + CANVAS_SIZE"
+      (pointermove)="onSvgPointerMove($event)"
+      (pointerup)="onSvgPointerUp($event)">
+
+      <!-- Grid lines every 25% -->
+      <g class="ipc-grid">
+        <line x1="45" y1="0" x2="45" [attr.y2]="CANVAS_SIZE" />
+        <line x1="90" y1="0" x2="90" [attr.y2]="CANVAS_SIZE" />
+        <line x1="135" y1="0" x2="135" [attr.y2]="CANVAS_SIZE" />
+        <line [attr.x1]="0" y1="45" [attr.x2]="CANVAS_SIZE" y2="45" />
+        <line [attr.x1]="0" y1="90" [attr.x2]="CANVAS_SIZE" y2="90" />
+        <line [attr.x1]="0" y1="135" [attr.x2]="CANVAS_SIZE" y2="135" />
+      </g>
+
+      <!-- Diagonal guide (0,0)→(1,1) -->
+      <line class="ipc-guide"
+        [attr.x1]="px(0)"
+        [attr.y1]="py(0)"
+        [attr.x2]="px(1)"
+        [attr.y2]="py(1)" />
+
+      <!-- Control-point lines -->
+      <path class="ipc-handle-line"
+        [attr.d]="line1D" />
+      <path class="ipc-handle-line"
+        [attr.d]="line2D" />
+
+      <!-- Bezier curve -->
+      <path class="ipc-curve"
+        [attr.d]="bezierCurveD" />
+
+      <!-- Handle 1 (x1,y1) -->
+      <circle class="ipc-handle"
+        [attr.cx]="handle1X"
+        [attr.cy]="handle1Y"
+        r="6"
+        (pointerdown)="onHandlePointerDown($event, 1)" />
+
+      <!-- Handle 2 (x2,y2) -->
+      <circle class="ipc-handle ipc-handle-2"
+        [attr.cx]="handle2X"
+        [attr.cy]="handle2Y"
+        r="6"
+        (pointerdown)="onHandlePointerDown($event, 2)" />
+    </svg>
+
+    <!-- Number inputs -->
+    <div class="ipc-inputs">
+      <label class="ipc-input-group">
+        <span class="ipc-input-label">x1</span>
+        <input class="ipc-input"
+          type="number"
+          min="0"
+          max="1"
+          step="0.01"
+          [value]="x1"
+          [disabled]="disabled"
+          (change)="onControlPointInput('x1', $event)">
+      </label>
+      <label class="ipc-input-group">
+        <span class="ipc-input-label">y1</span>
+        <input class="ipc-input"
+          type="number"
+          min="-0.5"
+          max="1.5"
+          step="0.01"
+          [value]="y1"
+          [disabled]="disabled"
+          (change)="onControlPointInput('y1', $event)">
+      </label>
+      <label class="ipc-input-group">
+        <span class="ipc-input-label">x2</span>
+        <input class="ipc-input"
+          type="number"
+          min="0"
+          max="1"
+          step="0.01"
+          [value]="x2"
+          [disabled]="disabled"
+          (change)="onControlPointInput('x2', $event)">
+      </label>
+      <label class="ipc-input-group">
+        <span class="ipc-input-label">y2</span>
+        <input class="ipc-input"
+          type="number"
+          min="-0.5"
+          max="1.5"
+          step="0.01"
+          [value]="y2"
+          [disabled]="disabled"
+          (change)="onControlPointInput('y2', $event)">
+      </label>
+    </div>
+
+    <!-- Preview dot -->
+    <div class="ipc-preview">
+      <div class="ipc-preview-track">
+        <div class="ipc-preview-dot"
+          [attr.key]="previewKey"
+          [style.animation-timing-function]="cubicBezierCSS">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

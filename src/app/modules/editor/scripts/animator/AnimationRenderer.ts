@@ -1,8 +1,7 @@
-import { INTERPOLATORS } from 'app/modules/editor/model/interpolators';
+import { getInterpolateFn } from 'app/modules/editor/model/interpolators';
 import { Layer, VectorLayer } from 'app/modules/editor/model/layers';
 import { Animation, AnimationBlock } from 'app/modules/editor/model/timeline';
 import { ModelUtil } from 'app/modules/editor/scripts/common';
-import * as _ from 'lodash';
 
 const DEFAULT_LAYER_PROPERTY_STATE: PropertyState = {
   activeBlock: undefined,
@@ -57,9 +56,7 @@ export class AnimationRenderer {
           }
           if (timeMillis < block.endTime) {
             const f = (timeMillis - block.startTime) / (block.endTime - block.startTime);
-            // TODO: this is a bit hacky... no need to perform a search every time.
-            const interpolatorFn = _.find(INTERPOLATORS, i => i.value === block.interpolator)
-              .interpolateFn;
+            const interpolatorFn = getInterpolateFn(block.interpolator);
             value = property.interpolateValue(block.fromValue, block.toValue, interpolatorFn(f));
             _ar.activeBlock = block;
             _ar.interpolatedValue = true;
