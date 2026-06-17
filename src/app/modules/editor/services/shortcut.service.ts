@@ -13,6 +13,7 @@ import { PlaybackService } from './playback.service';
 
 export enum Shortcut {
   ZoomToFit = 1,
+  DuplicateBlocks = 'DuplicateBlocks',
 }
 
 interface ModifierKeyEvent {
@@ -65,6 +66,12 @@ export class ShortcutService {
         if (event.keyCode === 'O'.charCodeAt(0)) {
           this.shortcutSubject.next(Shortcut.ZoomToFit);
           return false;
+        }
+        if (event.keyCode === 'D'.charCodeAt(0)) {
+          if (!document.activeElement.matches('input')) {
+            this.shortcutSubject.next(Shortcut.DuplicateBlocks);
+            return false;
+          }
         }
       }
       if (event.ctrlKey || event.metaKey) {

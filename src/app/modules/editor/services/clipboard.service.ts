@@ -3,10 +3,12 @@ import { AnimationBlock } from 'app/modules/editor/model/timeline';
 import { bugsnagClient } from 'app/modules/editor/scripts/bugsnag';
 import { SvgLoader, VectorDrawableLoader } from 'app/modules/editor/scripts/import';
 import * as $ from 'jquery';
+import * as _ from 'lodash';
 
 import { ActionModeService } from './actionmode.service';
 import { LayerTimelineService } from './layertimeline.service';
 import { PlaybackService } from './playback.service';
+import { Shortcut, ShortcutService } from './shortcut.service';
 
 declare const ga: Function;
 
@@ -16,9 +18,37 @@ export class ClipboardService {
     private readonly layerTimelineService: LayerTimelineService,
     private readonly playbackService: PlaybackService,
     private readonly actionModeService: ActionModeService,
+    private readonly shortcutService: ShortcutService,
   ) {}
 
   init() {
+    this.shortcutService.asObservable().subscribe(shortcut => {
+      if (shortcut !== Shortcut.DuplicateBlocks) {
+        return;
+      }
+      const selectedBlocks = this.layerTimelineService.getSelectedBlocks();
+      if (!selectedBlocks.length) {
+        return;
+      }
+      const animation = this.layerTimelineService.getAnimation();
+      const newBlocks = selectedBlocks.map(block => {
+        const duration = block.endTime - block.startTime;
+        const startTime = block.startTime + Math.round(duration * 0.5);
+        const endTime = Math.min(startTime + duration, animation.duration);
+        return {
+          id: _.uniqueId(),
+          layerId: block.layerId,
+          propertyName: block.propertyName,
+          fromValue: block.fromValue,
+          toValue: block.toValue,
+          currentTime: startTime,
+          duration: endTime - startTime,
+          interpolator: block.interpolator,
+        };
+      });
+      this.layerTimelineService.addBlocks(newBlocks);
+    });
+
     const cutCopyHandlerFn = (event: JQuery.Event, shouldCut: boolean) => {
       if (document.activeElement.matches('input')) {
         return true;
@@ -80,11 +110,12 @@ export class ClipboardService {
         }
         if (parsed.blocks) {
           ga('send', 'event', 'paste', 'json.blocks');
+          const selectedLayerIds = this.layerTimelineService.getSelectedLayerIds();
+          const vectorLayer = this.layerTimelineService.getVectorLayer();
           this.layerTimelineService.addBlocks(
             parsed.blocks.map((b: any) => {
               const block = AnimationBlock.from(b);
               const {
-                layerId,
                 propertyName,
                 fromValue,
                 toValue,
@@ -92,7 +123,19 @@ export class ClipboardService {
                 startTime,
                 endTime,
               } = block;
+              let { layerId } = block;
               const duration = endTime - startTime;
+              // Cross-layer paste: if exactly one layer is selected and it differs from
+              // the block's original layer, redirect to the selected layer if compatible.
+              if (selectedLayerIds.size === 1) {
+                const [targetLayerId] = Array.from(selectedLayerIds);
+                if (targetLayerId !== layerId) {
+                  const targetLayer = vectorLayer.findLayerById(targetLayerId);
+                  if (targetLayer && targetLayer.inspectableProperties.has(propertyName)) {
+                    layerId = targetLayerId;
+                  }
+                }
+              }
               return {
                 layerId,
                 propertyName,
