@@ -400,35 +400,73 @@ function newVectorLayerItem(vl: VectorLayer): paper.Item {
     const dashOffset = pathLength
       ? LayerUtil.toStrokeDashOffset(trimPathStart, trimPathEnd, trimPathOffset, pathLength)
       : undefined;
-    // Use a CompoundPath so multi-subpath fills (e.g. a shape with a hole, like
-    // a gear's center) render correctly. A plain paper.Path is a single subpath:
-    // given multi-subpath path data it bridges the subpaths with a connecting
-    // line (and the forced `closed` flag closes across them), producing a stray
-    // sliver/slit through the shape. CompoundPath closes each subpath from the
-    // path data's own Z commands, so the `closed` override is unnecessary.
-    return new paper.CompoundPath({
+    const pathData = layer.pathData ? layer.pathData.getPathString() : '';
+    const fillRule = layer.fillType === 'evenOdd' ? 'evenodd' : 'nonzero';
+    // Multi-subpath fills (e.g. a shape with a hole, like a gear's center) must
+    // use a CompoundPath: a single paper.Path is one subpath, so given
+    // multi-subpath data it bridges the subpaths with a connecting line (and the
+    // forced `closed` flag closes across them), producing a stray slit through
+    // the shape. CompoundPath closes each subpath from its own Z command.
+    //
+    // Single-subpath paths stay a plain paper.Path: the selection/edit gestures
+    // treat a layer's rendered item as a paper.Path (segments, curves, etc.), so
+    // everything drawn in the editor (a single subpath) must remain a paper.Path
+    // to stay selectable/editable.
+    const numSubPaths = layer.pathData ? layer.pathData.getSubPaths().length : 0;
+    if (numSubPaths > 1) {
+      return new paper.CompoundPath({
+        data: { id: layer.id },
+        pathData,
+        fillColor: parseAndroidColor(fillColor, fillAlpha),
+        strokeColor: parseAndroidColor(strokeColor, strokeAlpha),
+        strokeWidth: layer.strokeWidth,
+        miterLimit: layer.strokeMiterLimit,
+        strokeJoin: layer.strokeLinejoin,
+        strokeCap: layer.strokeLinecap,
+        fillRule,
+        dashArray,
+        dashOffset,
+      });
+    }
+    // Only paths with more than one command can be closed.
+    const closed =
+      layer.pathData && layer.pathData.isClosed() && layer.pathData.getCommands().length > 1;
+    return new paper.Path({
       data: { id: layer.id },
-      pathData: layer.pathData ? layer.pathData.getPathString() : '',
+      pathData,
       fillColor: parseAndroidColor(fillColor, fillAlpha),
       strokeColor: parseAndroidColor(strokeColor, strokeAlpha),
       strokeWidth: layer.strokeWidth,
       miterLimit: layer.strokeMiterLimit,
       strokeJoin: layer.strokeLinejoin,
       strokeCap: layer.strokeLinecap,
-      fillRule: layer.fillType === 'evenOdd' ? 'evenodd' : 'nonzero',
+      fillRule,
       dashArray,
       dashOffset,
+      closed,
     });
   };
 
   const fromClipPathLayerFn = (layer: ClipPathLayer) => {
     const pathData = layer.pathData ? layer.pathData.getPathString() : '';
-    // CompoundPath so multi-subpath clip masks work (see fromPathLayerFn). Each
-    // subpath is closed from its own Z command in the path data.
-    return new paper.CompoundPath({
+    // Multi-subpath clip masks use a CompoundPath; single-subpath ones stay a
+    // paper.Path so they remain editable (see fromPathLayerFn).
+    const numSubPaths = layer.pathData ? layer.pathData.getSubPaths().length : 0;
+    if (numSubPaths > 1) {
+      return new paper.CompoundPath({
+        data: { id: layer.id },
+        pathData,
+        clipMask: true,
+      });
+    }
+    // Only paths with more than one command can be closed.
+    const closed =
+      layer.pathData && layer.pathData.isClosed() && layer.pathData.getCommands().length > 1;
+    return new paper.Path({
       data: { id: layer.id },
       pathData,
       clipMask: true,
+      closed,
     });
   };
 
