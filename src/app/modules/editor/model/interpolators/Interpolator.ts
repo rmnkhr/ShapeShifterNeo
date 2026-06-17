@@ -125,6 +125,9 @@ export function isCustomInterpolator(value: string): boolean {
 
 export function parseCustomInterpolator(value: string): [number, number, number, number] {
   const parts = value.slice(CUSTOM_PREFIX.length).split(',').map(Number);
+  if (parts.length !== 4 || parts.some(isNaN)) {
+    return [0.4, 0, 0.2, 1]; // fallback to material standard
+  }
   return [parts[0], parts[1], parts[2], parts[3]];
 }
 
