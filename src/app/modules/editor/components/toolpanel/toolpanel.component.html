@@ -59,6 +59,15 @@
       (click)="onRectangleClick($event)">
       <mat-icon>crop_square</mat-icon>
     </button>
+    <button *ngIf="this.isActionMode$ | async"
+      class="tool-button"
+      matTooltip="Toggle onion skinning"
+      matTooltipPosition="right"
+      matTooltipShowDelay="500"
+      [class.is-checked]="this.onionSkinEnabled$ | async"
+      (click)="onToggleOnionSkin()">
+      <mat-icon>layers</mat-icon>
+    </button>
     <div class="tool-divider"></div>
     <!-- TODO: set the tooltip delay back to 500 once we have a better way of telling the user about zooming out -->
     <button class="tool-button"

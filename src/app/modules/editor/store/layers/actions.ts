@@ -6,6 +6,7 @@ export enum LayerActionTypes {
   SetSelectedLayers = '__layers__SET_SELECTED_LAYERS',
   SetHiddenLayers = '__layers__SET_HIDDEN_LAYERS',
   SetCollapsedLayers = '__layers__SET_COLLAPSED_LAYERS',
+  SetOnionSkinEnabled = '__layers__SET_ONION_SKIN_ENABLED',
 }
 
 export class SetVectorLayer implements Action {
@@ -40,8 +41,17 @@ export class SetCollapsedLayers implements Action {
   }
 }
 
+export class SetOnionSkinEnabled implements Action {
+  readonly type = LayerActionTypes.SetOnionSkinEnabled;
+  readonly payload: { enabled: boolean };
+  constructor(enabled: boolean) {
+    this.payload = { enabled };
+  }
+}
+
 export type LayerActions =
   | SetVectorLayer
   | SetSelectedLayers
   | SetHiddenLayers
-  | SetCollapsedLayers;
+  | SetCollapsedLayers
+  | SetOnionSkinEnabled;

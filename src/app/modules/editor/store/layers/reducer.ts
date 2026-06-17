@@ -1,12 +1,13 @@
 import { VectorLayer } from 'app/modules/editor/model/layers';
 
-import { LayerActionTypes, LayerActions } from './actions';
+import { LayerActionTypes, LayerActions, SetOnionSkinEnabled } from './actions';
 
 export interface State {
   readonly vectorLayer: VectorLayer;
   readonly selectedLayerIds: ReadonlySet<string>;
   readonly collapsedLayerIds: ReadonlySet<string>;
   readonly hiddenLayerIds: ReadonlySet<string>;
+  readonly onionSkinEnabled: boolean;
 }
 
 export function buildInitialState() {
@@ -15,6 +16,7 @@ export function buildInitialState() {
     selectedLayerIds: new Set<string>(),
     collapsedLayerIds: new Set<string>(),
     hiddenLayerIds: new Set<string>(),
+    onionSkinEnabled: false,
   } as State;
 }
 
@@ -28,6 +30,8 @@ export function reducer(state = buildInitialState(), action: LayerActions) {
       return { ...state, hiddenLayerIds: new Set<string>(action.payload.layerIds) };
     case LayerActionTypes.SetCollapsedLayers:
       return { ...state, collapsedLayerIds: new Set<string>(action.payload.layerIds) };
+    case LayerActionTypes.SetOnionSkinEnabled:
+      return { ...state, onionSkinEnabled: (action as SetOnionSkinEnabled).payload.enabled };
   }
   return state;
 }

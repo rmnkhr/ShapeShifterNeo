@@ -14,6 +14,7 @@ import {
   getActionModeEndState,
   getActionModeStartState,
 } from 'app/modules/editor/store/actionmode/selectors';
+import { getOnionSkinState } from 'app/modules/editor/store/common/selectors';
 import { getHiddenLayerIds, getVectorLayer } from 'app/modules/editor/store/layers/selectors';
 import * as $ from 'jquery';
 import { combineLatest, merge } from 'rxjs';
@@ -38,6 +39,8 @@ export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implem
   private readonly $offscreenCanvas: JQuery<HTMLCanvasElement>;
   private vectorLayer: VectorLayer;
   private hiddenLayerIds: ReadonlySet<string> = new Set<string>();
+  private ghostVectorLayer: VectorLayer;
+  private onionEnabled = false;
 
   constructor(
     elementRef: ElementRef,
@@ -71,9 +74,22 @@ export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implem
       const actionModeSelector =
         this.actionSource === ActionSource.From ? getActionModeStartState : getActionModeEndState;
       this.registerSubscription(
-        this.store.select(actionModeSelector).subscribe(({ vectorLayer, hiddenLayerIds }) => {
+        combineLatest(
+          this.store.select(actionModeSelector),
+          this.store.select(getOnionSkinState),
+        ).subscribe(([{ vectorLayer, hiddenLayerIds }, onionSkinState]) => {
           this.vectorLayer = vectorLayer;
           this.hiddenLayerIds = hiddenLayerIds;
+          this.onionEnabled = onionSkinState.enabled;
+          if (this.actionSource === ActionSource.From) {
+            this.ghostVectorLayer = onionSkinState.toState
+              ? onionSkinState.toState.vectorLayer
+              : undefined;
+          } else {
+            this.ghostVectorLayer = onionSkinState.fromState
+              ? onionSkinState.fromState.vectorLayer
+              : undefined;
+          }
           this.draw();
         }),
       );
@@ -118,6 +134,14 @@ export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implem
       this.renderingCtx.fillRect(0, 0, this.vectorLayer.width, this.vectorLayer.height);
     }
 
+    // Draw onion skin ghost before the main layer.
+    if (this.onionEnabled && this.ghostVectorLayer) {
+      this.renderingCtx.save();
+      this.renderingCtx.globalAlpha = 0.22;
+      this.renderVectorLayer(this.renderingCtx, this.ghostVectorLayer, this.hiddenLayerIds);
+      this.renderingCtx.restore();
+    }
+
     const currentAlpha = this.vectorLayer ? this.vectorLayer.alpha : 1;
     if (currentAlpha < 1) {
       this.offscreenCtx.save();
@@ -128,7 +152,7 @@ export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implem
     // so that we can draw it translucently w/o affecting the rest of
     // the layer's appearance.
     const layerCtx = currentAlpha < 1 ? this.offscreenCtx : this.renderingCtx;
-    this.drawLayer(this.vectorLayer, this.vectorLayer, layerCtx);
+    this.renderVectorLayer(layerCtx, this.vectorLayer, this.hiddenLayerIds);
 
     if (currentAlpha < 1) {
       this.renderingCtx.save();
@@ -143,8 +167,21 @@ export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implem
     this.renderingCtx.restore();
   }
 
+  private renderVectorLayer(ctx: Context, vl: VectorLayer, hiddenLayerIds: ReadonlySet<string>) {
+    this.drawLayerWithHidden(vl, vl, ctx, hiddenLayerIds);
+  }
+
   private drawLayer(vl: VectorLayer, layer: Layer, ctx: Context) {
-    if (this.hiddenLayerIds.has(layer.id)) {
+    this.drawLayerWithHidden(vl, layer, ctx, this.hiddenLayerIds);
+  }
+
+  private drawLayerWithHidden(
+    vl: VectorLayer,
+    layer: Layer,
+    ctx: Context,
+    hiddenLayerIds: ReadonlySet<string>,
+  ) {
+    if (hiddenLayerIds.has(layer.id)) {
       return;
     }
     if (layer instanceof ClipPathLayer) {
@@ -153,7 +190,7 @@ export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implem
       this.drawPathLayer(vl, layer, ctx);
     } else {
       ctx.save();
-      layer.children.forEach(child => this.drawLayer(vl, child, ctx));
+      layer.children.forEach(child => this.drawLayerWithHidden(vl, child, ctx, hiddenLayerIds));
       ctx.restore();
     }
   }
