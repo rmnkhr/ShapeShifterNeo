@@ -33,12 +33,55 @@
           <span class="spi-selection-description">{{ model.description }}</span>
           <span class="spi-selection-sub-description">{{ model.subDescription }}</span>
         </div>
-        <mat-menu #addTimelineBlockMenu="matMenu">
-          <button mat-menu-item
-            *ngFor="let propertyName of model.availablePropertyNames"
-            (click)="this.onAnimateLayerClick(model.model, propertyName)">
-            {{ propertyName }}
-          </button>
+        <mat-menu #addTimelineBlockMenu="matMenu"
+          class="ss-glass-menu ss-add-animation-menu">
+          <div class="slt-add-animation-panel">
+            <div class="slt-add-animation-head">
+              <div class="slt-add-animation-heading-copy">
+                <div class="slt-add-animation-title">
+                  <mat-icon>bolt</mat-icon>
+                  <span>Add animation</span>
+                </div>
+                <div class="slt-add-animation-subtitle">on {{ model.description }} · {{ this.getLayerTypeLabel(model) }}</div>
+              </div>
+              <button mat-icon-button
+                type="button"
+                class="slt-add-animation-close"
+                matMenuClose>
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <label class="slt-add-animation-search">
+              <mat-icon>search</mat-icon>
+              <input placeholder="Search properties..."
+                [(ngModel)]="addAnimationSearch"
+                (keydown)="$event.stopPropagation()">
+            </label>
+            <div class="slt-add-animation-body">
+              <ng-container *ngFor="let cat of categoryOrder">
+                <div class="slt-add-animation-category"
+                  *ngIf="this.getVisibleAnimateProperties(model, cat).length">
+                  {{ this.getCategoryLabel(cat) }}
+                </div>
+                <button class="slt-add-animation-item"
+                  *ngFor="let propertyName of this.getVisibleAnimateProperties(model, cat); trackBy: trackPropertyNameFn"
+                  (click)="this.onAnimateLayerClick(model.model, propertyName)">
+                  <span class="slt-add-animation-icon">
+                    <mat-icon>{{ this.getPropertyIcon(propertyName) }}</mat-icon>
+                  </span>
+                  <span class="slt-add-animation-copy">
+                    <span class="slt-add-animation-label">{{ this.getPropertyLabel(propertyName) }}</span>
+                    <span class="slt-add-animation-key">{{ propertyName }}</span>
+                  </span>
+                  <mat-icon class="slt-add-animation-state">add_circle</mat-icon>
+                </button>
+              </ng-container>
+              <div class="slt-add-animation-empty"
+                *ngIf="!this.hasVisibleAnimateProperties(model)">
+                No properties found
+              </div>
+            </div>
+          </div>
         </mat-menu>
         <button mat-icon-button
           class="spi-secondary-icon"
@@ -48,16 +91,6 @@
           matTooltipShowDelay="500"
           [matMenuTriggerFor]="addTimelineBlockMenu">
           <mat-icon>timer</mat-icon>
-        </button>
-        <button mat-icon-button
-          class="spi-secondary-icon"
-          [disabled]="this.shouldDisableStartActionModeButton(model)"
-          *ngIf="this.shouldShowStartActionModeButton(model)"
-          (click)="this.onStartActionModeClick()"
-          matTooltip="Edit path morphing animation"
-          matTooltipPosition="left"
-          matTooltipShowDelay="500">
-          <mat-icon>edit</mat-icon>
         </button>
       </div>
       <div class="spi-body"
@@ -211,7 +244,7 @@
                 ? '<i>toValue</i> must not be empty'
                 : (this.isPathBlockFromValueEmpty(model.model) && this.isPathBlockToValueEmpty(model.model))
                   ? '<i>fromValue</i> and <i>toValue</i> must not be empty'
-                  : 'Paths are incompatible. <i>Auto fix</i> or click the <i>edit path morphing animation</i> button above.'">
+                  : 'Paths are incompatible. <i>Auto fix</i> or click the <i>edit path morphing animation</i> button below.'">
           </span>
           <button mat-icon-button
             class="auto-fix-button"
@@ -223,6 +256,14 @@
             <mat-icon svgIcon="autofix"></mat-icon>
           </button>
         </div>
+        <button type="button"
+          class="spi-edit-morph-button"
+          *ngIf="this.shouldShowStartActionModeButton(model)"
+          [disabled]="this.shouldDisableStartActionModeButton(model)"
+          (click)="this.onStartActionModeClick()">
+          <mat-icon>edit</mat-icon>
+          <span>Edit path morphing animation</span>
+        </button>
       </div>
     </div>
   </ng-container>

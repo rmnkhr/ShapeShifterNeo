@@ -9,6 +9,14 @@ import {
 import { ClipPathLayer, GroupLayer, Layer, PathLayer, VectorLayer } from 'app/modules/editor/model/layers';
 import { Animation, AnimationBlock, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { ColorUtil, ModelUtil } from 'app/modules/editor/scripts/common';
+import {
+  CATEGORY_ORDER,
+  filterPropertyNames,
+  getCategoryLabel,
+  getPropertyCategory,
+  getPropertyIcon,
+  getPropertyLabel,
+} from 'app/modules/editor/scripts/common/PropertyAnimationMeta';
 import { ActionModeService } from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import { getLayerListTreeState } from 'app/modules/editor/store/common/selectors';
@@ -49,6 +57,8 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
 
   addAnimationSearch = '';
   readonly categoryOrder = CATEGORY_ORDER;
+  // PROPERTY_META / CATEGORY_ORDER / CATEGORY_LABELS now live in
+  // scripts/common/PropertyAnimationMeta so the property inspector can share them.
 
   ngOnInit() {
     this.layerModel$ = this.store.select(getLayerListTreeState).pipe(
@@ -261,35 +271,24 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
   }
 
   getPropertyLabel(propertyName: string) {
-    return PROPERTY_META[propertyName] ? PROPERTY_META[propertyName].label : _.startCase(propertyName);
+    return getPropertyLabel(propertyName);
   }
 
   getPropertyIcon(propertyName: string) {
-    return PROPERTY_META[propertyName] ? PROPERTY_META[propertyName].icon : 'animation';
+    return getPropertyIcon(propertyName);
   }
 
   getPropertyCategory(propertyName: string) {
-    return PROPERTY_META[propertyName] ? PROPERTY_META[propertyName].cat : 'transform';
+    return getPropertyCategory(propertyName);
   }
 
   getCategoryLabel(cat: string) {
-    return CATEGORY_LABELS[cat] || _.upperCase(cat);
+    return getCategoryLabel(cat);
   }
 
   getVisiblePropertyNames(model: LayerModel, cat: string) {
     const query = this.addAnimationSearch.trim().toLowerCase();
-    return model.allPropertyNames.filter(propertyName => {
-      if (this.getPropertyCategory(propertyName) !== cat) {
-        return false;
-      }
-      if (!query) {
-        return true;
-      }
-      return (
-        this.getPropertyLabel(propertyName).toLowerCase().includes(query) ||
-        propertyName.toLowerCase().includes(query)
-      );
-    });
+    return filterPropertyNames(model.allPropertyNames, cat, query);
   }
 
   hasVisibleProperties(model: LayerModel) {
@@ -367,29 +366,3 @@ interface LayerModel {
   readonly canBeFlattened: boolean;
 }
 
-const CATEGORY_ORDER = ['transform', 'path', 'fill', 'stroke', 'trim'];
-const CATEGORY_LABELS: Dictionary<string> = {
-  transform: 'Transform',
-  path: 'Path',
-  fill: 'Fill',
-  stroke: 'Stroke',
-  trim: 'Trim',
-};
-const PROPERTY_META: Dictionary<{ label: string; icon: string; cat: string }> = {
-  rotation: { label: 'Rotation', icon: 'rotate_right', cat: 'transform' },
-  pivotX: { label: 'Pivot X', icon: 'open_with', cat: 'transform' },
-  pivotY: { label: 'Pivot Y', icon: 'open_with', cat: 'transform' },
-  scaleX: { label: 'Scale X', icon: 'swap_horiz', cat: 'transform' },
-  scaleY: { label: 'Scale Y', icon: 'swap_vert', cat: 'transform' },
-  translateX: { label: 'Translate X', icon: 'east', cat: 'transform' },
-  translateY: { label: 'Translate Y', icon: 'south', cat: 'transform' },
-  pathData: { label: 'Path morph', icon: 'animation', cat: 'path' },
-  fillColor: { label: 'Fill color', icon: 'format_color_fill', cat: 'fill' },
-  fillAlpha: { label: 'Fill alpha', icon: 'opacity', cat: 'fill' },
-  strokeColor: { label: 'Stroke color', icon: 'border_color', cat: 'stroke' },
-  strokeAlpha: { label: 'Stroke alpha', icon: 'opacity', cat: 'stroke' },
-  strokeWidth: { label: 'Stroke width', icon: 'line_weight', cat: 'stroke' },
-  trimPathStart: { label: 'Trim start', icon: 'content_cut', cat: 'trim' },
-  trimPathEnd: { label: 'Trim end', icon: 'content_cut', cat: 'trim' },
-  trimPathOffset: { label: 'Trim offset', icon: 'sync', cat: 'trim' },
-};

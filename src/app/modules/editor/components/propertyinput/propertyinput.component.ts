@@ -12,6 +12,13 @@ import { FractionProperty, NameProperty, Option } from 'app/modules/editor/model
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { ColorUtil, ModelUtil } from 'app/modules/editor/scripts/common';
 import {
+  CATEGORY_ORDER,
+  filterPropertyNames,
+  getCategoryLabel,
+  getPropertyIcon,
+  getPropertyLabel,
+} from 'app/modules/editor/scripts/common/PropertyAnimationMeta';
+import {
   ActionModeService,
   LayerTimelineService,
   PlaybackService,
@@ -101,6 +108,10 @@ export class PropertyInputComponent implements OnInit, OnDestroy {
   private stopNumberScrub?: () => void;
 
   themeState$: Observable<{ prevThemeType: ThemeType; currThemeType: ThemeType }>;
+
+  // State for the "Add animation" menu (the timer button on a selected layer).
+  addAnimationSearch = '';
+  readonly categoryOrder = CATEGORY_ORDER;
 
   constructor(
     private readonly store: Store<State>,
@@ -193,6 +204,37 @@ export class PropertyInputComponent implements OnInit, OnDestroy {
         currentTime,
       },
     ]);
+  }
+
+  // ── "Add animation" menu helpers (mirrors the layer-tree animate menu) ──────
+  getLayerTypeLabel(pim: PropertyInputModel) {
+    const type = pim.model && pim.model.type;
+    return type === 'mask' ? 'Clip path' : type;
+  }
+
+  getCategoryLabel(cat: string) {
+    return getCategoryLabel(cat);
+  }
+
+  getPropertyLabel(propertyName: string) {
+    return getPropertyLabel(propertyName);
+  }
+
+  getPropertyIcon(propertyName: string) {
+    return getPropertyIcon(propertyName);
+  }
+
+  getVisibleAnimateProperties(pim: PropertyInputModel, cat: string) {
+    const query = this.addAnimationSearch.trim().toLowerCase();
+    return filterPropertyNames(pim.availablePropertyNames, cat, query);
+  }
+
+  hasVisibleAnimateProperties(pim: PropertyInputModel) {
+    return CATEGORY_ORDER.some(cat => this.getVisibleAnimateProperties(pim, cat).length > 0);
+  }
+
+  trackPropertyNameFn(index: number, propertyName: string) {
+    return propertyName;
   }
 
   shouldShowInvalidPathAnimationBlockMsg(pim: PropertyInputModel) {
