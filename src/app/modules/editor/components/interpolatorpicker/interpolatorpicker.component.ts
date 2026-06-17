@@ -2,7 +2,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  HostListener,
   Input,
   OnChanges,
   OnDestroy,
@@ -45,7 +44,7 @@ export class InterpolatorPickerComponent implements OnChanges, OnDestroy {
   draggingHandle: 1 | 2 | null = null;
 
   // Preview animation trigger — toggled to restart CSS animation.
-  previewKey = 0;
+  showPreviewDot = true;
   private previewTimer: any = null;
 
   get currentLabel(): string {
@@ -183,9 +182,11 @@ export class InterpolatorPickerComponent implements OnChanges, OnDestroy {
   }
 
   private restartPreview(): void {
-    this.previewKey++;
     if (this.previewTimer) { clearTimeout(this.previewTimer); }
-    // Re-trigger after a tick to force animation restart via key change.
-    this.previewTimer = setTimeout(() => { this.previewTimer = null; }, 0);
+    this.showPreviewDot = false;
+    this.previewTimer = setTimeout(() => {
+      this.showPreviewDot = true;
+      this.previewTimer = null;
+    }, 0);
   }
 }

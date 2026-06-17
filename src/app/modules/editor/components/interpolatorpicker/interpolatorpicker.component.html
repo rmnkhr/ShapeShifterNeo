@@ -94,7 +94,7 @@
           step="0.01"
           [value]="x1"
           [disabled]="disabled"
-          (change)="onControlPointInput('x1', $event)">
+          (input)="onControlPointInput('x1', $event)">
       </label>
       <label class="ipc-input-group">
         <span class="ipc-input-label">y1</span>
@@ -105,7 +105,7 @@
           step="0.01"
           [value]="y1"
           [disabled]="disabled"
-          (change)="onControlPointInput('y1', $event)">
+          (input)="onControlPointInput('y1', $event)">
       </label>
       <label class="ipc-input-group">
         <span class="ipc-input-label">x2</span>
@@ -116,7 +116,7 @@
           step="0.01"
           [value]="x2"
           [disabled]="disabled"
-          (change)="onControlPointInput('x2', $event)">
+          (input)="onControlPointInput('x2', $event)">
       </label>
       <label class="ipc-input-group">
         <span class="ipc-input-label">y2</span>
@@ -127,7 +127,7 @@
           step="0.01"
           [value]="y2"
           [disabled]="disabled"
-          (change)="onControlPointInput('y2', $event)">
+          (input)="onControlPointInput('y2', $event)">
       </label>
     </div>
 
@@ -135,7 +135,7 @@
     <div class="ipc-preview">
       <div class="ipc-preview-track">
         <div class="ipc-preview-dot"
-          [attr.key]="previewKey"
+          *ngIf="showPreviewDot"
           [style.animation-timing-function]="cubicBezierCSS">
         </div>
       </div>
