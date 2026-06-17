@@ -1,78 +1,219 @@
 @import '../../styles/material-icons';
 
 .property-input {
-    width: 320px;
+    width: clamp(348px, 30vw, 380px);
+    min-width: 348px;
+    max-width: 380px;
     user-select: none;
     cursor: default;
     position: relative;
-    // Floating panel (Kinetic Editor System): detached from the viewport edges
-    // with a gutter, rounded corners + 1px outline — matching the top bar and
-    // left tool panel. overflow:hidden clips the header/body to the radius.
-    margin: var(--ss-gutter, 16px);
-    border: 1px solid var(--ss-outline-variant);
-    border-radius: var(--ss-radius-lg, 1rem);
+    margin: -66px 16px 16px 8px;
+    border: 1px solid color-mix(in srgb, var(--ss-outline-variant) 76%, transparent);
+    border-radius: 22px;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 34px rgba(20, 24, 35, 0.1);
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
 }
 
 .spi-header {
     z-index: 1;
     display: flex;
     flex-direction: row;
-    padding: 16px;
+    align-items: center;
+    gap: 12px;
+    height: 70px;
+    min-height: 70px;
+    padding: 18px 18px 14px;
+    box-shadow: none !important;
+
     .spi-selection-icon {
-        margin-right: 12px;
-        width: 32px;
-        height: 32px;
+        margin-right: 0;
+        width: 25px;
+        height: 25px;
+        flex: 0 0 25px;
     }
+
     .spi-selection-description-container {
-        padding: calc((32px - 24px) / 2) 0;
+        padding: 0;
+        min-width: 0;
     }
+
     .spi-selection-description {
-        font-weight: 500;
-        font-size: 20px;
-        line-height: 24px;
+        font-weight: 800;
+        font-size: 21px;
+        line-height: 26px;
+        letter-spacing: 0;
     }
+
     .spi-selection-sub-description {
-        font-size: 14px;
-        line-height: 20px;
+        font-size: 11.5px;
+        line-height: 15px;
         &:empty {
             display: none;
+        }
+    }
+
+    .spi-secondary-icon {
+        --mdc-icon-button-state-layer-size: 38px;
+        --mdc-icon-button-icon-size: 20px;
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        min-width: 38px;
+        min-height: 38px;
+        padding: 0;
+        border-radius: 50%;
+        background: var(--ss-surface-container-high);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        ::ng-deep .mat-mdc-button-touch-target {
+            width: 100%;
+            height: 100%;
+        }
+
+        mat-icon {
+            width: 20px;
+            height: 20px;
+            font-size: 20px;
+            line-height: 20px;
         }
     }
 }
 
 .spi-body {
     overflow-y: auto;
-    padding: 8px 0;
-    // Section header for grouped properties (Fill / Stroke / Trim Path), with a
-    // separator line between categories (skipped on the first header).
+    min-height: 0;
+    padding: 8px 18px 20px;
+    scrollbar-gutter: stable;
+
+    .spi-section-separator {
+        height: 1px;
+        margin: 18px 0 16px;
+        background: var(--ss-outline-variant);
+    }
+
     .spi-property-group-header {
-        padding: 14px 16px 4px;
-        font-size: 11px;
-        font-weight: 600;
+        padding: 0;
+        margin: 0 0 14px;
+        font-size: 11.5px;
+        font-weight: 800;
         line-height: 16px;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--ss-on-surface-variant);
+    }
 
-        &:not(:first-child) {
-            margin-top: 8px;
-            padding-top: 16px;
-            border-top: 1px solid color-mix(in srgb, var(--ss-outline-variant) 55%, transparent);
+    .spi-property-group {
+        &.is-transform-group {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: 10px;
+            row-gap: 10px;
+
+            .spi-section-separator,
+            .spi-property-group-header,
+            .spi-property.is-rotation-property {
+                grid-column: 1 / -1;
+            }
+
+            .spi-section-separator {
+                margin: 14px 0 12px;
+            }
+
+            .spi-property-group-header {
+                margin-bottom: 2px;
+            }
+
+            .spi-property {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+                min-height: 0;
+                margin: 0;
+
+                .spi-property-name {
+                    align-self: stretch;
+                    text-align: left;
+                    min-height: 0;
+                    padding-left: 2px;
+                    font-size: 12px;
+                    line-height: 15px;
+                    font-weight: 800;
+                    color: color-mix(in srgb, var(--ss-on-surface-variant) 82%, transparent);
+                }
+
+                .spi-property-value {
+                    line-height: 1;
+                }
+
+                .spi-property-value-editor input {
+                    height: 38px;
+                    padding: 8px 10px;
+                    border-radius: 10px;
+                    font-size: 13px;
+                    background-color: var(--ss-surface-container-lowest);
+                }
+
+                .spi-number-field {
+                    height: 38px;
+                    border-radius: 10px;
+                }
+            }
         }
     }
 
     .spi-property {
-        display: flex;
-        flex-direction: row;
+        display: grid;
+        grid-template-columns: 82px minmax(0, 1fr);
         align-items: center;
         // The body scrolls (overflow-y: auto); without this, rows shrink to their
         // min-height and the taller bold-slider control spills over the next row.
         flex-shrink: 0;
-        padding: 4px 16px;
-        min-height: 24px;
+        column-gap: 12px;
+        row-gap: 7px;
+        padding: 0;
+        margin-bottom: 12px;
+        min-height: 42px;
 
+        &.is-code-property {
+            grid-template-columns: minmax(0, 1fr);
+            align-items: start;
+            margin-bottom: 15px;
+
+            .spi-property-name,
+            .spi-property-value {
+                grid-column: 1;
+            }
+
+            .spi-property-name {
+                min-height: auto;
+                line-height: 16px;
+            }
+        }
+
+        &.is-color-property {
+            .spi-property-value {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+
+        &.is-enum-property {
+            align-items: start;
+
+            .spi-property-name {
+                padding-top: 8px;
+            }
+        }
     }
 
     // ── Fraction slider (0..1) ─────────────────────────────────────────────
@@ -82,14 +223,14 @@
     .spi-slider {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         width: 100%;
 
         // Clickable track area; the visible rail is its ::before.
         .spi-slider-track {
             position: relative;
             flex: 1 1 auto;
-            height: 24px;
+            height: 30px;
             min-width: 0;
 
             &::before {
@@ -122,13 +263,13 @@
         .spi-slider-handle {
             position: absolute;
             top: 50%;
-            width: 14px;
-            height: 14px;
+            width: 15px;
+            height: 15px;
             transform: translate(-50%, -50%);
             border-radius: 50%;
             background-color: var(--ss-primary);
-            border: 2px solid var(--ss-surface-container-lowest);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+            border: 0;
+            box-shadow: 0 1px 4px rgba(20, 24, 35, 0.25);
             pointer-events: none;
             transition: left 60ms linear;
         }
@@ -149,17 +290,17 @@
 
         // Compact editable value on the right.
         .spi-slider-value {
-            flex: 0 0 44px;
-            width: 44px;
-            height: 24px;
-            padding: 2px 6px;
+            flex: 0 0 42px;
+            width: 42px;
+            height: 34px;
+            padding: 7px 8px;
             border: 0;
             outline: 0;
-            border-radius: var(--ss-radius, 0.5rem);
+            border-radius: var(--ss-radius-sm, 8px);
             background-color: var(--ss-surface-container-lowest);
             box-shadow: 0 0 0 1px var(--ss-outline-variant) inset;
-            text-align: right;
-            font-size: 14px;
+            text-align: center;
+            font-size: 13.5px;
             color: var(--ss-on-surface);
             &:focus {
                 box-shadow: 0 0 0 1px var(--ss-primary) inset;
@@ -178,28 +319,124 @@
     }
 
     .spi-property-name {
-        font-size: 14px;
-        line-height: 24px;
-        flex: 1 1 0;
+        font-size: 13.5px;
+        line-height: 18px;
+        font-weight: 650;
+        min-width: 0;
+        align-self: center;
+        color: var(--ss-on-surface-variant);
     }
     .spi-property-value {
-        flex: 2 1 0;
+        display: flex;
+        align-items: center;
+        width: 100%;
         min-width: 0;
-        font-size: 14px;
+        font-size: 13.5px;
         line-height: 24px;
     }
+
+    .spi-property-value-editor {
+        width: 100%;
+        min-width: 0;
+    }
+
     .spi-property-value-static,
     .spi-property-value-editor input,
     .spi-property-value-menu-target {
+        width: 100%;
         border: 0;
-        border-radius: var(--ss-radius, 0.5rem);
-        font-size: 14px;
-        line-height: 20px;
-        height: 24px;
+        border-radius: var(--ss-radius-sm, 8px);
+        font-size: 13.5px;
+        line-height: 24px;
+        height: 42px;
         box-sizing: border-box;
-        padding: 2px 6px;
+        padding: 10px 13px;
         outline: 0;
+        font-family: inherit;
+        transition: box-shadow 120ms ease, background-color 120ms ease;
+
+        &.is-code-input {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0;
+        }
+
+        &.is-number-input {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
     }
+
+    .spi-number-field {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 42px;
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid color-mix(in srgb, var(--ss-outline-variant) 96%, var(--ss-on-surface-variant));
+        border-radius: var(--ss-radius-sm, 8px);
+        background-color: var(--ss-surface-container-lowest);
+        box-shadow: none;
+        transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+
+        &:focus-within {
+            border-color: var(--ss-primary);
+            box-shadow: 0 0 0 1px var(--ss-primary);
+        }
+
+        .spi-number-scrubber {
+            width: 34px;
+            height: 100%;
+            flex: 0 0 34px;
+            border: 0;
+            border-right: 1px solid color-mix(in srgb, var(--ss-outline-variant) 86%, transparent);
+            outline: 0;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: var(--ss-on-surface-variant);
+            cursor: ew-resize;
+            touch-action: none;
+            transition: background-color 120ms ease, color 120ms ease;
+
+            mat-icon {
+                width: 17px;
+                height: 17px;
+                font-size: 17px;
+                line-height: 17px;
+            }
+
+            &:hover:not([disabled]) {
+                background-color: var(--ss-surface-container-high);
+                color: var(--ss-on-surface);
+            }
+
+            &[disabled] {
+                cursor: default;
+                opacity: 0.38;
+            }
+        }
+
+        input {
+            height: 100%;
+            min-width: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            padding: 8px 12px 8px 8px;
+
+            &:focus {
+                outline: 0;
+                box-shadow: none;
+            }
+        }
+    }
+
     .spi-property-value-static {
         overflow-x: scroll;
         white-space: nowrap;
@@ -237,20 +474,25 @@
     // pills; the selected option is filled with the primary color.
     .spi-segmented {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 6px;
+        flex-wrap: nowrap;
+        justify-content: stretch;
+        gap: 3px;
         width: 100%;
+        padding: 3px;
+        border-radius: var(--ss-radius-sm, 8px);
+        background: var(--ss-surface-container-high);
     }
     .spi-segmented-option {
         border: 0;
-        padding: 5px 14px;
-        border-radius: var(--ss-radius, 0.5rem);
-        font-size: 14px;
-        line-height: 18px;
-        font-weight: 500;
+        flex: 1 1 0;
+        min-height: 34px;
+        padding: 7px 10px;
+        border-radius: 7px;
+        font-size: 13.5px;
+        line-height: 24px;
+        font-weight: 700;
         cursor: pointer;
-        background-color: var(--ss-surface-container-highest);
+        background-color: transparent;
         color: var(--ss-on-surface-variant);
         transition: background-color 120ms ease, color 120ms ease;
 
@@ -267,11 +509,11 @@
 
     .spi-property-color-preview {
         position: relative;
-        width: 16px;
-        height: 16px;
-        min-width: 16px;
-        min-height: 16px;
-        margin: 4px 8px 4px 4px;
+        width: 26px;
+        height: 26px;
+        min-width: 26px;
+        min-height: 26px;
+        margin: 0 2px 0 0;
         border-radius: 50%;
         // 1px ring so light/white swatches stay visible against the panel.
         box-shadow: inset 0 0 0 1px var(--ss-outline-variant);
@@ -315,7 +557,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 14px;
+    font-size: 13.5px;
     line-height: 20px;
 }
 

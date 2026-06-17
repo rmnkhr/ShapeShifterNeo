@@ -7,8 +7,8 @@ import {
   Output,
 } from '@angular/core';
 import { ClipPathLayer, GroupLayer, Layer, PathLayer, VectorLayer } from 'app/modules/editor/model/layers';
-import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
-import { ModelUtil } from 'app/modules/editor/scripts/common';
+import { Animation, AnimationBlock, PathAnimationBlock } from 'app/modules/editor/model/timeline';
+import { ColorUtil, ModelUtil } from 'app/modules/editor/scripts/common';
 import { ActionModeService } from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import { getLayerListTreeState } from 'app/modules/editor/store/common/selectors';
@@ -37,6 +37,7 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
   @Output() layerToggleExpanded = new EventEmitter<LayerEvent>();
   @Output() layerToggleVisibility = new EventEmitter<LayerEvent>();
   @Output() addTimelineBlockClick = new EventEmitter<TimelineBlockEvent>();
+  @Output() removeTimelinePropertyClick = new EventEmitter<TimelineBlockEvent>();
   @Output() convertToClipPathClick = new EventEmitter<LayerEvent>();
   @Output() convertToPathClick = new EventEmitter<LayerEvent>();
   @Output() flattenGroupClick = new EventEmitter<LayerEvent>();
@@ -45,6 +46,9 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
     private readonly store: Store<State>,
     private readonly actionModeService: ActionModeService,
   ) {}
+
+  addAnimationSearch = '';
+  readonly categoryOrder = CATEGORY_ORDER;
 
   ngOnInit() {
     this.layerModel$ = this.store.select(getLayerListTreeState).pipe(
@@ -65,6 +69,17 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
             return _.keys(ModelUtil.getOrderedBlocksByPropertyByLayer(animation)[layerId]);
           };
           const existingPropertyNames = getExistingPropertyNamesFn(this.layer.id);
+          const existingBlocksByProperty =
+            ModelUtil.getOrderedBlocksByPropertyByLayer(animation)[this.layer.id] || {};
+          const allPropertyNames = _.sortBy(
+            _.uniq([...availablePropertyNames, ...existingPropertyNames]),
+            propertyName => {
+              const order = ['transform', 'path', 'fill', 'stroke', 'trim'];
+              return `${order.indexOf(this.getPropertyCategory(propertyName))}:${this.getPropertyLabel(
+                propertyName,
+              )}`;
+            },
+          );
           const canBeConvertedToPath = this.layer instanceof ClipPathLayer;
           // We can't convert a path into a clip path if it has incompatible animation blocks.
           const canBeConvertedToClipPath =
@@ -93,6 +108,8 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
             isVisible: !hiddenLayerIds.has(this.layer.id),
             availablePropertyNames,
             existingPropertyNames,
+            existingBlocksByProperty,
+            allPropertyNames,
             isActionMode,
             canBeConvertedToClipPath,
             canBeConvertedToPath,
@@ -136,8 +153,16 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
 
   // @Override
   onAddTimelineBlockClick(event: MouseEvent, layer: Layer, propertyName: string) {
+    event.stopPropagation();
     if (!this.actionModeService.isActionMode()) {
       this.addTimelineBlockClick.emit({ event, layer, propertyName });
+    }
+  }
+
+  onRemoveTimelinePropertyClick(event: MouseEvent, layer: Layer, propertyName: string) {
+    event.stopPropagation();
+    if (!this.actionModeService.isActionMode()) {
+      this.removeTimelinePropertyClick.emit({ event, layer, propertyName });
     }
   }
 
@@ -167,6 +192,136 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
     return layer.id;
   }
 
+  trackPropertyNameFn(index: number, propertyName: string) {
+    return propertyName;
+  }
+
+  getLayerTypeLabel() {
+    return this.layer.type === 'mask' ? 'Clip path' : this.layer.type;
+  }
+
+  hasLayerPreview(layer: Layer) {
+    return (
+      (layer instanceof PathLayer || layer instanceof ClipPathLayer) &&
+      !!layer.pathData &&
+      !!layer.pathData.getPathString()
+    );
+  }
+
+  getLayerPreviewPath(layer: Layer) {
+    if (!this.hasLayerPreview(layer)) {
+      return '';
+    }
+    return (layer as PathLayer | ClipPathLayer).pathData.getPathString();
+  }
+
+  getLayerPreviewViewBox(layer: Layer) {
+    const bounds = layer.bounds;
+    if (!bounds) {
+      return '0 0 24 24';
+    }
+    const width = Math.max(bounds.r - bounds.l, 0);
+    const height = Math.max(bounds.b - bounds.t, 0);
+    if (!Number.isFinite(width) || !Number.isFinite(height) || (width === 0 && height === 0)) {
+      return '0 0 24 24';
+    }
+    const pad = Math.max(width, height, 1) * 0.16;
+    return `${bounds.l - pad} ${bounds.t - pad} ${Math.max(width + pad * 2, 1)} ${Math.max(
+      height + pad * 2,
+      1,
+    )}`;
+  }
+
+  getLayerPreviewFill(layer: Layer) {
+    if (layer instanceof PathLayer) {
+      return layer.fillColor ? ColorUtil.androidToCssRgbaColor(layer.fillColor, layer.fillAlpha) : 'none';
+    }
+    return 'currentColor';
+  }
+
+  getLayerPreviewFillRule(layer: Layer) {
+    return layer instanceof PathLayer ? layer.fillType : 'nonzero';
+  }
+
+  getLayerPreviewStroke(layer: Layer) {
+    if (layer instanceof PathLayer) {
+      if (layer.strokeColor && layer.strokeWidth > 0) {
+        return ColorUtil.androidToCssRgbaColor(layer.strokeColor, layer.strokeAlpha);
+      }
+      return layer.fillColor ? 'none' : 'currentColor';
+    }
+    return 'none';
+  }
+
+  getLayerPreviewStrokeWidth(layer: Layer) {
+    if (layer instanceof PathLayer && layer.strokeColor && layer.strokeWidth > 0) {
+      return Math.max(layer.strokeWidth, 1);
+    }
+    return layer instanceof PathLayer && !layer.fillColor ? 1.4 : 0;
+  }
+
+  getPropertyLabel(propertyName: string) {
+    return PROPERTY_META[propertyName] ? PROPERTY_META[propertyName].label : _.startCase(propertyName);
+  }
+
+  getPropertyIcon(propertyName: string) {
+    return PROPERTY_META[propertyName] ? PROPERTY_META[propertyName].icon : 'animation';
+  }
+
+  getPropertyCategory(propertyName: string) {
+    return PROPERTY_META[propertyName] ? PROPERTY_META[propertyName].cat : 'transform';
+  }
+
+  getCategoryLabel(cat: string) {
+    return CATEGORY_LABELS[cat] || _.upperCase(cat);
+  }
+
+  getVisiblePropertyNames(model: LayerModel, cat: string) {
+    const query = this.addAnimationSearch.trim().toLowerCase();
+    return model.allPropertyNames.filter(propertyName => {
+      if (this.getPropertyCategory(propertyName) !== cat) {
+        return false;
+      }
+      if (!query) {
+        return true;
+      }
+      return (
+        this.getPropertyLabel(propertyName).toLowerCase().includes(query) ||
+        propertyName.toLowerCase().includes(query)
+      );
+    });
+  }
+
+  hasVisibleProperties(model: LayerModel) {
+    return CATEGORY_ORDER.some(cat => this.getVisiblePropertyNames(model, cat).length > 0);
+  }
+
+  getPropertyRange(model: LayerModel, propertyName: string) {
+    const blocks = model.existingBlocksByProperty[propertyName] || [];
+    if (!blocks.length) {
+      return '';
+    }
+    const first = blocks[0];
+    const last = blocks[blocks.length - 1];
+    return `${this.formatValue(first.fromValue)} → ${this.formatValue(last.toValue)}`;
+  }
+
+  private formatValue(value: any) {
+    if (_.isNil(value)) {
+      return 'none';
+    }
+    if (typeof value === 'number') {
+      return `${Number(value.toFixed(2))}`;
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (value && typeof value.getPathString === 'function') {
+      return 'path';
+    }
+    return `${value}`;
+  }
+
   private isLayerExpandable() {
     return this.layer instanceof VectorLayer || this.layer instanceof GroupLayer;
   }
@@ -178,6 +333,7 @@ export interface Callbacks {
   onLayerToggleExpanded(event: MouseEvent, layer: Layer): void;
   onLayerToggleVisibility(event: MouseEvent, layer: Layer): void;
   onAddTimelineBlockClick(event: MouseEvent, layer: Layer, propertyName: string): void;
+  onRemoveTimelinePropertyClick(event: MouseEvent, layer: Layer, propertyName: string): void;
   onConvertToClipPathClick(event: MouseEvent, layer: Layer): void;
   onConvertToPathClick(event: MouseEvent, layer: Layer): void;
   onFlattenGroupClick(event: MouseEvent, layer: Layer): void;
@@ -203,8 +359,37 @@ interface LayerModel {
   readonly isVisible: boolean;
   readonly availablePropertyNames: ReadonlyArray<string>;
   readonly existingPropertyNames: ReadonlyArray<string>;
+  readonly existingBlocksByProperty: Dictionary<AnimationBlock[]>;
+  readonly allPropertyNames: ReadonlyArray<string>;
   readonly isActionMode: boolean;
   readonly canBeConvertedToPath: boolean;
   readonly canBeConvertedToClipPath: boolean;
   readonly canBeFlattened: boolean;
 }
+
+const CATEGORY_ORDER = ['transform', 'path', 'fill', 'stroke', 'trim'];
+const CATEGORY_LABELS: Dictionary<string> = {
+  transform: 'Transform',
+  path: 'Path',
+  fill: 'Fill',
+  stroke: 'Stroke',
+  trim: 'Trim',
+};
+const PROPERTY_META: Dictionary<{ label: string; icon: string; cat: string }> = {
+  rotation: { label: 'Rotation', icon: 'rotate_right', cat: 'transform' },
+  pivotX: { label: 'Pivot X', icon: 'open_with', cat: 'transform' },
+  pivotY: { label: 'Pivot Y', icon: 'open_with', cat: 'transform' },
+  scaleX: { label: 'Scale X', icon: 'swap_horiz', cat: 'transform' },
+  scaleY: { label: 'Scale Y', icon: 'swap_vert', cat: 'transform' },
+  translateX: { label: 'Translate X', icon: 'east', cat: 'transform' },
+  translateY: { label: 'Translate Y', icon: 'south', cat: 'transform' },
+  pathData: { label: 'Path morph', icon: 'animation', cat: 'path' },
+  fillColor: { label: 'Fill color', icon: 'format_color_fill', cat: 'fill' },
+  fillAlpha: { label: 'Fill alpha', icon: 'opacity', cat: 'fill' },
+  strokeColor: { label: 'Stroke color', icon: 'border_color', cat: 'stroke' },
+  strokeAlpha: { label: 'Stroke alpha', icon: 'opacity', cat: 'stroke' },
+  strokeWidth: { label: 'Stroke width', icon: 'line_weight', cat: 'stroke' },
+  trimPathStart: { label: 'Trim start', icon: 'content_cut', cat: 'trim' },
+  trimPathEnd: { label: 'Trim end', icon: 'content_cut', cat: 'trim' },
+  trimPathOffset: { label: 'Trim offset', icon: 'sync', cat: 'trim' },
+};

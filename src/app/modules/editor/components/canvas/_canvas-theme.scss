@@ -5,8 +5,7 @@
     .app-canvas-container {
         .canvas-container {
             canvas.rendering-canvas {
-                // background-color: mat.m2-get-color-from-palette($background, base);
-                background-color: #fff;
+                background-color: var(--ss-surface-container-lowest);
             }
         }
     }

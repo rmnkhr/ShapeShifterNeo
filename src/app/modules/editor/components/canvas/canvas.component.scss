@@ -1,5 +1,10 @@
 .app-canvas-container {
   position: relative;
+  border-radius: 18px;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+
   .canvas-ruler {
     position: absolute;
     transition: opacity 0.15s ease, visibility 0s linear 0.15s;
@@ -13,19 +18,42 @@
   }
   .canvas-container {
     position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--ss-surface-container-lowest);
+    box-shadow:
+      0 18px 46px rgba(20, 24, 35, 0.11),
+      inset 0 0 0 1px color-mix(in srgb, var(--ss-outline-variant) 72%, transparent);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--ss-outline-variant) 1px, transparent 1px),
+        linear-gradient(90deg, var(--ss-outline-variant) 1px, transparent 1px);
+      background-size: 24px 24px;
+      opacity: 0.28;
+    }
+
     canvas.rendering-canvas {
       position: absolute;
       z-index: 1;
+      border-radius: 18px;
     }
     canvas.overlay-canvas {
       position: absolute;
       background-color: transparent;
       z-index: 2;
+      border-radius: 18px;
     }
     canvas.paper-canvas {
       position: absolute;
       background-color: transparent;
       z-index: 3;
+      border-radius: 18px;
     }
   }
   $rulerWidth: 32px;

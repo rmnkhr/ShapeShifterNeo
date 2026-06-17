@@ -6,24 +6,27 @@
     $accent: map-get($theme, accent);
     $is-dark: map-get($theme, is-dark);
     .slt-properties {
-        background-color: mat.m2-get-color-from-palette($background, if($is-dark, base50, base));
-        box-shadow: 0 0 0 1px mat.m2-get-color-from-palette($foreground, divider) inset;
+        background-color: transparent;
+        box-shadow: none;
         .slt-property {
             &:not(:last-child) {
-                box-shadow: 0 -1px 0 mat.m2-get-color-from-palette($foreground, divider) inset;
+                box-shadow: none;
             }
             .slt-timeline-block {
-                background-color: mat.m2-get-color-from-palette(
-                    mat.m2-define-palette(if($is-dark, mat.$m2-indigo-palette, mat.$m2-green-palette), 200)
-                );
+                background-color: var(--ss-track);
                 &.is-selected {
-                    background-color: mat.m2-get-color-from-palette($accent);
+                    background-color: var(--ss-primary);
                 }
                 &.has-error {
                     background-color: mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-red-palette, A200));
                 }
                 &.is-selected-with-error {
                     background-color: mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-red-palette, A700));
+                }
+                .slt-timeline-block-edge {
+                    border: 2px solid var(--ss-track-hi);
+                    background: var(--ss-surface-container-lowest);
+                    box-sizing: border-box;
                 }
             }
         }

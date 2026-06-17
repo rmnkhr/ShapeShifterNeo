@@ -23,6 +23,11 @@ export class PlaybackComponent implements OnInit {
     this.playbackModel$ = this.store.select(getPlaybackState);
   }
 
+  restartClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.playbackService.setCurrentTime(0);
+  }
+
   isSlowMotionClick(event: MouseEvent) {
     event.stopPropagation();
     this.playbackService.toggleIsSlowMotion();

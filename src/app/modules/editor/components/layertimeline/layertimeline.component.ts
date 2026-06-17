@@ -40,6 +40,7 @@ import { getLayerTimelineState, isWorkspaceDirty } from 'app/modules/editor/stor
 import { SetSelectedLayers, SetVectorLayer } from 'app/modules/editor/store/layers/actions';
 import { getVectorLayer } from 'app/modules/editor/store/layers/selectors';
 import { ResetWorkspace } from 'app/modules/editor/store/reset/actions';
+import { SetAnimation } from 'app/modules/editor/store/timeline/actions';
 import { getAnimation } from 'app/modules/editor/store/timeline/selectors';
 import { environment } from 'environments/environment';
 import * as $ from 'jquery';
@@ -61,6 +62,8 @@ const MIN_BLOCK_DURATION = 10;
 const MAX_ZOOM = 10;
 const MIN_ZOOM = 0.01;
 const DEFAULT_HORIZ_ZOOM = 2; // 1ms = 2px.
+const MIN_DURATION = 50;
+const MAX_DURATION = 5000;
 
 enum MouseActions {
   // We are dragging a block to a different location on the timeline.
@@ -87,6 +90,9 @@ export class LayerTimelineComponent extends DestroyableMixin()
   @ViewChild('timeline', { static: false })
   private timelineRef: ElementRef;
   private $timeline: JQuery;
+
+  @ViewChild('timelineScrollbar', { static: false })
+  private timelineScrollbarRef: ElementRef;
 
   @ViewChild('timelineAnimation', { static: false })
   private timelineAnimationRef: ElementRef;
@@ -122,6 +128,7 @@ export class LayerTimelineComponent extends DestroyableMixin()
   private performZoomRAF: number = undefined;
   private endZoomTimeout: number = undefined;
   private zoomStartTimeCursorPos: number;
+  private isSyncingTimelineScroll = false;
 
   constructor(
     private readonly fileImportService: FileImportService,
@@ -226,6 +233,7 @@ export class LayerTimelineComponent extends DestroyableMixin()
 
   private set horizZoom(horizZoom: number) {
     this.horizZoomSubject.next(horizZoom);
+    window.requestAnimationFrame(() => this.syncTimelineScrollbar());
   }
 
   private get currentTime() {
@@ -380,6 +388,56 @@ export class LayerTimelineComponent extends DestroyableMixin()
         const layer = new GroupLayer({ name, children: [] });
         this.layerTimelineService.addLayer(layer);
       });
+  }
+
+  onDurationInput(event: Event, animation: Animation) {
+    const value = parseFloat((event.target as HTMLInputElement).value);
+    if (isNaN(value)) {
+      return;
+    }
+    const duration = _.clamp(Math.round(value), MIN_DURATION, MAX_DURATION);
+    if (duration === animation.duration) {
+      return;
+    }
+    const cloned = animation.clone();
+    cloned.duration = duration;
+    cloned.blocks = cloned.blocks.map(block => {
+      if (block.endTime <= duration) {
+        return block;
+      }
+      const b = block.clone();
+      b.endTime = duration;
+      b.startTime = Math.min(b.startTime, Math.max(0, duration - MIN_BLOCK_DURATION));
+      return b;
+    });
+    this.store.dispatch(new SetAnimation(cloned));
+    this.playbackService.setCurrentTime(_.clamp(this.currentTime, 0, duration));
+    window.requestAnimationFrame(() => this.syncTimelineScrollbar());
+  }
+
+  onTimelineHorizontalScroll(event: Event) {
+    if (this.isSyncingTimelineScroll) {
+      return;
+    }
+    this.isSyncingTimelineScroll = true;
+    this.syncTimelineScrollbar();
+    this.isSyncingTimelineScroll = false;
+  }
+
+  onTimelineScrollbarScroll(event: Event) {
+    if (this.isSyncingTimelineScroll || !this.$timeline) {
+      return;
+    }
+    this.isSyncingTimelineScroll = true;
+    this.$timeline.scrollLeft((event.target as HTMLElement).scrollLeft);
+    this.isSyncingTimelineScroll = false;
+  }
+
+  private syncTimelineScrollbar() {
+    const scrollbar = this.timelineScrollbarRef && this.timelineScrollbarRef.nativeElement;
+    if (scrollbar && this.$timeline) {
+      scrollbar.scrollLeft = this.$timeline.scrollLeft();
+    }
   }
 
   // @Override TimelineAnimationRowCallbacks
@@ -797,6 +855,11 @@ export class LayerTimelineComponent extends DestroyableMixin()
         currentTime: this.currentTime,
       },
     ]);
+  }
+
+  // @Override LayerListTreeComponentCallbacks
+  onRemoveTimelinePropertyClick(event: MouseEvent, layer: Layer, propertyName: string) {
+    this.layerTimelineService.removeBlocksForLayerProperty(layer.id, propertyName);
   }
 
   // @Override LayerListTreeComponentCallbacks

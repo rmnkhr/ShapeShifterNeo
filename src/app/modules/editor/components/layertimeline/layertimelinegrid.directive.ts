@@ -17,7 +17,7 @@ import { filter } from 'rxjs/operators';
 
 import { TIMELINE_ANIMATION_PADDING } from './constants';
 
-const HEADER_HEIGHT = 40;
+const HEADER_HEIGHT = 49;
 const GRID_INTERVALS_MS = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 30000, 60000];
 
 @Directive({
@@ -121,10 +121,15 @@ export class LayerTimelineGridDirective extends DestroyableMixin() implements On
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     ctx.translate(TIMELINE_ANIMATION_PADDING, 0);
 
+    const styles = getComputedStyle(this.canvas);
+    const onVariant = styles.getPropertyValue('--ss-on-surface-variant').trim();
+    const outline = styles.getPropertyValue('--ss-outline-variant').trim();
+    const playhead = styles.getPropertyValue('--ss-playhead').trim() || '#e8542f';
+
     // Compute grid spacing (40 = minimum grid spacing in pixels).
     let interval = 0;
     let spacingMs = GRID_INTERVALS_MS[interval];
-    while (spacingMs * this.horizZoom < 40 || interval >= GRID_INTERVALS_MS.length) {
+    while (spacingMs * this.horizZoom < 40 && interval < GRID_INTERVALS_MS.length - 1) {
       interval++;
       spacingMs = GRID_INTERVALS_MS[interval];
     }
@@ -132,23 +137,53 @@ export class LayerTimelineGridDirective extends DestroyableMixin() implements On
     const spacingPx = spacingMs * this.horizZoom;
 
     if (this.isHeader) {
-      // Text labels.
-      ctx.fillStyle = this.themeService.getSecondaryTextColor();
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = `10px Inter, Roboto, 'Helvetica Neue', sans-serif`;
-      for (let x = 0, t = 0; round(x) <= round(width); x += spacingPx, t += spacingMs) {
-        ctx.fillText(`${t / 1000}s`, x, height / 2);
+      ctx.strokeStyle = outline || this.themeService.getDividerTextColor();
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.55;
+      for (let x = 0; round(x) <= round(width - TIMELINE_ANIMATION_PADDING * 2); x += spacingPx) {
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 16);
+        ctx.lineTo(x + 0.5, height);
+        ctx.stroke();
       }
-      ctx.fillStyle = 'rgba(244, 67, 54, .7)';
+      ctx.globalAlpha = 1;
+
+      // Text labels.
+      ctx.fillStyle = onVariant || this.themeService.getSecondaryTextColor();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.font = `500 11px 'Hanken Grotesk', Roboto, 'Helvetica Neue', sans-serif`;
+      for (
+        let x = 0, t = 0, i = 0;
+        round(x) <= round(width - TIMELINE_ANIMATION_PADDING * 2);
+        x += spacingPx, t += spacingMs, i++
+      ) {
+        if (i % 5 !== 0 && x !== 0) {
+          continue;
+        }
+        ctx.globalAlpha = 1;
+        ctx.fillText(formatSeconds(t), x, 7);
+        ctx.strokeStyle = outline || this.themeService.getDividerTextColor();
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0);
+        ctx.lineTo(x + 0.5, height);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = playhead;
+      const playheadX = this.currentTime * this.horizZoom;
       ctx.beginPath();
-      ctx.arc(this.currentTime * this.horizZoom, height / 2, 4, 0, 2 * Math.PI, false);
-      ctx.fill();
+      ctx.moveTo(playheadX - 6, 0);
+      ctx.lineTo(playheadX + 6, 0);
+      ctx.lineTo(playheadX, 8);
       ctx.closePath();
-      ctx.fillRect(this.currentTime * this.horizZoom - 1, height / 2 + 4, 2, height);
+      ctx.fill();
+      ctx.fillRect(playheadX - 1, 8, 2, height - 8);
     } else {
       // Grid lines.
-      ctx.fillStyle = this.themeService.getDividerTextColor();
+      ctx.fillStyle = outline || this.themeService.getDividerTextColor();
+      ctx.globalAlpha = 0.55;
       for (
         let x = spacingPx;
         round(x) < round(width - TIMELINE_ANIMATION_PADDING * 2);
@@ -156,7 +191,8 @@ export class LayerTimelineGridDirective extends DestroyableMixin() implements On
       ) {
         ctx.fillRect(x - 0.5, HEADER_HEIGHT, 1, height - HEADER_HEIGHT);
       }
-      ctx.fillStyle = 'rgba(244, 67, 54, .7)';
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = playhead;
       ctx.fillRect(this.currentTime * this.horizZoom - 1, HEADER_HEIGHT, 2, height - HEADER_HEIGHT);
     }
   }
@@ -171,6 +207,11 @@ export class LayerTimelineGridDirective extends DestroyableMixin() implements On
 
 function round(n: number) {
   return _.round(n, 8);
+}
+
+function formatSeconds(ms: number) {
+  const seconds = ms / 1000;
+  return `${Number(seconds.toFixed(3))}s`;
 }
 
 export interface ScrubEvent {
