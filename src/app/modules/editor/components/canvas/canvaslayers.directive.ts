@@ -74,10 +74,10 @@ export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implem
       const actionModeSelector =
         this.actionSource === ActionSource.From ? getActionModeStartState : getActionModeEndState;
       this.registerSubscription(
-        combineLatest(
+        combineLatest([
           this.store.select(actionModeSelector),
           this.store.select(getOnionSkinState),
-        ).subscribe(([{ vectorLayer, hiddenLayerIds }, onionSkinState]) => {
+        ]).subscribe(([{ vectorLayer, hiddenLayerIds }, onionSkinState]) => {
           this.vectorLayer = vectorLayer;
           this.hiddenLayerIds = hiddenLayerIds;
           this.onionEnabled = onionSkinState.enabled;
@@ -169,10 +169,6 @@ export class CanvasLayersDirective extends CanvasLayoutDestroyableMixin() implem
 
   private renderVectorLayer(ctx: Context, vl: VectorLayer, hiddenLayerIds: ReadonlySet<string>) {
     this.drawLayerWithHidden(vl, vl, ctx, hiddenLayerIds);
-  }
-
-  private drawLayer(vl: VectorLayer, layer: Layer, ctx: Context) {
-    this.drawLayerWithHidden(vl, layer, ctx, this.hiddenLayerIds);
   }
 
   private drawLayerWithHidden(

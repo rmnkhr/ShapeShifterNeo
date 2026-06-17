@@ -129,7 +129,7 @@ export class ClipboardService {
                 const [targetLayerId] = Array.from(selectedLayerIds);
                 if (targetLayerId !== layerId) {
                   const targetLayer = vectorLayer.findLayerById(targetLayerId);
-                  if (targetLayer && targetLayer.inspectableProperties.has(propertyName)) {
+                  if (targetLayer && targetLayer.animatableProperties.has(propertyName)) {
                     layerId = targetLayerId;
                   }
                 }

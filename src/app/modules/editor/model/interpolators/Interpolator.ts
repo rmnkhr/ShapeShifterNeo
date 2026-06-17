@@ -119,6 +119,8 @@ export const INTERPOLATORS: ReadonlyArray<Interpolator> = [
 
 const CUSTOM_PREFIX = 'CUSTOM:';
 
+const customInterpolatorCache = new Map<string, (t: number) => number>();
+
 export function isCustomInterpolator(value: string): boolean {
   return value != null && value.startsWith(CUSTOM_PREFIX);
 }
@@ -142,8 +144,12 @@ export function buildCustomInterpolatorValue(
 
 export function getInterpolateFn(value: string): (t: number) => number {
   if (isCustomInterpolator(value)) {
+    if (customInterpolatorCache.has(value)) {
+      return customInterpolatorCache.get(value)!;
+    }
     const [x1, y1, x2, y2] = parseCustomInterpolator(value);
     const fn = BezierEasing.create(x1, y1, x2, y2);
+    customInterpolatorCache.set(value, fn);
     return fn;
   }
   const preset = INTERPOLATORS.find(i => i.value === value);
