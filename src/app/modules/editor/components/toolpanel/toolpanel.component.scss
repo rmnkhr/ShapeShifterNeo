@@ -3,20 +3,23 @@
 // canvas shows around it. See Design.md.
 :host {
   position: absolute;
-  left: var(--ss-gutter, 16px);
-  // Anchored to .editor-body, so top: 0 is already just below the toolbar.
-  // Inset the bottom past the playback bar so the pill centers between the two.
-  top: 0;
-  bottom: 56px;
+  inset: 0;
   z-index: 10;
-  display: flex;
-  flex-direction: row;
-  align-items: center; // vertical-center the pill within the editor body
   // Let canvas interactions pass through the empty area around the pill.
   pointer-events: none;
 }
 
+.tool-panel-shell {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .tool-panel {
+  position: absolute;
+  left: var(--ss-gutter, 16px);
+  top: 50%;
+  transform: translateY(-50%);
   pointer-events: auto;
   display: flex;
   flex-direction: column;
@@ -26,6 +29,13 @@
   background-color: var(--ss-surface-container);
   border: 1px solid var(--ss-outline-variant);
   border-radius: var(--ss-radius-full, 9999px);
+  max-height: calc(100% - 48px);
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .tool-button {

@@ -1,1 +1,1 @@
-export const TIMELINE_ANIMATION_PADDING = 20; // 20px
+export const TIMELINE_ANIMATION_PADDING = 14; // px

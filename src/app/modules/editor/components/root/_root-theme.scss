@@ -3,15 +3,12 @@
 @mixin ss-root-theme($theme) {
     $background: map-get($theme, ss-background);
     $accent: map-get($theme, accent);
-    // Shell backdrop. The top bar is now a transparent row holding floating
-    // pills, so the area behind it must be themed (it used to be covered by the
-    // opaque toolbar). Use the same base300 backdrop the canvas/tool panel sit
-    // on, so the floating top bar reads consistently with the left tool panel.
+    // Shell backdrop behind the floating topbar pills.
     .app-container {
-        background-color: mat.m2-get-color-from-palette($background, base300);
+        background-color: mat.m2-get-color-from-palette($background, base50);
     }
     div.display-container {
-        background-color: mat.m2-get-color-from-palette($background, base300);
+        background-color: mat.m2-get-color-from-palette($background, base50);
     }
     .file-drop-target {
         &.is-dragging-over::after {

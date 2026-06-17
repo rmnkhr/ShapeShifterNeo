@@ -5,8 +5,8 @@
     $background: map-get($theme, ss-background);
     $accent: map-get($theme, accent);
     .studio-layer-timeline {
-        $headerHeight: 40px;
-        background-color: mat.m2-get-color-from-palette($background, base100);
+        $headerHeight: 49px;
+        background-color: var(--ss-surface-container);
         .slt-layers {
             .slt-header {
                 .slt-layers-menu-group-button {
@@ -45,7 +45,7 @@
             .slt-timeline-animation {
                 // Start-of-animation marker only; the end-of-timeline grey line
                 // has been removed.
-                box-shadow: -4px 0 0 mat.m2-get-color-from-palette(mat.m2-define-palette(mat.$m2-grey-palette, 500));
+                box-shadow: none;
                 &.is-selected {
                     background-color: mat.m2-get-color-from-palette($accent);
                 }
@@ -67,7 +67,7 @@
                     font-weight: 500;
                 }
                 .slt-timeline-header-grid {
-                    background-color: mat.m2-get-color-from-palette($background, base100);
+                    background-color: var(--ss-surface-container);
                 }
             }
         }

@@ -12,10 +12,10 @@
   margin: var(--ss-gutter, 16px);
   margin-top: 0;
   border: 1px solid var(--ss-outline-variant);
-  border-radius: var(--ss-radius-lg, 1rem);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  $headerHeight: 40px;
-  $timelineAnimationPadding: 20px;
+  border-radius: var(--ss-radius-lg, 22px);
+  box-shadow: 0 10px 34px rgba(20, 24, 35, 0.1);
+  $headerHeight: 49px;
+  $timelineAnimationPadding: 14px;
   ul {
     margin: 0;
     padding: 0;
@@ -31,11 +31,11 @@
   }
   .slt-layer {
     box-sizing: border-box;
-    line-height: 20px;
-    height: 20px;
+    line-height: 38px;
+    height: 38px;
   }
   .slt-layers {
-    width: 300px;
+    width: 308px;
     position: relative;
     z-index: 3;
     user-select: none;
@@ -61,15 +61,16 @@
       display: flex;
     }
     .slt-header {
-      padding: 0 0 0 4px;
+      padding: 0 10px;
       overflow: hidden;
+      gap: 6px;
       .slt-layers-menu-group-button {
         position: relative;
         cursor: pointer;
         border: 0;
         // Inset chip (centered in the 40px header via the flex row) so the hover
         // background reads as a rounded box rather than a full-height block.
-        height: 28px;
+        height: 32px;
         font-size: 12px;
         font-weight: 500;
         line-height: 28px;
@@ -84,6 +85,48 @@
         }
         &.is-disabled {
           cursor: default;
+        }
+      }
+      .slt-duration-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
+        padding: 0 9px 0 10px;
+        border: 1px solid var(--ss-outline-variant);
+        border-radius: var(--ss-radius-sm, 8px);
+        background: var(--ss-surface-container-high);
+        color: var(--ss-on-surface-variant);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1;
+
+        mat-icon {
+          width: 17px;
+          height: 17px;
+          font-size: 17px;
+          color: var(--ss-primary);
+        }
+
+        input {
+          width: 48px;
+          border: 0;
+          outline: 0;
+          padding: 0;
+          background: transparent;
+          color: var(--ss-on-surface);
+          font: inherit;
+          font-weight: 800;
+          text-align: right;
+          font-variant-numeric: tabular-nums;
+          -moz-appearance: textfield;
+          appearance: textfield;
+
+          &::-webkit-outer-spin-button,
+          &::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
         }
       }
       button {
@@ -113,6 +156,40 @@
           }
         }
       }
+      .slt-add-layer-trigger {
+        --mdc-icon-button-icon-size: 20px;
+        flex: 0 0 34px;
+        width: 34px;
+        height: 32px;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        color: var(--ss-primary);
+        background: color-mix(in srgb, var(--ss-primary) 10%, var(--ss-surface-container-high));
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--ss-primary) 20%, var(--ss-outline-variant)) inset;
+        transition:
+          background-color 140ms ease,
+          box-shadow 140ms ease,
+          transform 140ms ease;
+
+        &:hover:not([disabled]) {
+          background: color-mix(in srgb, var(--ss-primary) 16%, var(--ss-surface-container-high));
+          box-shadow: 0 0 0 1px color-mix(in srgb, var(--ss-primary) 34%, var(--ss-outline-variant)) inset;
+          transform: translateY(-1px);
+        }
+
+        mat-icon {
+          width: 20px;
+          height: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          line-height: 20px !important;
+        }
+      }
     }
     .slt-layers-list-drag-indicator {
       position: absolute;
@@ -138,15 +215,30 @@
     font-size: 14px;
     line-height: 20px;
   }
+
+  .slt-timeline-wrap {
+    min-width: 0;
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+  }
+
   .slt-timeline {
     overflow-x: auto;
     overflow-y: hidden;
     flex: 1;
+    min-height: 0;
     user-select: none;
     cursor: default;
     display: flex;
     flex-direction: row;
     align-items: stretch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
     .slt-timeline-animation-scroller {
       position: relative;
       overflow-x: hidden;
@@ -229,7 +321,7 @@
         padding-right: 1.5px;
         padding-top: 1px;
         padding-bottom: 1px;
-        margin-left: 4px;
+      margin-left: 0;
         &[mat-icon-button] {
           mat-icon {
             line-height: normal;
@@ -239,6 +331,41 @@
       }
     }
   }
+
+  .slt-timeline-scrollbar {
+    flex: 0 0 16px;
+    height: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-top: 1px solid color-mix(in srgb, var(--ss-outline-variant) 70%, transparent);
+    background: color-mix(in srgb, var(--ss-surface-container-high) 55%, transparent);
+    scrollbar-color: color-mix(in srgb, var(--ss-primary) 45%, var(--ss-outline-variant)) transparent;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      height: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border: 3px solid transparent;
+      border-radius: 999px;
+      background-clip: content-box;
+      background-color: color-mix(in srgb, var(--ss-primary) 45%, var(--ss-outline-variant));
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: color-mix(in srgb, var(--ss-primary) 70%, var(--ss-outline-variant));
+    }
+  }
+
+  .slt-timeline-scrollbar-content {
+    height: 1px;
+  }
+
   .slt-header {
     position: relative;
     flex: 0 0 auto;
@@ -269,6 +396,169 @@ button {
       cursor: pointer;
     }
   }
+}
+
+.slt-add-layer-panel {
+  width: 286px;
+  max-width: 286px;
+  padding: 10px;
+  box-sizing: border-box;
+  color: var(--ss-on-surface);
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+.slt-add-layer-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 4px 4px 10px;
+  border-bottom: 1px solid var(--ss-outline-variant);
+}
+
+.slt-add-layer-head-icon,
+.slt-add-layer-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.slt-add-layer-head-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ss-primary) 12%, var(--ss-surface-container-high));
+  color: var(--ss-primary);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    line-height: 18px;
+  }
+}
+
+.slt-add-layer-head-copy,
+.slt-add-layer-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.slt-add-layer-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.slt-add-layer-subtitle {
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ss-on-surface-variant);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.slt-add-layer-item {
+  width: 100%;
+  min-height: 56px;
+  margin: 6px 0 0;
+  padding: 8px 9px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 22px;
+  align-items: center;
+  column-gap: 10px;
+  border: 0;
+  border-radius: var(--ss-radius, 12px);
+  background: transparent;
+  color: var(--ss-on-surface);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+
+  &:hover,
+  &:focus-visible {
+    outline: 0;
+    background: color-mix(in srgb, var(--ss-primary) 8%, var(--ss-surface-container-high));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ss-primary) 18%, transparent) inset;
+
+    .slt-add-layer-caret {
+      color: var(--ss-primary);
+      opacity: 1;
+    }
+  }
+}
+
+.slt-add-layer-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--ss-surface-container-high);
+  color: var(--ss-on-surface-variant);
+  box-shadow: 0 0 0 1px var(--ss-outline-variant) inset;
+
+  mat-icon {
+    width: 19px;
+    height: 19px;
+    font-size: 19px;
+    line-height: 19px;
+  }
+}
+
+.slt-add-layer-icon-path {
+  color: var(--ss-primary);
+}
+
+.slt-add-layer-icon-mask {
+  color: var(--ss-track-hi);
+}
+
+.slt-add-layer-icon-group {
+  color: var(--ss-on-surface-variant);
+}
+
+.slt-add-layer-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.slt-add-layer-description {
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ss-on-surface-variant);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.slt-add-layer-caret {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  color: var(--ss-on-surface-variant);
+  font-size: 20px;
+  line-height: 20px;
+  opacity: 0.56;
 }
 
 // Floating "fit to width" button — anchored to the bottom-center of the
