@@ -200,8 +200,15 @@
                     [disabled]="!ip.isEditable()">
                 </div>
                 <ng-container *ngIf="ip.typeName === 'EnumProperty'">
+                  <!-- Interpolator property: dedicated cubic-bezier picker. -->
+                  <app-interpolator-picker
+                    *ngIf="ip.propertyName === 'interpolator'"
+                    [value]="ip.value"
+                    [disabled]="!ip.isEditable()"
+                    (valueChange)="ip.value = $event">
+                  </app-interpolator-picker>
                   <!-- Small enums (<= 3 options): inline segmented buttons. -->
-                  <div *ngIf="ip.property.options.length <= 3"
+                  <div *ngIf="ip.property.options.length <= 3 && ip.propertyName !== 'interpolator'"
                     class="spi-segmented">
                     <button *ngFor="let option of ip.property.options; trackBy: trackEnumOptionFn"
                       type="button"
@@ -212,7 +219,7 @@
                     </button>
                   </div>
                   <!-- Larger enums: keep the frosted-glass dropdown menu. -->
-                  <ng-container *ngIf="ip.property.options.length > 3">
+                  <ng-container *ngIf="ip.property.options.length > 3 && ip.propertyName !== 'interpolator'">
                     <mat-menu #enumMenu="matMenu"
                       class="ss-glass-menu">
                       <button mat-menu-item

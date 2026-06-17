@@ -116,3 +116,37 @@ export const INTERPOLATORS: ReadonlyArray<Interpolator> = [
   },
   // TODO: add support for custom path interpolators
 ];
+
+const CUSTOM_PREFIX = 'CUSTOM:';
+
+export function isCustomInterpolator(value: string): boolean {
+  return value != null && value.startsWith(CUSTOM_PREFIX);
+}
+
+export function parseCustomInterpolator(value: string): [number, number, number, number] {
+  const parts = value.slice(CUSTOM_PREFIX.length).split(',').map(Number);
+  return [parts[0], parts[1], parts[2], parts[3]];
+}
+
+export function buildCustomInterpolatorValue(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): string {
+  return `${CUSTOM_PREFIX}${x1},${y1},${x2},${y2}`;
+}
+
+export function getInterpolateFn(value: string): (t: number) => number {
+  if (isCustomInterpolator(value)) {
+    const [x1, y1, x2, y2] = parseCustomInterpolator(value);
+    const fn = BezierEasing.create(x1, y1, x2, y2);
+    return fn;
+  }
+  const preset = INTERPOLATORS.find(i => i.value === value);
+  if (preset) {
+    return preset.interpolateFn;
+  }
+  // Fallback: linear
+  return t => t;
+}
