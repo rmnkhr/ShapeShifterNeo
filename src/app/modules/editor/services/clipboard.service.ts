@@ -3,7 +3,6 @@ import { AnimationBlock } from 'app/modules/editor/model/timeline';
 import { bugsnagClient } from 'app/modules/editor/scripts/bugsnag';
 import { SvgLoader, VectorDrawableLoader } from 'app/modules/editor/scripts/import';
 import * as $ from 'jquery';
-import * as _ from 'lodash';
 
 import { ActionModeService } from './actionmode.service';
 import { LayerTimelineService } from './layertimeline.service';
@@ -36,7 +35,6 @@ export class ClipboardService {
         const startTime = block.startTime + Math.round(duration * 0.5);
         const endTime = Math.min(startTime + duration, animation.duration);
         return {
-          id: _.uniqueId(),
           layerId: block.layerId,
           propertyName: block.propertyName,
           fromValue: block.fromValue,
