@@ -27,6 +27,7 @@ import {
   ConfirmDialogComponent,
   DemoDialogComponent,
   DropFilesDialogComponent,
+  HotkeysDialogComponent,
 } from 'app/modules/editor/components/dialogs';
 import {
   LayerListTreeComponent,
@@ -59,6 +60,7 @@ import { environment } from 'environments/environment';
     ConfirmDialogComponent,
     DemoDialogComponent,
     DropFilesDialogComponent,
+    HotkeysDialogComponent,
     DropTargetDirective,
     LayerListTreeComponent,
     LayerTimelineComponent,

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ToolMode } from 'app/modules/editor/model/paper';
 import { State, Store } from 'app/modules/editor/store';
 import { environment } from 'environments/environment';
 import * as $ from 'jquery';
@@ -7,6 +8,7 @@ import { Subject } from 'rxjs';
 
 import { ActionModeService } from './actionmode.service';
 import { LayerTimelineService } from './layertimeline.service';
+import { PaperService } from './paper.service';
 import { PlaybackService } from './playback.service';
 
 export enum Shortcut {
@@ -37,6 +39,7 @@ export class ShortcutService {
     private readonly actionModeService: ActionModeService,
     private readonly playbackService: PlaybackService,
     private readonly layerTimelineService: LayerTimelineService,
+    private readonly paperService: PaperService,
   ) {}
 
   asObservable() {
@@ -94,11 +97,17 @@ export class ShortcutService {
         this.actionModeService.closeActionMode();
         return false;
       }
-      // TODO: figure out how to re-enable this keyboard shortcut in beta
-      if (!environment.beta && event.keyCode === 32) {
-        // Spacebar.
-        this.playbackService.toggleIsPlaying();
-        return false;
+      if (event.keyCode === 32) {
+        // Spacebar toggles playback. Skip it while the zoom/pan tool is active
+        // (there, holding space is the temporary pan modifier), and ignore key
+        // auto-repeat so holding the key doesn't rapidly flip play/pause.
+        const isKeyRepeat = !!(event.originalEvent as KeyboardEvent | undefined)?.repeat;
+        if (!isKeyRepeat && this.paperService.getToolMode() !== ToolMode.ZoomPan) {
+          event.preventDefault();
+          this.playbackService.toggleIsPlaying();
+          return false;
+        }
+        return undefined;
       }
       if (event.keyCode === 37) {
         // Left arrow.

@@ -1,0 +1,70 @@
+.hk-title {
+    margin: 0;
+    padding: 4px 4px 8px;
+    color: var(--ss-on-surface);
+}
+
+.hk-content {
+    min-width: 320px;
+    padding: 0 4px 4px;
+}
+
+.hk-group {
+    margin-bottom: 12px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.hk-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ss-on-surface-variant);
+    padding: 6px 4px;
+}
+
+.hk-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 4px;
+}
+
+.hk-label {
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--ss-on-surface);
+}
+
+.hk-keys {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+// Each key rendered as a small frosted chip.
+.hk-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: var(--ss-radius-sm, 0.25rem);
+    background-color: color-mix(in srgb, var(--ss-surface-container-highest) 70%, transparent);
+    border: 1px solid var(--ss-outline-variant);
+    box-shadow: 0 1px 0 var(--ss-outline-variant);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ss-on-surface);
+}

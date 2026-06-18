@@ -6,6 +6,7 @@ import {
   DropFilesAction,
   DropFilesDialogComponent,
 } from 'app/modules/editor/components/dialogs/dropfilesdialog.component';
+import { HotkeysDialogComponent } from 'app/modules/editor/components/dialogs/hotkeysdialog.component';
 import { DemoInfo } from 'app/modules/editor/scripts/demos';
 import { Observable } from 'rxjs';
 
@@ -27,5 +28,11 @@ export class DialogService {
 
   dropFiles(): Observable<DropFilesAction> {
     return this.dialog.open(DropFilesDialogComponent, new MatDialogConfig()).afterClosed();
+  }
+
+  showHotkeys(): Observable<void> {
+    const config = new MatDialogConfig();
+    config.panelClass = 'ss-glass-dialog';
+    return this.dialog.open(HotkeysDialogComponent, config).afterClosed();
   }
 }

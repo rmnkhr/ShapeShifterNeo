@@ -8,6 +8,7 @@ import {
 import { MorphableLayer } from 'app/modules/editor/model/layers';
 import { NameProperty } from 'app/modules/editor/model/properties';
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
+import { DialogService } from 'app/modules/editor/components/dialogs';
 import { ActionModeUtil } from 'app/modules/editor/scripts/actionmode';
 import { ActionModeService, ThemeService } from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
@@ -67,7 +68,12 @@ export class ToolbarComponent implements OnInit {
     private readonly actionModeService: ActionModeService,
     readonly themeService: ThemeService,
     private readonly store: Store<State>,
+    private readonly dialogService: DialogService,
   ) {}
+
+  onHotkeysClick() {
+    this.dialogService.showHotkeys().subscribe();
+  }
 
   ngOnInit() {
     this.animation$ = this.store.select(getAnimation);

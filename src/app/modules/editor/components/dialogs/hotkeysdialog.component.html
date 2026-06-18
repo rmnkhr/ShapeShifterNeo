@@ -1,0 +1,16 @@
+<h2 matDialogTitle
+  class="hk-title">Keyboard shortcuts</h2>
+<mat-dialog-content class="hk-content">
+  <div class="hk-group"
+    *ngFor="let group of groups">
+    <div class="hk-group-title">{{ group.title }}</div>
+    <div class="hk-row"
+      *ngFor="let hk of group.hotkeys">
+      <span class="hk-label">{{ hk.label }}</span>
+      <span class="hk-keys">
+        <kbd class="hk-key"
+          *ngFor="let k of hk.keys">{{ k }}</kbd>
+      </span>
+    </div>
+  </div>
+</mat-dialog-content>
