@@ -30,11 +30,17 @@ export class InterpolatorPickerComponent implements OnChanges, OnDestroy {
   @ViewChild('bezierCanvas') bezierCanvasRef: ElementRef<SVGSVGElement>;
 
   readonly INTERPOLATORS = INTERPOLATORS;
-  readonly CANVAS_SIZE = 180;
-  readonly Y_OFFSET = 0.5; // canvas shows y ∈ [-0.5, 1.5]
-  readonly Y_RANGE = 2.0;
 
-  // Cubic-bezier control points.
+  // SVG coordinate system: 200×200 units.
+  // Visible y range is [-0.5, 1.5] so handles can show overshoot/anticipate.
+  readonly CANVAS_SIZE = 200;
+  readonly Y_MAX = 1.5;
+  readonly Y_RANGE = 2.0; // Y_MAX − Y_MIN = 1.5 − (−0.5)
+
+  // Pre-computed pixel positions for the [0,1] grid box (constants, used in template).
+  readonly GRID_Y0 = 150;  // py(0)
+  readonly GRID_Y1 = 50;   // py(1)
+
   x1 = 0.42;
   y1 = 0;
   x2 = 0.58;
@@ -48,19 +54,13 @@ export class InterpolatorPickerComponent implements OnChanges, OnDestroy {
   private previewTimer: any = null;
 
   get currentLabel(): string {
-    if (isCustomInterpolator(this.value)) {
-      return 'Custom';
-    }
+    if (isCustomInterpolator(this.value)) { return 'Custom'; }
     const preset = INTERPOLATORS.find(i => i.value === this.value);
     return preset ? preset.label : this.value;
   }
 
   get bezierCurveD(): string {
-    const { px, py } = this;
-    const [sx1, sy1] = [px(this.x1), py(this.y1)];
-    const [sx2, sy2] = [px(this.x2), py(this.y2)];
-    const [endX, endY] = [px(1), py(1)];
-    return `M ${px(0)} ${py(0)} C ${sx1} ${sy1}, ${sx2} ${sy2}, ${endX} ${endY}`;
+    return `M ${this.px(0)} ${this.py(0)} C ${this.px(this.x1)} ${this.py(this.y1)}, ${this.px(this.x2)} ${this.py(this.y2)}, ${this.px(1)} ${this.py(1)}`;
   }
 
   get handle1X(): number { return this.px(this.x1); }
@@ -130,6 +130,7 @@ export class InterpolatorPickerComponent implements OnChanges, OnDestroy {
   onHandlePointerDown(event: PointerEvent, handle: 1 | 2): void {
     if (this.disabled) { return; }
     event.preventDefault();
+    event.stopPropagation();
     this.draggingHandle = handle;
     (event.target as Element).setPointerCapture(event.pointerId);
   }
@@ -139,11 +140,17 @@ export class InterpolatorPickerComponent implements OnChanges, OnDestroy {
     event.preventDefault();
     const svg = this.bezierCanvasRef?.nativeElement;
     if (!svg) { return; }
-    const rect = svg.getBoundingClientRect();
-    const rawX = (event.clientX - rect.left) / rect.width;
-    const rawY = (event.clientY - rect.top) / rect.height;
-    const valX = Math.max(0, Math.min(1, rawX));
-    const valY = Math.max(-0.5, Math.min(1.5, (1 - rawY) * this.Y_RANGE - this.Y_OFFSET));
+    // getScreenCTM gives correct mapping regardless of how CSS scales the SVG.
+    const ctm = svg.getScreenCTM();
+    if (!ctm) { return; }
+    const pt = svg.createSVGPoint();
+    pt.x = event.clientX;
+    pt.y = event.clientY;
+    const svgPt = pt.matrixTransform(ctm.inverse());
+
+    const valX = Math.max(0, Math.min(1, svgPt.x / this.CANVAS_SIZE));
+    const valY = Math.max(-0.5, Math.min(1.5,
+      this.Y_MAX - (svgPt.y / this.CANVAS_SIZE) * this.Y_RANGE));
 
     if (this.draggingHandle === 1) {
       this.x1 = Math.round(valX * 100) / 100;
@@ -162,22 +169,17 @@ export class InterpolatorPickerComponent implements OnChanges, OnDestroy {
     this.draggingHandle = null;
   }
 
-  // Map value-space → SVG pixel space.
   px(x: number): number {
     return x * this.CANVAS_SIZE;
   }
 
   py(y: number): number {
-    // y=0 → bottom of canvas, y=1 → top. SVG y increases downward.
-    // We show y ∈ [-0.5, 1.5] → [canvas_bottom, canvas_top]
-    // pixel = (1 - (y + Y_OFFSET) / Y_RANGE) * CANVAS_SIZE
-    return (1 - (y + this.Y_OFFSET) / this.Y_RANGE) * this.CANVAS_SIZE;
+    // y=1.5→0 (top), y=1→50, y=0→150, y=−0.5→200 (bottom)
+    return (this.Y_MAX - y) / this.Y_RANGE * this.CANVAS_SIZE;
   }
 
   private emitCustom(): void {
-    this.valueChange.emit(
-      buildCustomInterpolatorValue(this.x1, this.y1, this.x2, this.y2),
-    );
+    this.valueChange.emit(buildCustomInterpolatorValue(this.x1, this.y1, this.x2, this.y2));
     this.restartPreview();
   }
 
@@ -187,6 +189,6 @@ export class InterpolatorPickerComponent implements OnChanges, OnDestroy {
     this.previewTimer = setTimeout(() => {
       this.showPreviewDot = true;
       this.previewTimer = null;
-    }, 0);
+    }, 50);
   }
 }

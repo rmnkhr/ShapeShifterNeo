@@ -32,50 +32,56 @@
   <div class="ipc-custom-editor"
     *ngIf="showCustomEditor">
 
-    <!-- SVG canvas -->
+    <!-- SVG canvas — no width/height attrs, CSS makes it responsive -->
     <svg #bezierCanvas
       class="ipc-canvas"
-      [attr.width]="CANVAS_SIZE"
-      [attr.height]="CANVAS_SIZE"
-      [attr.viewBox]="'0 0 ' + CANVAS_SIZE + ' ' + CANVAS_SIZE"
+      viewBox="0 0 200 200"
       (pointermove)="onSvgPointerMove($event)"
       (pointerup)="onSvgPointerUp($event)">
 
-      <!-- Grid lines every 25% -->
+      <!-- Highlight the [0,1]×[0,1] bezier region -->
+      <rect class="ipc-main-area"
+        x="0"
+        [attr.y]="GRID_Y1"
+        width="200"
+        [attr.height]="GRID_Y0 - GRID_Y1" />
+
+      <!-- Grid: vertical lines at 25%, 50%, 75% of x -->
       <g class="ipc-grid">
-        <line x1="45" y1="0" x2="45" [attr.y2]="CANVAS_SIZE" />
-        <line x1="90" y1="0" x2="90" [attr.y2]="CANVAS_SIZE" />
-        <line x1="135" y1="0" x2="135" [attr.y2]="CANVAS_SIZE" />
-        <line [attr.x1]="0" y1="45" [attr.x2]="CANVAS_SIZE" y2="45" />
-        <line [attr.x1]="0" y1="90" [attr.x2]="CANVAS_SIZE" y2="90" />
-        <line [attr.x1]="0" y1="135" [attr.x2]="CANVAS_SIZE" y2="135" />
+        <line x1="50"  y1="0" x2="50"  y2="200" />
+        <line x1="100" y1="0" x2="100" y2="200" />
+        <line x1="150" y1="0" x2="150" y2="200" />
+        <!-- Horizontal lines at 25%, 50%, 75% of y within the [0,1] box -->
+        <line x1="0" y1="75"  x2="200" y2="75" />
+        <line x1="0" y1="100" x2="200" y2="100" />
+        <line x1="0" y1="125" x2="200" y2="125" />
+        <!-- value=0 and value=1 boundary lines (slightly stronger) -->
+        <line class="ipc-grid-boundary" x1="0" [attr.y1]="GRID_Y0" x2="200" [attr.y2]="GRID_Y0" />
+        <line class="ipc-grid-boundary" x1="0" [attr.y1]="GRID_Y1" x2="200" [attr.y2]="GRID_Y1" />
       </g>
 
       <!-- Diagonal guide (0,0)→(1,1) -->
       <line class="ipc-guide"
-        [attr.x1]="px(0)"
-        [attr.y1]="py(0)"
-        [attr.x2]="px(1)"
-        [attr.y2]="py(1)" />
+        x1="0"
+        [attr.y1]="GRID_Y0"
+        x2="200"
+        [attr.y2]="GRID_Y1" />
 
-      <!-- Control-point lines -->
-      <path class="ipc-handle-line"
-        [attr.d]="line1D" />
-      <path class="ipc-handle-line"
-        [attr.d]="line2D" />
+      <!-- Control-point arm lines -->
+      <path class="ipc-handle-line" [attr.d]="line1D" />
+      <path class="ipc-handle-line" [attr.d]="line2D" />
 
       <!-- Bezier curve -->
-      <path class="ipc-curve"
-        [attr.d]="bezierCurveD" />
+      <path class="ipc-curve" [attr.d]="bezierCurveD" />
 
-      <!-- Handle 1 (x1,y1) -->
+      <!-- Handle 1 (x1,y1) — primary color -->
       <circle class="ipc-handle"
         [attr.cx]="handle1X"
         [attr.cy]="handle1Y"
         r="6"
         (pointerdown)="onHandlePointerDown($event, 1)" />
 
-      <!-- Handle 2 (x2,y2) -->
+      <!-- Handle 2 (x2,y2) — secondary color -->
       <circle class="ipc-handle ipc-handle-2"
         [attr.cx]="handle2X"
         [attr.cy]="handle2Y"
