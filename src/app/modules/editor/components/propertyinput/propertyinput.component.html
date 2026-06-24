@@ -42,7 +42,6 @@
                   <mat-icon>bolt</mat-icon>
                   <span>Add animation</span>
                 </div>
-                <div class="slt-add-animation-subtitle">on {{ model.description }} · {{ this.getLayerTypeLabel(model) }}</div>
               </div>
               <button mat-icon-button
                 type="button"
@@ -51,12 +50,7 @@
                 <mat-icon>close</mat-icon>
               </button>
             </div>
-            <label class="slt-add-animation-search">
-              <mat-icon>search</mat-icon>
-              <input placeholder="Search properties..."
-                [(ngModel)]="addAnimationSearch"
-                (keydown)="$event.stopPropagation()">
-            </label>
+
             <div class="slt-add-animation-body">
               <ng-container *ngFor="let cat of categoryOrder">
                 <div class="slt-add-animation-category"
@@ -71,7 +65,6 @@
                   </span>
                   <span class="slt-add-animation-copy">
                     <span class="slt-add-animation-label">{{ this.getPropertyLabel(propertyName) }}</span>
-                    <span class="slt-add-animation-key">{{ propertyName }}</span>
                   </span>
                   <mat-icon class="slt-add-animation-state">add_circle</mat-icon>
                 </button>
@@ -200,8 +193,15 @@
                     [disabled]="!ip.isEditable()">
                 </div>
                 <ng-container *ngIf="ip.typeName === 'EnumProperty'">
+                  <!-- Interpolator property: dedicated cubic-bezier picker. -->
+                  <app-interpolator-picker
+                    *ngIf="ip.propertyName === 'interpolator'"
+                    [value]="ip.value"
+                    [disabled]="!ip.isEditable()"
+                    (valueChange)="ip.value = $event">
+                  </app-interpolator-picker>
                   <!-- Small enums (<= 3 options): inline segmented buttons. -->
-                  <div *ngIf="ip.property.options.length <= 3"
+                  <div *ngIf="ip.property.options.length <= 3 && ip.propertyName !== 'interpolator'"
                     class="spi-segmented">
                     <button *ngFor="let option of ip.property.options; trackBy: trackEnumOptionFn"
                       type="button"
@@ -212,7 +212,7 @@
                     </button>
                   </div>
                   <!-- Larger enums: keep the frosted-glass dropdown menu. -->
-                  <ng-container *ngIf="ip.property.options.length > 3">
+                  <ng-container *ngIf="ip.property.options.length > 3 && ip.propertyName !== 'interpolator'">
                     <mat-menu #enumMenu="matMenu"
                       class="ss-glass-menu">
                       <button mat-menu-item

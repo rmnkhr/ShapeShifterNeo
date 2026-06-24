@@ -28,31 +28,57 @@ li {
         height: 38px;
         .slt-timeline-block {
             position: absolute;
-            height: 6px;
+            height: 8px;
             border-radius: 99px;
             top: 50%;
             transform: translate(0, -50%);
             outline: 0;
             cursor: pointer;
-            min-width: 14px;
+            min-width: 16px;
+            transition: height 100ms ease, opacity 100ms ease;
+
+            &:hover {
+                height: 10px;
+            }
+
             .slt-timeline-block-edge {
                 position: absolute;
                 top: 50%;
-                width: 13px;
-                height: 13px;
-                border-radius: 2px;
+                width: 14px;
+                height: 14px;
+                border-radius: 3px;
                 transform: translateY(-50%) rotate(45deg);
                 cursor: ew-resize;
                 z-index: 2;
+                transition: transform 120ms ease, box-shadow 120ms ease;
+
+                // Larger transparent hit area so the diamond is easy to grab
+                &::before {
+                    content: '';
+                    position: absolute;
+                    inset: -8px;
+                }
             }
+
+            &:hover .slt-timeline-block-edge {
+                transform: translateY(-50%) rotate(45deg) scale(1.25);
+            }
+
             .slt-timeline-block-edge-start {
-                left: -6px;
+                left: -7px;
             }
             .slt-timeline-block-edge-end {
-                right: -6px;
+                right: -7px;
             }
             &.is-disabled {
                 cursor: default;
+                opacity: 0.5;
+                &:hover {
+                    height: 8px;
+                }
+                &:hover .slt-timeline-block-edge {
+                    transform: translateY(-50%) rotate(45deg) scale(1);
+                }
             }
         }
     }

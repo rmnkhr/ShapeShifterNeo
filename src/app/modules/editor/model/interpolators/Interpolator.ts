@@ -116,3 +116,46 @@ export const INTERPOLATORS: ReadonlyArray<Interpolator> = [
   },
   // TODO: add support for custom path interpolators
 ];
+
+const CUSTOM_PREFIX = 'CUSTOM:';
+
+const customInterpolatorCache = new Map<string, (t: number) => number>();
+
+export function isCustomInterpolator(value: string): boolean {
+  return value != null && value.startsWith(CUSTOM_PREFIX);
+}
+
+export function parseCustomInterpolator(value: string): [number, number, number, number] {
+  const parts = value.slice(CUSTOM_PREFIX.length).split(',').map(Number);
+  if (parts.length !== 4 || parts.some(isNaN)) {
+    return [0.4, 0, 0.2, 1]; // fallback to material standard
+  }
+  return [parts[0], parts[1], parts[2], parts[3]];
+}
+
+export function buildCustomInterpolatorValue(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): string {
+  return `${CUSTOM_PREFIX}${x1},${y1},${x2},${y2}`;
+}
+
+export function getInterpolateFn(value: string): (t: number) => number {
+  if (isCustomInterpolator(value)) {
+    if (customInterpolatorCache.has(value)) {
+      return customInterpolatorCache.get(value)!;
+    }
+    const [x1, y1, x2, y2] = parseCustomInterpolator(value);
+    const fn = BezierEasing.create(x1, y1, x2, y2);
+    customInterpolatorCache.set(value, fn);
+    return fn;
+  }
+  const preset = INTERPOLATORS.find(i => i.value === value);
+  if (preset) {
+    return preset.interpolateFn;
+  }
+  // Fallback: linear
+  return t => t;
+}

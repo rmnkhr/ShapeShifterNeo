@@ -46,7 +46,7 @@ export class LayerTimelineGridDirective extends DestroyableMixin() implements On
       this.themeService
         .asObservable()
         .pipe(filter(t => !t.isInitialPageLoad))
-        .subscribe(t => this.redraw()),
+        .subscribe(t => requestAnimationFrame(() => this.redraw())),
     );
   }
 

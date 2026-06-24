@@ -139,6 +139,8 @@ class Animator {
   private animationFrameId: number;
   private playbackSpeed = DEFAULT_PLAYBACK_SPEED;
   private isRepeating = false;
+  private currentDuration: number;
+  private currentAnimationTime = 0;
 
   constructor(private readonly ngZone: NgZone, private readonly callback: Callback) {}
 
@@ -147,8 +149,15 @@ class Animator {
   }
 
   setIsSlowMotion(isSlowMotion: boolean) {
-    // TODO: make it possible to change this mid-animation?
+    const wasPlaying = !!this.animationFrameId;
+    const savedTime = this.currentAnimationTime;
     this.playbackSpeed = isSlowMotion ? SLOW_MOTION_PLAYBACK_SPEED : DEFAULT_PLAYBACK_SPEED;
+    // Restart from the same animation position so the speed change is immediate.
+    if (wasPlaying && this.currentDuration !== undefined) {
+      window.cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = undefined;
+      this.startAnimation(this.currentDuration, savedTime);
+    }
   }
 
   play(duration: number, startTime: number) {
@@ -156,25 +165,29 @@ class Animator {
     this.runInsideAngular(() => this.callback.onAnimationStart());
   }
 
-  private startAnimation(duration: number, startTime: number) {
+  // startTime is animation time in ms (0..duration), NOT scaled by playbackSpeed.
+  private startAnimation(duration: number, animationStartTime: number) {
+    this.currentDuration = duration;
     let startTimestamp: number;
     const playbackSpeed = this.playbackSpeed;
     const onAnimationFrameFn = (timestamp: number) => {
       if (!startTimestamp) {
         startTimestamp = timestamp;
       }
-      const progress = timestamp - startTimestamp + startTime;
-      if (progress < duration * playbackSpeed) {
+      // Convert real elapsed ms → animation ms by dividing by speed.
+      const elapsed = timestamp - startTimestamp;
+      const fraction = _.clamp((animationStartTime + elapsed / playbackSpeed) / duration, 0, 1);
+      this.currentAnimationTime = fraction * duration;
+      if (fraction < 1) {
         this.animationFrameId = window.requestAnimationFrame(onAnimationFrameFn);
       } else if (this.isRepeating) {
         this.timeoutId = window.setTimeout(
-          () => this.startAnimation(duration, startTime),
+          () => this.startAnimation(duration, 0),
           REPEAT_DELAY,
         );
       } else {
         this.pause(true);
       }
-      const fraction = _.clamp(progress / (duration * playbackSpeed), 0, 1);
       const executeFn = () => this.callback.onAnimationUpdate(fraction * duration);
       if (fraction === 0 || fraction === 1) {
         this.runInsideAngular(executeFn);

@@ -3,13 +3,13 @@
   fxLayout="row"
   fxLayoutAlign="center center">
   <span fxFlex></span>
-  <button class="playback-icon-button"
+  <button class="playback-icon-button slow-motion-button"
     mat-icon-button
-    matTooltip="Restart"
+    matTooltip="Slow motion (S)"
     matTooltipPosition="below"
     matTooltipShowDelay="500"
-    (click)="this.restartClick($event)">
-    <mat-icon>restart_alt</mat-icon>
+    (click)="this.isSlowMotionClick($event)">
+    <mat-icon [class.activated]="model.isSlowMotion">slow_motion_video</mat-icon>
   </button>
   <button class="playback-icon-button"
     mat-icon-button
