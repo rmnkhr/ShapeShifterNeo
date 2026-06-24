@@ -1,7 +1,13 @@
-import { getActionMode, isActionMode } from 'app/modules/editor/store/actionmode/selectors';
+import {
+  getActionMode,
+  getActionModeEndState,
+  getActionModeStartState,
+  isActionMode,
+} from 'app/modules/editor/store/actionmode/selectors';
 import {
   getCollapsedLayerIds,
   getHiddenLayerIds,
+  getOnionSkinEnabled,
   getSelectedLayerIds,
   getVectorLayer,
 } from 'app/modules/editor/store/layers/selectors';
@@ -61,4 +67,11 @@ export const getLayerTimelineState = createStructuredSelector({
 export const isWorkspaceDirty = createSelector(
   [getVectorLayer, getAnimation],
   (vl, anim) => vl.children.length > 0 || anim.blocks.length > 0,
+);
+
+export const getOnionSkinState = createSelector(
+  getOnionSkinEnabled,
+  getActionModeStartState,
+  getActionModeEndState,
+  (enabled, fromState, toState) => ({ enabled, fromState, toState }),
 );

@@ -1,7 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ToolMode } from 'app/modules/editor/model/paper';
 import { PaperService, ShortcutService } from 'app/modules/editor/services';
+import { State, Store } from 'app/modules/editor/store';
+import { isActionMode } from 'app/modules/editor/store/actionmode/selectors';
+import { SetOnionSkinEnabled } from 'app/modules/editor/store/layers/actions';
+import { getOnionSkinEnabled } from 'app/modules/editor/store/layers/selectors';
 import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
   standalone: false,
@@ -17,11 +22,18 @@ export class ToolPanelComponent implements OnInit {
 
   // TODO: only enable edit path/rotate/transform in default mode?
   model$: Observable<ToolPanelModel>;
+  onionSkinEnabled$: Observable<boolean>;
+  isActionMode$: Observable<boolean>;
 
-  constructor(private readonly ps: PaperService) {}
+  constructor(
+    private readonly ps: PaperService,
+    private readonly store: Store<State>,
+  ) {}
 
   ngOnInit() {
     this.model$ = this.ps.observeToolPanelState();
+    this.onionSkinEnabled$ = this.store.select(getOnionSkinEnabled);
+    this.isActionMode$ = this.store.select(isActionMode);
   }
 
   onDefaultClick(event: Event) {
@@ -62,6 +74,15 @@ export class ToolPanelComponent implements OnInit {
   onZoomPanClick(event: Event) {
     this.ps.setToolMode(ToolMode.ZoomPan);
     event.stopPropagation();
+  }
+
+  onToggleOnionSkin() {
+    this.store
+      .select(getOnionSkinEnabled)
+      .pipe(take(1))
+      .subscribe(enabled => {
+        this.store.dispatch(new SetOnionSkinEnabled(!enabled));
+      });
   }
 
   isMac() {

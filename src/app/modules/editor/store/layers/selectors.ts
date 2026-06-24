@@ -9,3 +9,4 @@ export const getCollapsedLayerIds = createDeepEqualSelector(
   l => l.collapsedLayerIds,
 );
 export const getHiddenLayerIds = createDeepEqualSelector(getLayerState, l => l.hiddenLayerIds);
+export const getOnionSkinEnabled = createSelector(getLayerState, l => l.onionSkinEnabled);
