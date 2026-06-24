@@ -1,6 +1,6 @@
 .playback {
     gap: 15px;
-    padding: 16px 0 8px;
+    padding: 16px 0 32px;
 
     button {
         margin: 0;
@@ -34,7 +34,7 @@
         height: 62px;
         background: var(--ss-primary);
         color: var(--ss-on-primary);
-        box-shadow: 0 8px 22px color-mix(in srgb, var(--ss-primary) 42%, transparent);
+        box-shadow: none;
 
         mat-icon {
             width: 31px;

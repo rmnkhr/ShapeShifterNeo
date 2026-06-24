@@ -144,7 +144,7 @@ $dark-theme: ss-dark-theme($dark-primary, $dark-accent, $dark-warn);
 @mixin theme-animation-properties {
     animation-duration: 200ms;
     animation-timing-function: ease-out;
-    animation-fill-mode: forwards;
+    animation-fill-mode: none;
 }
 
 @mixin build-theme-animations($themeKey, $paletteKey, $animName) {

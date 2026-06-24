@@ -91,7 +91,6 @@
               <mat-icon>bolt</mat-icon>
               <span>Add animation</span>
             </div>
-            <div class="slt-add-animation-subtitle">on {{ layer.name }} · {{ this.getLayerTypeLabel() }}</div>
           </div>
           <button mat-icon-button
             type="button"
@@ -100,12 +99,7 @@
             <mat-icon>close</mat-icon>
           </button>
         </div>
-        <label class="slt-add-animation-search">
-          <mat-icon>search</mat-icon>
-          <input placeholder="Search properties..."
-            [(ngModel)]="addAnimationSearch"
-            (keydown)="$event.stopPropagation()">
-        </label>
+
         <div class="slt-add-animation-body">
           <ng-container *ngFor="let cat of categoryOrder">
             <div class="slt-add-animation-category"
@@ -120,7 +114,6 @@
               </span>
               <span class="slt-add-animation-copy">
                 <span class="slt-add-animation-label">{{ getPropertyLabel(propertyName) }}</span>
-                <span class="slt-add-animation-key">{{ propertyName }}</span>
               </span>
               <mat-icon class="slt-add-animation-state"
                 [class.is-added]="model.existingPropertyNames.includes(propertyName)">
@@ -168,6 +161,15 @@
         matTooltipPosition="below"
         matTooltipShowDelay="1000">
         <mat-icon>close</mat-icon>
+      </button>
+      <button mat-icon-button
+        class="slt-layer-action-button slt-property-add-button"
+        (click)="this.onAddTimelineBlockClick($event, layer, propertyName)"
+        [disabled]="model.isActionMode"
+        matTooltip="Add another block"
+        matTooltipPosition="below"
+        matTooltipShowDelay="1000">
+        <mat-icon>add</mat-icon>
       </button>
     </div>
   </div>
