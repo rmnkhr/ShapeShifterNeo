@@ -33,12 +33,55 @@
           <span class="spi-selection-description">{{ model.description }}</span>
           <span class="spi-selection-sub-description">{{ model.subDescription }}</span>
         </div>
-        <mat-menu #addTimelineBlockMenu="matMenu">
-          <button mat-menu-item
-            *ngFor="let propertyName of model.availablePropertyNames"
-            (click)="this.onAnimateLayerClick(model.model, propertyName)">
-            {{ propertyName }}
-          </button>
+        <mat-menu #addTimelineBlockMenu="matMenu"
+          class="ss-glass-menu ss-add-animation-menu">
+          <div class="slt-add-animation-panel">
+            <div class="slt-add-animation-head">
+              <div class="slt-add-animation-heading-copy">
+                <div class="slt-add-animation-title">
+                  <mat-icon>bolt</mat-icon>
+                  <span>Add animation</span>
+                </div>
+                <div class="slt-add-animation-subtitle">on {{ model.description }} · {{ this.getLayerTypeLabel(model) }}</div>
+              </div>
+              <button mat-icon-button
+                type="button"
+                class="slt-add-animation-close"
+                matMenuClose>
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <label class="slt-add-animation-search">
+              <mat-icon>search</mat-icon>
+              <input placeholder="Search properties..."
+                [(ngModel)]="addAnimationSearch"
+                (keydown)="$event.stopPropagation()">
+            </label>
+            <div class="slt-add-animation-body">
+              <ng-container *ngFor="let cat of categoryOrder">
+                <div class="slt-add-animation-category"
+                  *ngIf="this.getVisibleAnimateProperties(model, cat).length">
+                  {{ this.getCategoryLabel(cat) }}
+                </div>
+                <button class="slt-add-animation-item"
+                  *ngFor="let propertyName of this.getVisibleAnimateProperties(model, cat); trackBy: trackPropertyNameFn"
+                  (click)="this.onAnimateLayerClick(model.model, propertyName)">
+                  <span class="slt-add-animation-icon">
+                    <mat-icon>{{ this.getPropertyIcon(propertyName) }}</mat-icon>
+                  </span>
+                  <span class="slt-add-animation-copy">
+                    <span class="slt-add-animation-label">{{ this.getPropertyLabel(propertyName) }}</span>
+                    <span class="slt-add-animation-key">{{ propertyName }}</span>
+                  </span>
+                  <mat-icon class="slt-add-animation-state">add_circle</mat-icon>
+                </button>
+              </ng-container>
+              <div class="slt-add-animation-empty"
+                *ngIf="!this.hasVisibleAnimateProperties(model)">
+                No properties found
+              </div>
+            </div>
+          </div>
         </mat-menu>
         <button mat-icon-button
           class="spi-secondary-icon"
@@ -47,17 +90,7 @@
           matTooltipPosition="left"
           matTooltipShowDelay="500"
           [matMenuTriggerFor]="addTimelineBlockMenu">
-          <mat-icon svgIcon="animationblock"></mat-icon>
-        </button>
-        <button mat-icon-button
-          class="spi-secondary-icon"
-          [disabled]="this.shouldDisableStartActionModeButton(model)"
-          *ngIf="this.shouldShowStartActionModeButton(model)"
-          (click)="this.onStartActionModeClick()"
-          matTooltip="Edit path morphing animation"
-          matTooltipPosition="left"
-          matTooltipShowDelay="500">
-          <mat-icon>edit</mat-icon>
+          <mat-icon>timer</mat-icon>
         </button>
       </div>
       <div class="spi-body"
@@ -68,110 +101,138 @@
           fxFlex>
           No shared properties to view or edit
         </div>
-        <ng-container *ngFor="let group of model.propertyGroups; trackBy: trackPropertyGroupFn">
-        <div class="spi-property-group-header"
-          *ngIf="group.label">{{ group.label }}</div>
-        <div class="spi-property"
-          *ngFor="let ip of group.inspectedProperties; trackBy: trackInspectedPropertyFn">
-          <div class="spi-property-name">{{ this.displayName(ip) }}</div>
-          <div class="spi-property-value"
-            fxLayout="row">
-            <label *ngIf="ip.typeName === 'ColorProperty'"
-              class="spi-property-color-preview"
-              [class.is-disabled]="!ip.isEditable()"
-              [style.background-color]="this.androidToCssColor(ip.value)"
-              matTooltip="Pick a color"
-              matTooltipPosition="below"
-              matTooltipShowDelay="500">
-              <input type="color"
-                class="spi-color-picker-input"
-                [disabled]="!ip.isEditable()"
-                [value]="this.colorToInputValue(ip.value)"
-                (input)="this.onColorPickerChange(ip, $event)">
-            </label>
-            <span *ngIf="!ip.isEditable()"
-              class="spi-property-value-static"
-              fxFlex>
-              <!-- Only show text if the property isn't inspectable. -->
-              {{ ip.getDisplayValue() }}
-            </span>
-            <div *ngIf="ip.isEditable()"
-              class="spi-property-value-editor"
-              fxLayout="column"
-              fxFlex>
-              <!-- Fraction (0..1): inline slider + value field (label stays in the
-                   name column like other rows). Slider steps by 0.1; the value
-                   field still accepts finer manual values (e.g. 0.14). -->
-              <div *ngIf="ip.typeName === 'FractionProperty'"
-                class="spi-slider"
-                [class.is-disabled]="!ip.isEditable()">
-                <div class="spi-slider-track">
-                  <div class="spi-slider-fill"
-                    *ngIf="this.fractionPercent(ip) > 0"
-                    [style.width.%]="this.fractionPercent(ip)"></div>
-                  <div class="spi-slider-handle"
-                    [style.left.%]="this.fractionPercent(ip)"></div>
-                  <input type="range"
-                    class="spi-slider-range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    [value]="ip.value"
-                    [disabled]="!ip.isEditable()"
-                    (input)="this.onFractionSliderChange(ip, $event)">
+        <div class="spi-property-group"
+          [class.is-transform-group]="group.label === 'Transform'"
+          [class.is-ungrouped]="!group.label"
+          *ngFor="let group of model.propertyGroups; trackBy: trackPropertyGroupFn">
+          <div class="spi-section-separator"
+            *ngIf="group.label"></div>
+          <div class="spi-property-group-header"
+            *ngIf="group.label">{{ group.label }}</div>
+          <div class="spi-property"
+            [class.is-code-property]="this.isCodeProperty(ip)"
+            [class.is-rotation-property]="ip.propertyName === 'rotation'"
+            [class.is-color-property]="ip.typeName === 'ColorProperty'"
+            [class.is-fraction-property]="ip.typeName === 'FractionProperty'"
+            [class.is-enum-property]="ip.typeName === 'EnumProperty'"
+            *ngFor="let ip of group.inspectedProperties; trackBy: trackInspectedPropertyFn">
+            <div class="spi-property-name">{{ this.displayName(ip) }}</div>
+            <div class="spi-property-value"
+              fxLayout="row">
+              <label *ngIf="ip.typeName === 'ColorProperty'"
+                class="spi-property-color-preview"
+                [class.is-disabled]="!ip.isEditable()"
+                [style.background-color]="this.androidToCssColor(ip.value)"
+                matTooltip="Pick a color"
+                matTooltipPosition="below"
+                matTooltipShowDelay="500">
+                <input type="color"
+                  class="spi-color-picker-input"
+                  [disabled]="!ip.isEditable()"
+                  [value]="this.colorToInputValue(ip.value)"
+                  (input)="this.onColorPickerChange(ip, $event)">
+              </label>
+              <span *ngIf="!ip.isEditable()"
+                class="spi-property-value-static"
+                fxFlex>
+                <!-- Only show text if the property isn't inspectable. -->
+                {{ ip.getDisplayValue() }}
+              </span>
+              <div *ngIf="ip.isEditable()"
+                class="spi-property-value-editor"
+                fxLayout="column"
+                fxFlex>
+                <!-- Fraction (0..1): inline slider + value field (label stays in the
+                     name column like other rows). Slider steps by 0.1; the value
+                     field still accepts finer manual values (e.g. 0.14). -->
+                <div *ngIf="ip.typeName === 'FractionProperty'"
+                  class="spi-slider"
+                  [class.is-disabled]="!ip.isEditable()">
+                  <div class="spi-slider-track">
+                    <div class="spi-slider-fill"
+                      *ngIf="this.fractionPercent(ip) > 0"
+                      [style.width.%]="this.fractionPercent(ip)"></div>
+                    <div class="spi-slider-handle"
+                      [style.left.%]="this.fractionPercent(ip)"></div>
+                    <input type="range"
+                      class="spi-slider-range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      [value]="ip.value"
+                      [disabled]="!ip.isEditable()"
+                      (input)="this.onFractionSliderChange(ip, $event)">
+                  </div>
+                  <input class="spi-slider-value"
+                    (keydown)="this.onValueEditorKeyDown($event, ip)"
+                    (blur)="ip.resolveEnteredValue()"
+                    name="{{ip.propertyName}}"
+                    [(ngModel)]="ip.editableValue"
+                    [disabled]="!ip.isEditable()">
                 </div>
-                <input class="spi-slider-value"
-                  (keydown)="this.onValueEditorKeyDown($event, ip)"
+                <input (keydown)="this.onValueEditorKeyDown($event, ip)"
+                  [class.is-code-input]="this.isCodeProperty(ip)"
+                  [ngClass]="{
+                    'has-input-error': ip.typeName === 'PathProperty' && this.shouldShowInvalidPathAnimationBlockMsg(model)
+                  }"
                   (blur)="ip.resolveEnteredValue()"
                   name="{{ip.propertyName}}"
                   [(ngModel)]="ip.editableValue"
-                  [disabled]="!ip.isEditable()">
-              </div>
-              <input (keydown)="this.onValueEditorKeyDown($event, ip)"
-                [ngClass]="{
-                  'has-input-error': ip.typeName === 'PathProperty' && this.shouldShowInvalidPathAnimationBlockMsg(model)
-                }"
-                (blur)="ip.resolveEnteredValue()"
-                name="{{ip.propertyName}}"
-                [(ngModel)]="ip.editableValue"
-                *ngIf="ip.typeName === 'NameProperty'
-                || ip.typeName === 'PathProperty'
-                || ip.typeName === 'ColorProperty'
-                || ip.typeName === 'NumberProperty'">
-              <ng-container *ngIf="ip.typeName === 'EnumProperty'">
-                <!-- Small enums (<= 3 options): inline segmented buttons. -->
-                <div *ngIf="ip.property.options.length <= 3"
-                  class="spi-segmented">
-                  <button *ngFor="let option of ip.property.options; trackBy: trackEnumOptionFn"
-                    type="button"
-                    class="spi-segmented-option"
-                    [class.is-selected]="ip.value === option.value"
-                    (click)="ip.value = option.value">
-                    {{ option.label }}
+                  *ngIf="ip.typeName === 'NameProperty'
+                  || ip.typeName === 'PathProperty'
+                  || ip.typeName === 'ColorProperty'">
+                <div class="spi-number-field"
+                  *ngIf="ip.typeName === 'NumberProperty'">
+                  <button type="button"
+                    class="spi-number-scrubber"
+                    [disabled]="!ip.isEditable()"
+                    (pointerdown)="this.onNumberScrubStart($event, ip)"
+                    matTooltip="Drag horizontally to change value"
+                    matTooltipPosition="below"
+                    matTooltipShowDelay="500">
+                    <mat-icon>{{ this.propertyIcon(ip) }}</mat-icon>
                   </button>
+                  <input (keydown)="this.onValueEditorKeyDown($event, ip)"
+                    class="is-number-input"
+                    (blur)="ip.resolveEnteredValue()"
+                    name="{{ip.propertyName}}"
+                    [(ngModel)]="ip.editableValue"
+                    [disabled]="!ip.isEditable()">
                 </div>
-                <!-- Larger enums: keep the frosted-glass dropdown menu. -->
-                <ng-container *ngIf="ip.property.options.length > 3">
-                  <mat-menu #enumMenu="matMenu"
-                    class="ss-glass-menu">
-                    <button mat-menu-item
-                      *ngFor="let option of ip.property.options; trackBy: trackEnumOptionFn"
-                      (click)="ip.value = option.value;">
-                    {{ option.label }}
-                  </button>
-                  </mat-menu>
-                  <button class="spi-property-value-menu-target"
-                    [matMenuTriggerFor]="enumMenu">
-                    <span class="spi-property-value-menu-current-value">
-                      {{ ip.getDisplayValue() }}
-                    </span>
-                  </button>
+                <ng-container *ngIf="ip.typeName === 'EnumProperty'">
+                  <!-- Small enums (<= 3 options): inline segmented buttons. -->
+                  <div *ngIf="ip.property.options.length <= 3"
+                    class="spi-segmented">
+                    <button *ngFor="let option of ip.property.options; trackBy: trackEnumOptionFn"
+                      type="button"
+                      class="spi-segmented-option"
+                      [class.is-selected]="ip.value === option.value"
+                      (click)="ip.value = option.value">
+                      {{ option.label }}
+                    </button>
+                  </div>
+                  <!-- Larger enums: keep the frosted-glass dropdown menu. -->
+                  <ng-container *ngIf="ip.property.options.length > 3">
+                    <mat-menu #enumMenu="matMenu"
+                      class="ss-glass-menu">
+                      <button mat-menu-item
+                        *ngFor="let option of ip.property.options; trackBy: trackEnumOptionFn"
+                        (click)="ip.value = option.value;">
+                      {{ option.label }}
+                    </button>
+                    </mat-menu>
+                    <button class="spi-property-value-menu-target"
+                      [matMenuTriggerFor]="enumMenu">
+                      <span class="spi-property-value-menu-current-value">
+                        {{ ip.getDisplayValue() }}
+                      </span>
+                    </button>
+                  </ng-container>
                 </ng-container>
-              </ng-container>
+              </div>
             </div>
           </div>
         </div>
-        </ng-container>
         <div *ngIf="this.shouldShowInvalidPathAnimationBlockMsg(model)"
           class="alert alert-danger"
           fxLayout="row">
@@ -183,7 +244,7 @@
                 ? '<i>toValue</i> must not be empty'
                 : (this.isPathBlockFromValueEmpty(model.model) && this.isPathBlockToValueEmpty(model.model))
                   ? '<i>fromValue</i> and <i>toValue</i> must not be empty'
-                  : 'Paths are incompatible. <i>Auto fix</i> or click the <i>edit path morphing animation</i> button above.'">
+                  : 'Paths are incompatible. <i>Auto fix</i> or click the <i>edit path morphing animation</i> button below.'">
           </span>
           <button mat-icon-button
             class="auto-fix-button"
@@ -195,6 +256,14 @@
             <mat-icon svgIcon="autofix"></mat-icon>
           </button>
         </div>
+        <button type="button"
+          class="spi-edit-morph-button"
+          *ngIf="this.shouldShowStartActionModeButton(model)"
+          [disabled]="this.shouldDisableStartActionModeButton(model)"
+          (click)="this.onStartActionModeClick()">
+          <mat-icon>edit</mat-icon>
+          <span>Edit path morphing animation</span>
+        </button>
       </div>
     </div>
   </ng-container>

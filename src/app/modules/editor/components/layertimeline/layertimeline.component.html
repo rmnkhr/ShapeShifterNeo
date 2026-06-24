@@ -119,31 +119,81 @@
         </button>
 
         <div fxFlex></div>
+        <div class="slt-duration-chip"
+          *ngIf="!model.isActionMode">
+          <mat-icon>timer</mat-icon>
+          <span>Duration</span>
+          <input type="number"
+            [min]="50"
+            [max]="5000"
+            [value]="model.animation.duration"
+            (click)="$event.stopPropagation()"
+            (input)="onDurationInput($event, model.animation)">
+          <span>ms</span>
+        </div>
 
         <!-- Add layer menu. -->
         <mat-menu #addLayerMenu="matMenu"
-          class="ss-glass-menu">
-          <button mat-menu-item
-            (click)="this.onAddPathLayerClick()">
-            New path
-          </button>
-          <button mat-menu-item
-            (click)="this.onAddClipPathLayerClick()">
-            New clip path
-          </button>
-          <button mat-menu-item
-            (click)="this.onAddGroupLayerClick()">
-            New group layer
-          </button>
+          class="ss-glass-menu ss-add-layer-menu">
+          <div class="slt-add-layer-panel">
+            <div class="slt-add-layer-head">
+              <span class="slt-add-layer-head-icon">
+                <mat-icon>add_box</mat-icon>
+              </span>
+              <span class="slt-add-layer-head-copy">
+                <span class="slt-add-layer-title">Add layer</span>
+                <span class="slt-add-layer-subtitle">Create structure in the vector tree</span>
+              </span>
+            </div>
+            <button type="button"
+              class="slt-add-layer-item"
+              matMenuClose
+              (click)="this.onAddPathLayerClick()">
+              <span class="slt-add-layer-icon slt-add-layer-icon-path">
+                <mat-icon>polyline</mat-icon>
+              </span>
+              <span class="slt-add-layer-copy">
+                <span class="slt-add-layer-label">Path</span>
+                <span class="slt-add-layer-description">Drawable shape with fill and stroke</span>
+              </span>
+              <mat-icon class="slt-add-layer-caret">add_circle</mat-icon>
+            </button>
+            <button type="button"
+              class="slt-add-layer-item"
+              matMenuClose
+              (click)="this.onAddClipPathLayerClick()">
+              <span class="slt-add-layer-icon slt-add-layer-icon-mask">
+                <mat-icon>select_all</mat-icon>
+              </span>
+              <span class="slt-add-layer-copy">
+                <span class="slt-add-layer-label">Clip path</span>
+                <span class="slt-add-layer-description">Mask geometry for child paths</span>
+              </span>
+              <mat-icon class="slt-add-layer-caret">add_circle</mat-icon>
+            </button>
+            <button type="button"
+              class="slt-add-layer-item"
+              matMenuClose
+              (click)="this.onAddGroupLayerClick()">
+              <span class="slt-add-layer-icon slt-add-layer-icon-group">
+                <mat-icon>folder</mat-icon>
+              </span>
+              <span class="slt-add-layer-copy">
+                <span class="slt-add-layer-label">Group</span>
+                <span class="slt-add-layer-description">Transform and organize nested layers</span>
+              </span>
+              <mat-icon class="slt-add-layer-caret">add_circle</mat-icon>
+            </button>
+          </div>
         </mat-menu>
         <button mat-icon-button
-          (click)="$event.stopPropagation()"
+          class="slt-add-layer-trigger"
           matTooltip="Add layer"
           matTooltipPosition="below"
           matTooltipShowDelay="500"
           [disabled]="model.isActionMode"
           [matMenuTriggerFor]="addLayerMenu">
-          <mat-icon svgIcon="addlayer"></mat-icon>
+          <mat-icon>add</mat-icon>
         </button>
       </div>
 
@@ -165,6 +215,7 @@
             (layerToggleVisibility)="this.onLayerToggleVisibility($event.event, $event.layer)"
             (layerMouseDown)="this.onLayerMouseDown($event.event, $event.layer)"
             (addTimelineBlockClick)="this.onAddTimelineBlockClick($event.event, $event.layer, $event.propertyName)"
+            (removeTimelinePropertyClick)="this.onRemoveTimelinePropertyClick($event.event, $event.layer, $event.propertyName)"
             (convertToClipPathClick)="this.onConvertToClipPathClick($event.event, $event.layer)"
             (convertToPathClick)="this.onConvertToPathClick($event.event, $event.layer)"
             (flattenGroupClick)="this.onFlattenGroupClick($event.event, $event.layer)">
@@ -186,11 +237,13 @@
     </div>
 
     <!-- Animation timeline. -->
+    <div class="slt-timeline-wrap"
+      *ngIf="{ horizZoom: (this.horizZoomObservable | async) } as animationData">
     <div #timeline
       class="slt-timeline"
+      (scroll)="this.onTimelineHorizontalScroll($event)"
       (mousewheel)="this.onWheelEvent($event)">
       <div #timelineAnimation
-        *ngIf="{ horizZoom: (this.horizZoomObservable | async) } as animationData"
         class="slt-timeline-animation is-active"
         [ngStyle]="{'width': (model.animation.duration * animationData.horizZoom + 40) + 'px'}"
         fxLayout="column">
@@ -231,6 +284,14 @@
           </div>
         </div>
       </div>
+    </div>
+    <div #timelineScrollbar
+      class="slt-timeline-scrollbar"
+      (scroll)="this.onTimelineScrollbarScroll($event)">
+      <div class="slt-timeline-scrollbar-content"
+        [ngStyle]="{'width': (model.animation.duration * animationData.horizZoom + 40) + 'px'}">
+      </div>
+    </div>
     </div>
 
     <!-- Floating "fit to width" button — shown when the timeline content

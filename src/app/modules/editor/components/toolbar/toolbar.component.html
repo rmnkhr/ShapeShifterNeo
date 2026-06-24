@@ -49,51 +49,24 @@
         </div>
       </div>
 
-      <span class="topbar-spacer"
-        fxFlex="1 1 auto"></span>
-
-      <!-- Composition (animation) name + duration bubbles. Click to edit. -->
-      <ng-container *ngIf="!data.showActionMode && (animation$ | async) as animation">
-        <div class="topbar-pill topbar-comp"
-          (click)="startEditName(animation, $event)">
-          <span *ngIf="!isEditingName"
-            class="comp-text">{{ animation.name }}</span>
-          <input *ngIf="isEditingName"
-            #nameInput
-            class="comp-input"
-            [(ngModel)]="nameDraft"
-            (click)="$event.stopPropagation()"
-            (keydown.enter)="commitName(animation)"
-            (keydown.escape)="isEditingName = false"
-            (blur)="commitName(animation)">
-        </div>
-
-        <span class="topbar-spacer"
-          fxFlex="1 1 auto"></span>
-
-        <div class="topbar-pill topbar-comp"
-          (click)="startEditDuration(animation, $event)">
-          <mat-icon class="comp-icon">timer</mat-icon>
-          <span *ngIf="!isEditingDuration"
-            class="comp-text">{{ animation.duration }}ms</span>
-          <ng-container *ngIf="isEditingDuration">
-            <input #durationInput
-              type="number"
-              [min]="100"
-              [max]="60000"
-              class="comp-input comp-input-duration"
-              [(ngModel)]="durationDraft"
+      <div class="topbar-center-cluster">
+        <!-- Composition (animation) name bubble. Click to edit. Duration lives in the timeline toolbar. -->
+        <ng-container *ngIf="!data.showActionMode && (animation$ | async) as animation">
+          <button class="topbar-comp"
+            type="button"
+            (click)="startEditName(animation, $event)">
+            <span *ngIf="!isEditingName"
+              class="comp-text">{{ animation.name }}</span>
+            <input *ngIf="isEditingName"
+              #nameInput
+              class="comp-input"
+              [(ngModel)]="nameDraft"
               (click)="$event.stopPropagation()"
-              (keydown.enter)="commitDuration(animation)"
-              (keydown.escape)="isEditingDuration = false"
-              (blur)="commitDuration(animation)">
-            <span class="comp-unit">ms</span>
-          </ng-container>
-        </div>
-      </ng-container>
-
-      <!-- Actions pill: contextual action buttons grouped with the menu. -->
-      <div class="topbar-pill topbar-actions">
+              (keydown.enter)="commitName(animation)"
+              (keydown.escape)="isEditingName = false"
+              (blur)="commitName(animation)">
+          </button>
+        </ng-container>
 
         <button class="pill-icon-button"
           (click)="onAutoFixClick($event)"
@@ -207,12 +180,10 @@
         </button>
 
         <!-- Divider between contextual actions and the menu. -->
-        <div class="pill-divider"
-          *ngIf="data.showActionMode"></div>
+        <div class="pill-divider"></div>
 
         <!-- Menu (hamburger) — opens the frosted-glass menu. -->
         <button class="pill-icon-button"
-          (click)="$event.stopPropagation()"
           [matMenuTriggerFor]="overflowMenu"
           matTooltip="Menu"
           matTooltipShowDelay="500"
@@ -222,18 +193,44 @@
       </div>
 
       <mat-menu #overflowMenu="matMenu"
-        class="ss-glass-menu"
+        class="ss-glass-menu ss-structured-menu"
         xPosition="before">
+        <button mat-menu-item
+          (click)="onNewWorkspaceClick($event)">
+          <mat-icon>note_add</mat-icon>
+          <span>New file</span>
+        </button>
+        <button mat-menu-item
+          (click)="onLaunchFilePickerClick($event, 'topbarOpenFileButton')">
+          <mat-icon>folder_open</mat-icon>
+          <span>Open...</span>
+          <span class="menu-shortcut">⌘O</span>
+          <input id="topbarOpenFileButton"
+            type="file"
+            accept=".shapeshifter"
+            (click)="$event.stopPropagation()"
+            (change)="onImportedFilesPicked($event, ($event.target || $event.srcElement).files)">
+        </button>
+        <button mat-menu-item
+          (click)="onExportAnimatedVectorDrawableClick($event)">
+          <mat-icon>code</mat-icon>
+          <span>Export as XML</span>
+          <span class="menu-shortcut">⌘E</span>
+        </button>
+        <div class="ss-menu-divider"></div>
         <div mat-menu-item
+          class="ss-menu-toggle"
           (click)="darkTheme = !darkTheme; $event.stopPropagation()">
+          <mat-icon>{{ darkTheme ? 'dark_mode' : 'light_mode' }}</mat-icon>
+          <span>Dark theme</span>
           <mat-slide-toggle [(ngModel)]="darkTheme"
             (click)="$event.stopPropagation()"></mat-slide-toggle>
-          <span>Dark theme</span>
         </div>
         <button mat-menu-item
           (click)="this.onHotkeysClick()">
           <mat-icon>keyboard</mat-icon>
           <span>Keyboard shortcuts</span>
+          <span class="menu-shortcut">⌘/</span>
         </button>
         <a href="http://www.androiddesignpatterns.com/2016/11/introduction-to-icon-animation-techniques.html"
           target="_blank"

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActionMode } from 'app/modules/editor/model/actionmode';
 import {
   ClipPathLayer,
@@ -11,6 +11,13 @@ import {
 import { FractionProperty, NameProperty, Option } from 'app/modules/editor/model/properties';
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { ColorUtil, ModelUtil } from 'app/modules/editor/scripts/common';
+import {
+  CATEGORY_ORDER,
+  filterPropertyNames,
+  getCategoryLabel,
+  getPropertyIcon,
+  getPropertyLabel,
+} from 'app/modules/editor/scripts/common/PropertyAnimationMeta';
 import {
   ActionModeService,
   LayerTimelineService,
@@ -35,6 +42,10 @@ declare const ga: Function;
 // headers (in this order); anything not matched falls into a leading, unlabeled
 // group so it renders first (e.g. 'name', 'pathData').
 const PROPERTY_GROUPS: ReadonlyArray<{ label: string; properties: ReadonlyArray<string> }> = [
+  {
+    label: 'Transform',
+    properties: ['rotation', 'scaleX', 'scaleY', 'pivotX', 'pivotY', 'translateX', 'translateY'],
+  },
   { label: 'Fill', properties: ['fillColor', 'fillAlpha', 'fillType'] },
   {
     label: 'Stroke',
@@ -53,13 +64,26 @@ const PROPERTY_GROUPS: ReadonlyArray<{ label: string; properties: ReadonlyArray<
 // Friendly labels shown in the inspector. The section header (Fill / Stroke /
 // Trim Path) already gives context, so the per-row labels can be short.
 const PROPERTY_DISPLAY_NAMES: { readonly [propertyName: string]: string } = {
+  name: 'Name',
+  pathData: 'Path data',
+  canvasColor: 'Canvas color',
+  width: 'Width',
+  height: 'Height',
+  alpha: 'Alpha',
+  rotation: 'Rotation',
+  scaleX: 'Scale X',
+  scaleY: 'Scale Y',
+  pivotX: 'Pivot X',
+  pivotY: 'Pivot Y',
+  translateX: 'Move X',
+  translateY: 'Move Y',
   fillColor: 'Color',
   fillAlpha: 'Alpha',
-  fillType: 'Type',
+  fillType: 'Fill rule',
   strokeColor: 'Color',
   strokeAlpha: 'Alpha',
   strokeWidth: 'Width',
-  strokeLinecap: 'Linecap',
+  strokeLinecap: 'Line cap',
   strokeLinejoin: 'Linejoin',
   strokeMiterLimit: 'Miter limit',
   trimPathStart: 'Start',
@@ -75,14 +99,19 @@ const PROPERTY_DISPLAY_NAMES: { readonly [propertyName: string]: string } = {
   styleUrls: ['./propertyinput.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PropertyInputComponent implements OnInit {
+export class PropertyInputComponent implements OnInit, OnDestroy {
   propertyInputModel$: Observable<PropertyInputModel>;
 
   // Map used to track user state that has been entered into textfields
   // but may not have been saved in the store.
   private readonly enteredValueMap = new Map<string, any>();
+  private stopNumberScrub?: () => void;
 
   themeState$: Observable<{ prevThemeType: ThemeType; currThemeType: ThemeType }>;
+
+  // State for the "Add animation" menu (the timer button on a selected layer).
+  addAnimationSearch = '';
+  readonly categoryOrder = CATEGORY_ORDER;
 
   constructor(
     private readonly store: Store<State>,
@@ -123,6 +152,10 @@ export class PropertyInputComponent implements OnInit {
         return { prevThemeType, currThemeType };
       }),
     );
+  }
+
+  ngOnDestroy() {
+    this.stopNumberScrub?.();
   }
 
   shouldShowStartActionModeButton(pim: PropertyInputModel) {
@@ -173,6 +206,37 @@ export class PropertyInputComponent implements OnInit {
     ]);
   }
 
+  // ── "Add animation" menu helpers (mirrors the layer-tree animate menu) ──────
+  getLayerTypeLabel(pim: PropertyInputModel) {
+    const type = pim.model && pim.model.type;
+    return type === 'mask' ? 'Clip path' : type;
+  }
+
+  getCategoryLabel(cat: string) {
+    return getCategoryLabel(cat);
+  }
+
+  getPropertyLabel(propertyName: string) {
+    return getPropertyLabel(propertyName);
+  }
+
+  getPropertyIcon(propertyName: string) {
+    return getPropertyIcon(propertyName);
+  }
+
+  getVisibleAnimateProperties(pim: PropertyInputModel, cat: string) {
+    const query = this.addAnimationSearch.trim().toLowerCase();
+    return filterPropertyNames(pim.availablePropertyNames, cat, query);
+  }
+
+  hasVisibleAnimateProperties(pim: PropertyInputModel) {
+    return CATEGORY_ORDER.some(cat => this.getVisibleAnimateProperties(pim, cat).length > 0);
+  }
+
+  trackPropertyNameFn(index: number, propertyName: string) {
+    return propertyName;
+  }
+
   shouldShowInvalidPathAnimationBlockMsg(pim: PropertyInputModel) {
     return (
       pim.numSelections === 1 &&
@@ -219,6 +283,37 @@ export class PropertyInputComponent implements OnInit {
         return false;
     }
     return undefined;
+  }
+
+  onNumberScrubStart(event: PointerEvent, ip: InspectedProperty<number>) {
+    if (!ip.isEditable()) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    this.stopNumberScrub?.();
+    ip.resolveEnteredValue();
+    const startX = event.clientX;
+    const startValue = Number(ip.value) || 0;
+    const step = this.numberScrubStep(ip);
+    const precision = this.numberScrubPrecision(ip);
+    document.body.classList.add('spi-is-number-scrubbing');
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const nextValue = startValue + delta * step;
+      ip.value = Number(nextValue.toFixed(precision));
+    };
+    const onPointerUp = () => {
+      document.body.classList.remove('spi-is-number-scrubbing');
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      this.stopNumberScrub = undefined;
+    };
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+    this.stopNumberScrub = onPointerUp;
   }
 
   private buildInspectedLayerProperties(
@@ -442,6 +537,56 @@ export class PropertyInputComponent implements OnInit {
   // Friendly per-row label (falls back to the raw property name).
   displayName(ip: InspectedProperty<any>) {
     return PROPERTY_DISPLAY_NAMES[ip.propertyName] || ip.propertyName;
+  }
+
+  isCodeProperty(ip: InspectedProperty<any>) {
+    return ip.propertyName === 'pathData';
+  }
+
+  isNumberLikeProperty(ip: InspectedProperty<any>) {
+    return ip.typeName === 'NumberProperty' || ip.typeName === 'FractionProperty';
+  }
+
+  propertyIcon(ip: InspectedProperty<any>) {
+    const icons: { readonly [propertyName: string]: string } = {
+      rotation: 'rotate_right',
+      scaleX: 'swap_horiz',
+      scaleY: 'swap_vert',
+      pivotX: 'filter_center_focus',
+      pivotY: 'filter_center_focus',
+      translateX: 'east',
+      translateY: 'south',
+      strokeWidth: 'line_weight',
+      strokeMiterLimit: 'join_inner',
+      width: 'width',
+      height: 'height',
+    };
+    return icons[ip.propertyName] || 'drag_indicator';
+  }
+
+  private numberScrubStep(ip: InspectedProperty<any>) {
+    switch (ip.propertyName) {
+      case 'scaleX':
+      case 'scaleY':
+        return 0.01;
+      case 'strokeWidth':
+      case 'strokeMiterLimit':
+        return 0.05;
+      default:
+        return 0.1;
+    }
+  }
+
+  private numberScrubPrecision(ip: InspectedProperty<any>) {
+    switch (ip.propertyName) {
+      case 'scaleX':
+      case 'scaleY':
+      case 'strokeWidth':
+      case 'strokeMiterLimit':
+        return 2;
+      default:
+        return 1;
+    }
   }
 
   trackInspectedPropertyFn(index: number, ip: InspectedProperty<any>) {

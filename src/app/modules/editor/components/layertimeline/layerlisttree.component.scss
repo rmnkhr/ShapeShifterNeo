@@ -13,15 +13,16 @@ li {
 
 .slt-layer {
   box-sizing: border-box;
-  height: 20px;
+  height: 38px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 2px;
-  font-size: 12px;
+  gap: 8px;
+  padding: 4px 6px;
+  font-size: 13.5px;
   cursor: pointer;
   outline: none;
-  border-radius: 2px 0 0 2px;
+  border-radius: var(--ss-radius, 12px);
   &.is-selected {
     box-shadow: none;
   }
@@ -33,25 +34,67 @@ li {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-left: 4px;
+    margin-left: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+  .slt-layer-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 800;
+    color: var(--ss-on-surface);
+  }
+  .slt-layer-type-label {
+    margin-top: 2px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ss-on-surface-variant);
+    opacity: 0.62;
   }
   mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-    line-height: 16px;
+    width: 19px;
+    height: 19px;
+    font-size: 19px;
+    line-height: 19px;
+  }
+  .slt-layer-preview {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--ss-surface-container-high) 78%, transparent);
+    color: var(--ss-on-surface-variant);
+    box-shadow: 0 0 0 1px var(--ss-outline-variant) inset;
+
+    svg {
+      width: 15px;
+      height: 15px;
+      display: block;
+      overflow: visible;
+    }
+
+    path {
+      vector-effect: non-scaling-stroke;
+    }
   }
   button[mat-icon-button],
   .mat-mdc-icon-button {
     // Override Angular Material's MDC icon button defaults (40px state layer
     // with internal padding) so the icons stay compact and centered.
-    --mdc-icon-button-state-layer-size: 20px;
-    --mdc-icon-button-icon-size: 16px;
-    width: 20px;
-    height: 20px;
-    min-height: 20px;
+    --mdc-icon-button-state-layer-size: 28px;
+    --mdc-icon-button-icon-size: 18px;
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
     padding: 2px;
-    line-height: 16px;
+    line-height: 18px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -64,10 +107,10 @@ li {
       height: 100%;
     }
     mat-icon {
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
-      line-height: 16px;
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+      line-height: 18px;
       vertical-align: top;
     }
   }
@@ -84,22 +127,22 @@ li {
 }
 
 @mixin layer-list-button {
-  --mdc-icon-button-state-layer-size: 20px;
-  --mdc-icon-button-icon-size: 16px;
+  --mdc-icon-button-state-layer-size: 28px;
+  --mdc-icon-button-icon-size: 18px;
   margin: 0;
   padding: 2px;
-  height: 20px;
-  width: 20px;
-  line-height: 16px;
-  min-height: 20px;
+  height: 28px;
+  width: 28px;
+  line-height: 18px;
+  min-height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-    line-height: 16px;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    line-height: 18px;
     vertical-align: top;
   }
 }
@@ -116,6 +159,12 @@ li {
 }
 
 .slt-layer.is-selected {
+  .slt-layer-preview {
+    background: color-mix(in srgb, var(--ss-primary) 12%, var(--ss-surface-container-high));
+    color: var(--ss-on-primary-container);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ss-primary) 30%, transparent) inset;
+  }
+
   .slt-layer-action-button {
     opacity: 1;
   }
@@ -123,10 +172,11 @@ li {
 
 .slt-layer-expanded-toggle {
   @include layer-list-button;
-  visibility: hidden;
-  &.is-visible {
-    visibility: visible;
-  }
+}
+
+.slt-layer-expanded-toggle-placeholder {
+  width: 28px;
+  flex: 0 0 28px;
 }
 
 .slt-layer-id {
@@ -138,7 +188,10 @@ li {
 
 .slt-layer-action-button {
   @include layer-list-button;
-  opacity: 0.2;
+  flex: 0 0 28px;
+  opacity: 0.82;
+  border-radius: var(--ss-radius-sm, 8px);
+  background: var(--ss-surface-container-high);
   &[disabled] {
     opacity: 0;
   }
@@ -166,33 +219,63 @@ mat-menu {
 }
 
 .slt-properties {
-  margin-top: 4px;
-  margin-bottom: 4px;
-  margin-left: 40px; // indent by both the icon (20px) and expand toggle (20px)
-  margin-right: -2px; // hide inset shadow
-  padding-right: 2px; // offset margin
-  border-radius: 2px;
+  margin: 0 0 0 40px;
+  border-radius: var(--ss-radius, 12px);
 }
 
 .slt-property {
-  padding-left: 8px;
-  font-size: 12px;
+  height: 38px;
+  gap: 8px;
+  padding: 4px 6px;
+  font-size: 13px;
+  border-radius: var(--ss-radius, 12px);
   .slt-property-name {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+  }
+  .slt-property-range {
     flex: 1 1 0;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ss-on-surface-variant);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.72;
+  }
+  .slt-property-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    border-radius: 6px;
+    background: var(--ss-track-hi);
+    color: #fff;
+
+    mat-icon {
+      width: 13px;
+      height: 13px;
+      font-size: 13px;
+      line-height: 13px;
+    }
   }
   button[mat-icon-button],
   .mat-mdc-icon-button {
-    --mdc-icon-button-state-layer-size: 20px;
-    --mdc-icon-button-icon-size: 16px;
-    margin: 2px;
+    --mdc-icon-button-state-layer-size: 28px;
+    --mdc-icon-button-icon-size: 17px;
+    margin: 0;
     padding: 2px;
-    line-height: 16px;
-    height: 20px;
-    width: 20px;
-    min-height: 20px;
+    line-height: 17px;
+    height: 28px;
+    width: 28px;
+    min-height: 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -201,14 +284,23 @@ mat-menu {
       height: 100%;
     }
     mat-icon {
-      width: 16px;
-      height: 16px;
-      font-size: 16px;
-      line-height: 16px;
+      width: 17px;
+      height: 17px;
+      font-size: 17px;
+      line-height: 17px;
       vertical-align: top;
     }
   }
 }
+
+.slt-property-remove-button:hover:not([disabled]) {
+  background: rgba(232, 84, 47, 0.16);
+  color: var(--ss-playhead);
+}
+
+// The .slt-add-animation-* panel styles live in styles/_glass-menu.scss (global)
+// because the menu renders in the CDK overlay and is shared with the property
+// inspector's animate-this-layer menu.
 
 .slt-layers-list-drag-indicator {
   position: absolute;

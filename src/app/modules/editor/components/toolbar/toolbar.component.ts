@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { DialogService } from 'app/modules/editor/components/dialogs';
 import {
   ActionMode,
   ActionSource,
@@ -10,23 +11,27 @@ import { NameProperty } from 'app/modules/editor/model/properties';
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { DialogService } from 'app/modules/editor/components/dialogs';
 import { ActionModeUtil } from 'app/modules/editor/scripts/actionmode';
-import { ActionModeService, ThemeService } from 'app/modules/editor/services';
+import {
+  ActionModeService,
+  FileExportService,
+  FileImportService,
+  ThemeService,
+} from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import { getToolbarState } from 'app/modules/editor/store/actionmode/selectors';
+import { isWorkspaceDirty } from 'app/modules/editor/store/common/selectors';
+import { ResetWorkspace } from 'app/modules/editor/store/reset/actions';
 import { SetAnimation } from 'app/modules/editor/store/timeline/actions';
 import { getAnimation } from 'app/modules/editor/store/timeline/selectors';
 import { ThemeType } from 'app/modules/editor/store/theme/reducer';
 import { environment } from 'environments/environment';
 import * as _ from 'lodash';
 import { Observable, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 
 declare const ga: Function;
 
-// Duration bounds mirror the NumberProperty('duration', { min, max }) registered
-// on the Animation model.
-const MIN_DURATION = 100;
-const MAX_DURATION = 60000;
+const IS_DEV_BUILD = !environment.production;
 
 @Component({
   standalone: false,
@@ -44,20 +49,12 @@ export class ToolbarComponent implements OnInit {
     currIsActionMode: boolean;
   }>;
 
-  // Composition (animation) name + duration, shown as editable bubbles.
+  // Composition (animation) name, shown as an editable bubble.
   animation$: Observable<Animation>;
   isEditingName = false;
-  isEditingDuration = false;
   nameDraft = '';
-  durationDraft = '';
 
   @ViewChild('nameInput') set nameInput(ref: ElementRef<HTMLInputElement> | undefined) {
-    if (ref) {
-      ref.nativeElement.focus();
-      ref.nativeElement.select();
-    }
-  }
-  @ViewChild('durationInput') set durationInput(ref: ElementRef<HTMLInputElement> | undefined) {
     if (ref) {
       ref.nativeElement.focus();
       ref.nativeElement.select();
@@ -69,6 +66,8 @@ export class ToolbarComponent implements OnInit {
     readonly themeService: ThemeService,
     private readonly store: Store<State>,
     private readonly dialogService: DialogService,
+    private readonly fileImportService: FileImportService,
+    private readonly fileExportService: FileExportService,
   ) {}
 
   onHotkeysClick() {
@@ -117,7 +116,7 @@ export class ToolbarComponent implements OnInit {
     this.themeService.setTheme(isDark ? 'dark' : 'light');
   }
 
-  // ─── Composition name / duration bubbles ───────────────────────────────
+  // ─── Composition name bubble ───────────────────────────────────────────
 
   startEditName(animation: Animation, event: MouseEvent) {
     event.stopPropagation();
@@ -139,30 +138,6 @@ export class ToolbarComponent implements OnInit {
     this.store.dispatch(new SetAnimation(cloned));
   }
 
-  startEditDuration(animation: Animation, event: MouseEvent) {
-    event.stopPropagation();
-    this.durationDraft = `${animation.duration}`;
-    this.isEditingDuration = true;
-  }
-
-  commitDuration(animation: Animation) {
-    if (!this.isEditingDuration) {
-      return;
-    }
-    this.isEditingDuration = false;
-    const parsed = parseFloat(this.durationDraft);
-    if (isNaN(parsed)) {
-      return;
-    }
-    const duration = _.clamp(Math.round(parsed), MIN_DURATION, MAX_DURATION);
-    if (duration === animation.duration) {
-      return;
-    }
-    const cloned = animation.clone();
-    cloned.duration = duration;
-    this.store.dispatch(new SetAnimation(cloned));
-  }
-
   onSendFeedbackClick(event: MouseEvent) {
     ga('send', 'event', 'Miscellaneous', 'Send feedback click');
   }
@@ -173,6 +148,49 @@ export class ToolbarComponent implements OnInit {
 
   onGettingStartedClick(event: MouseEvent) {
     ga('send', 'event', 'Miscellaneous', 'Getting started click');
+  }
+
+  onNewWorkspaceClick(event: MouseEvent) {
+    event.stopPropagation();
+    const resetWorkspaceFn = () => {
+      ga('send', 'event', 'File', 'New');
+      this.store.dispatch(new ResetWorkspace());
+    };
+    this.store
+      .select(isWorkspaceDirty)
+      .pipe(first())
+      .subscribe(isDirty => {
+        if (isDirty && !IS_DEV_BUILD) {
+          this.dialogService
+            .confirm('Start over?', `You'll lose any unsaved changes.`)
+            .pipe(filter(result => result))
+            .subscribe(resetWorkspaceFn);
+        } else {
+          resetWorkspaceFn();
+        }
+      });
+  }
+
+  onImportedFilesPicked(event: Event, fileList: FileList) {
+    event.stopPropagation();
+    this.fileImportService.import(fileList, true /* resetWorkspace */);
+  }
+
+  onLaunchFilePickerClick(event: MouseEvent, id: string) {
+    event.stopPropagation();
+    setTimeout(() => {
+      const input = document.getElementById(id) as HTMLInputElement;
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    });
+  }
+
+  onExportAnimatedVectorDrawableClick(event: MouseEvent) {
+    event.stopPropagation();
+    ga('send', 'event', 'Export', 'Animated Vector Drawable');
+    this.fileExportService.exportAnimatedVectorDrawable();
   }
 
   onAutoFixClick(event: MouseEvent) {
