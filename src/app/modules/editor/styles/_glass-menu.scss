@@ -87,6 +87,14 @@
     .ss-menu-toggle {
         cursor: pointer;
 
+        .mat-mdc-menu-item-text,
+        .mat-mdc-menu-item-text span {
+            font-size: 13.5px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--ss-on-surface);
+        }
+
         mat-slide-toggle {
             flex: 0 0 auto;
             margin-left: auto;
@@ -142,6 +150,11 @@
         gap: 8px;
         font-size: 14px;
         font-weight: 800;
+
+        .slt-add-animation-title-type {
+            font-weight: 600;
+            opacity: 0.45;
+        }
 
         mat-icon {
             width: 18px;
