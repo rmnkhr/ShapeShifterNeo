@@ -341,3 +341,36 @@ export function toStrokeDashOffset(
   // should wrap around once it reaches 1.
   return pathLength * (1 - ((trimPathStart + trimPathOffset) % 1));
 }
+
+/**
+ * Returns a copy of the vector layer whose canvas has been resized to the
+ * specified target dimensions. All descendant path data (and stroke widths)
+ * are scaled to match, so the artwork continues to fill the canvas exactly as
+ * it did before. Intended for freshly imported layers, whose transforms have
+ * already been baked into their path data (i.e. groups are untransformed).
+ */
+export function scaleVectorLayer(vl: VectorLayer, targetWidth: number, targetHeight: number) {
+  const sx = targetWidth / vl.width;
+  const sy = targetHeight / vl.height;
+  if (sx === 1 && sy === 1) {
+    return vl;
+  }
+  const matrix = Matrix.scaling(sx, sy);
+  const avgScale = (Math.abs(sx) + Math.abs(sy)) / 2;
+  const scaled = vl.deepClone();
+  const scaleLayerFn = (layer: Layer) => {
+    if (layer instanceof PathLayer || layer instanceof ClipPathLayer) {
+      if (layer.pathData) {
+        layer.pathData = layer.pathData.transform(matrix);
+      }
+    }
+    if (layer instanceof PathLayer && layer.strokeWidth) {
+      layer.strokeWidth *= avgScale;
+    }
+    (layer.children || []).forEach(scaleLayerFn);
+  };
+  scaled.children.forEach(scaleLayerFn);
+  scaled.width = targetWidth;
+  scaled.height = targetHeight;
+  return scaled;
+}

@@ -14,9 +14,10 @@ import { Observable } from 'rxjs';
 export class DialogService {
   constructor(private readonly dialog: MatDialog) {}
 
-  confirm(title: string, message: string): Observable<boolean> {
+  confirm(title: string, message: string, ok?: string, cancel?: string): Observable<boolean> {
     const config = new MatDialogConfig();
-    config.data = { title, message };
+    config.panelClass = 'ss-glass-dialog';
+    config.data = { title, message, ok, cancel };
     return this.dialog.open(ConfirmDialogComponent, config).afterClosed();
   }
 

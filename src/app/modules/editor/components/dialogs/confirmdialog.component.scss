@@ -1,10 +1,21 @@
 button {
     text-transform: uppercase;
-    &:mat-dialog-close {
-        margin-right: 8px;
-    }
 }
 
 mat-dialog-actions {
     min-width: 220px;
+    gap: 8px;
+}
+
+// Primary action: filled accent button using the Kinetic Editor tokens
+// (matches the app's --ss-primary accent, resolves in both light/dark).
+.ss-confirm-ok.mat-mdc-unelevated-button {
+    --mdc-filled-button-container-color: var(--ss-primary);
+    --mdc-filled-button-label-text-color: var(--ss-on-primary);
+    border-radius: var(--ss-radius-md, 0.75rem);
+}
+
+// Secondary action reads as a quiet text button on the glass surface.
+.ss-confirm-cancel {
+    color: var(--ss-on-surface-variant);
 }

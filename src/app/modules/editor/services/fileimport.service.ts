@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DialogService } from 'app/modules/editor/components/dialogs';
 import { LayerUtil, VectorLayer } from 'app/modules/editor/model/layers';
 import { Animation } from 'app/modules/editor/model/timeline';
 import { ModelUtil } from 'app/modules/editor/scripts/common';
@@ -29,6 +30,7 @@ export class FileImportService {
     private readonly store: Store<State>,
     private readonly snackBarService: SnackBarService,
     private readonly layerTimelineService: LayerTimelineService,
+    private readonly dialogService: DialogService,
   ) {}
 
   private get vectorLayer() {
@@ -161,23 +163,60 @@ export class FileImportService {
     if (importType === ImportType.Json) {
       ga('send', 'event', 'Import', 'JSON');
       this.store.dispatch(new ResetWorkspace(vls[0], animation, hiddenLayerIds));
-    } else {
-      if (importType === ImportType.Svg) {
-        ga('send', 'event', 'Import', 'SVG');
-      } else if (importType === ImportType.VectorDrawable) {
-        ga('send', 'event', 'Import', 'Vector Drawable');
-      }
-      if (resetWorkspace) {
-        this.store.dispatch(new ResetWorkspace());
-      }
-      this.layerTimelineService.importLayers(vls);
-      // TODO: count number of individual layers?
-      this.snackBarService.show(
-        `Imported ${vls.length} layer${vls.length === 1 ? '' : 's'}`,
-        'Dismiss',
-        Duration.Short,
-      );
+      return;
     }
+
+    // Icons authored on a non-24 grid (e.g. Material Symbols, drawn on a
+    // 960×960 grid) import with an oversized canvas. Offer to normalize them.
+    const resizeCandidates = vls.filter(vl => this.isResizeCandidate(vl));
+    if (importType === ImportType.Svg && resizeCandidates.length) {
+      const { width, height } = resizeCandidates[0];
+      this.dialogService
+        .confirm(
+          'Resize canvas to 24×24?',
+          `This icon was drawn on a ${width}×${height} grid. Resize the canvas to the ` +
+            `standard 24×24 icon size? The artwork will scale to fit.`,
+          'Resize to 24×24',
+          `Keep ${width}×${height}`,
+        )
+        .pipe(first())
+        .subscribe(resize => {
+          const finalVls = resize
+            ? vls.map(vl => (this.isResizeCandidate(vl) ? LayerUtil.scaleVectorLayer(vl, 24, 24) : vl))
+            : vls;
+          this.commitImport(importType, resetWorkspace, finalVls);
+        });
+      return;
+    }
+
+    this.commitImport(importType, resetWorkspace, vls);
+  }
+
+  /** A square canvas that isn't already the standard 24×24 icon size. */
+  private isResizeCandidate(vl: VectorLayer) {
+    return !!vl && vl.width > 0 && vl.width === vl.height && vl.width !== 24;
+  }
+
+  private commitImport(
+    importType: ImportType,
+    resetWorkspace: boolean,
+    vls: ReadonlyArray<VectorLayer>,
+  ) {
+    if (importType === ImportType.Svg) {
+      ga('send', 'event', 'Import', 'SVG');
+    } else if (importType === ImportType.VectorDrawable) {
+      ga('send', 'event', 'Import', 'Vector Drawable');
+    }
+    if (resetWorkspace) {
+      this.store.dispatch(new ResetWorkspace());
+    }
+    this.layerTimelineService.importLayers(vls);
+    // TODO: count number of individual layers?
+    this.snackBarService.show(
+      `Imported ${vls.length} layer${vls.length === 1 ? '' : 's'}`,
+      'Dismiss',
+      Duration.Short,
+    );
   }
 
   private onFailure() {

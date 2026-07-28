@@ -12,14 +12,15 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   <mat-dialog-actions fxLayout="row">
     <!-- The ordering here matters (it ensures that 'OK' gets focus first). -->
     <span fxFlex></span>
-    <button fxFlexOrder="2" mat-button (click)="dialogRef.close(true)">OK</button>
-    <button fxFlexOrder="1" mat-button matDialogClose>Cancel</button>
+    <button fxFlexOrder="2" mat-flat-button class="ss-confirm-ok" (click)="dialogRef.close(true)">{{ data.ok || 'OK' }}</button>
+    <button fxFlexOrder="1" mat-button class="ss-confirm-cancel" matDialogClose>{{ data.cancel || 'Cancel' }}</button>
   </mat-dialog-actions>`,
   styleUrls: ['./confirmdialog.component.scss'],
 })
 export class ConfirmDialogComponent {
   constructor(
     readonly dialogRef: MatDialogRef<ConfirmDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) readonly data: { title: string; message: string },
+    @Inject(MAT_DIALOG_DATA)
+    readonly data: { title: string; message: string; ok?: string; cancel?: string },
   ) {}
 }
