@@ -5,12 +5,12 @@ import {
   Selection,
   SelectionType,
 } from 'app/modules/editor/model/actionmode';
-import { MorphableLayer } from 'app/modules/editor/model/layers';
+import { LayerUtil, MorphableLayer } from 'app/modules/editor/model/layers';
 import { NameProperty } from 'app/modules/editor/model/properties';
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { DialogService } from 'app/modules/editor/components/dialogs';
 import { ActionModeUtil } from 'app/modules/editor/scripts/actionmode';
-import { ActionModeService, ThemeService } from 'app/modules/editor/services';
+import { ActionModeService, LayerTimelineService, ThemeService } from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import { getToolbarState } from 'app/modules/editor/store/actionmode/selectors';
 import { SetAnimation } from 'app/modules/editor/store/timeline/actions';
@@ -69,10 +69,17 @@ export class ToolbarComponent implements OnInit {
     readonly themeService: ThemeService,
     private readonly store: Store<State>,
     private readonly dialogService: DialogService,
+    private readonly layerTimelineService: LayerTimelineService,
   ) {}
 
   onHotkeysClick() {
     this.dialogService.showHotkeys().subscribe();
+  }
+
+  onSnapToGridClick() {
+    ga('send', 'event', 'Miscellaneous', 'Snap points to grid');
+    const vl = this.layerTimelineService.getVectorLayer();
+    this.layerTimelineService.setVectorLayer(LayerUtil.snapVectorLayerToGrid(vl));
   }
 
   ngOnInit() {

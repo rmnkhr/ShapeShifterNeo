@@ -374,3 +374,27 @@ export function scaleVectorLayer(vl: VectorLayer, targetWidth: number, targetHei
   scaled.height = targetHeight;
   return scaled;
 }
+
+/**
+ * Returns a copy of the vector layer with every descendant path's coordinates
+ * rounded to the nearest integer (i.e. snapped to the pixel grid). Command
+ * types and point counts are preserved, so path-morph compatibility is
+ * unaffected — only the numeric values change (e.g. 4.022 → 4).
+ */
+export function snapVectorLayerToGrid(vl: VectorLayer) {
+  const roundPathFn = (path: Path) =>
+    new Path(
+      path
+        .getPathString()
+        .replace(/-?\d*\.?\d+(?:[eE][-+]?\d+)?/g, n => `${Math.round(Number(n))}`),
+    );
+  const snapped = vl.deepClone();
+  const snapLayerFn = (layer: Layer) => {
+    if ((layer instanceof PathLayer || layer instanceof ClipPathLayer) && layer.pathData) {
+      layer.pathData = roundPathFn(layer.pathData);
+    }
+    (layer.children || []).forEach(snapLayerFn);
+  };
+  snapped.children.forEach(snapLayerFn);
+  return snapped;
+}
