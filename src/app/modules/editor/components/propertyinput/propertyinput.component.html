@@ -68,27 +68,18 @@
           fxFlex>
           No shared properties to view or edit
         </div>
-        <ng-container *ngFor="let group of model.propertyGroups; trackBy: trackPropertyGroupFn">
+        <div class="spi-property-group"
+          [class.is-transform-group]="group.label === 'Transform'"
+          [class.is-ungrouped]="!group.label"
+          *ngFor="let group of model.propertyGroups; trackBy: trackPropertyGroupFn">
         <div class="spi-property-group-header"
           *ngIf="group.label">{{ group.label }}</div>
         <div class="spi-property"
+          [class.is-rotation-property]="ip.propertyName === 'rotation'"
           *ngFor="let ip of group.inspectedProperties; trackBy: trackInspectedPropertyFn">
           <div class="spi-property-name">{{ this.displayName(ip) }}</div>
           <div class="spi-property-value"
             fxLayout="row">
-            <label *ngIf="ip.typeName === 'ColorProperty'"
-              class="spi-property-color-preview"
-              [class.is-disabled]="!ip.isEditable()"
-              [style.background-color]="this.androidToCssColor(ip.value)"
-              matTooltip="Pick a color"
-              matTooltipPosition="below"
-              matTooltipShowDelay="500">
-              <input type="color"
-                class="spi-color-picker-input"
-                [disabled]="!ip.isEditable()"
-                [value]="this.colorToInputValue(ip.value)"
-                (input)="this.onColorPickerChange(ip, $event)">
-            </label>
             <span *ngIf="!ip.isEditable()"
               class="spi-property-value-static"
               fxFlex>
@@ -136,8 +127,25 @@
                 [(ngModel)]="ip.editableValue"
                 *ngIf="ip.typeName === 'NameProperty'
                 || ip.typeName === 'PathProperty'
-                || ip.typeName === 'ColorProperty'
-                || ip.typeName === 'NumberProperty'">
+                || (ip.typeName === 'ColorProperty' && !!ip.value)">
+              <div class="spi-number-field"
+                *ngIf="ip.typeName === 'NumberProperty'">
+                <button type="button"
+                  class="spi-number-scrubber"
+                  [disabled]="!ip.isEditable()"
+                  (pointerdown)="this.onNumberScrubStart($event, ip)"
+                  matTooltip="Drag horizontally to change value"
+                  matTooltipPosition="below"
+                  matTooltipShowDelay="500">
+                  <mat-icon>{{ this.propertyIcon(ip) }}</mat-icon>
+                </button>
+                <input (keydown)="this.onValueEditorKeyDown($event, ip)"
+                  class="is-number-input"
+                  (blur)="ip.resolveEnteredValue()"
+                  name="{{ip.propertyName}}"
+                  [(ngModel)]="ip.editableValue"
+                  [disabled]="!ip.isEditable()">
+              </div>
               <ng-container *ngIf="ip.typeName === 'EnumProperty'">
                 <!-- Small enums (<= 3 options): inline segmented buttons. -->
                 <div *ngIf="ip.property.options.length <= 3"
@@ -169,9 +177,15 @@
                 </ng-container>
               </ng-container>
             </div>
+            <app-color-picker *ngIf="ip.typeName === 'ColorProperty'"
+              class="spi-property-color-picker"
+              [value]="ip.value"
+              [disabled]="!ip.isEditable()"
+              (valueChange)="this.onColorPicked(ip, $event)">
+            </app-color-picker>
           </div>
         </div>
-        </ng-container>
+        </div>
         <div *ngIf="this.shouldShowInvalidPathAnimationBlockMsg(model)"
           class="alert alert-danger"
           fxLayout="row">

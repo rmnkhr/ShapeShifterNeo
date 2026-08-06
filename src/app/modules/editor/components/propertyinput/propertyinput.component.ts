@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActionMode } from 'app/modules/editor/model/actionmode';
 import {
   ClipPathLayer,
@@ -10,7 +10,7 @@ import {
 } from 'app/modules/editor/model/layers';
 import { FractionProperty, NameProperty, Option } from 'app/modules/editor/model/properties';
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
-import { ColorUtil, ModelUtil } from 'app/modules/editor/scripts/common';
+import { ModelUtil } from 'app/modules/editor/scripts/common';
 import {
   ActionModeService,
   LayerTimelineService,
@@ -35,6 +35,10 @@ declare const ga: Function;
 // headers (in this order); anything not matched falls into a leading, unlabeled
 // group so it renders first (e.g. 'name', 'pathData').
 const PROPERTY_GROUPS: ReadonlyArray<{ label: string; properties: ReadonlyArray<string> }> = [
+  {
+    label: 'Transform',
+    properties: ['rotation', 'scaleX', 'scaleY', 'pivotX', 'pivotY', 'translateX', 'translateY'],
+  },
   { label: 'Fill', properties: ['fillColor', 'fillAlpha', 'fillType'] },
   {
     label: 'Stroke',
@@ -53,6 +57,19 @@ const PROPERTY_GROUPS: ReadonlyArray<{ label: string; properties: ReadonlyArray<
 // Friendly labels shown in the inspector. The section header (Fill / Stroke /
 // Trim Path) already gives context, so the per-row labels can be short.
 const PROPERTY_DISPLAY_NAMES: { readonly [propertyName: string]: string } = {
+  name: 'Name',
+  pathData: 'Path data',
+  canvasColor: 'Canvas color',
+  width: 'Width',
+  height: 'Height',
+  alpha: 'Alpha',
+  rotation: 'Rotation',
+  scaleX: 'Scale X',
+  scaleY: 'Scale Y',
+  pivotX: 'Pivot X',
+  pivotY: 'Pivot Y',
+  translateX: 'Move X',
+  translateY: 'Move Y',
   fillColor: 'Color',
   fillAlpha: 'Alpha',
   fillType: 'Type',
@@ -75,12 +92,13 @@ const PROPERTY_DISPLAY_NAMES: { readonly [propertyName: string]: string } = {
   styleUrls: ['./propertyinput.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PropertyInputComponent implements OnInit {
+export class PropertyInputComponent implements OnInit, OnDestroy {
   propertyInputModel$: Observable<PropertyInputModel>;
 
   // Map used to track user state that has been entered into textfields
   // but may not have been saved in the store.
   private readonly enteredValueMap = new Map<string, any>();
+  private stopNumberScrub?: () => void;
 
   themeState$: Observable<{ prevThemeType: ThemeType; currThemeType: ThemeType }>;
 
@@ -123,6 +141,10 @@ export class PropertyInputComponent implements OnInit {
         return { prevThemeType, currThemeType };
       }),
     );
+  }
+
+  ngOnDestroy() {
+    this.stopNumberScrub?.();
   }
 
   shouldShowStartActionModeButton(pim: PropertyInputModel) {
@@ -369,21 +391,6 @@ export class PropertyInputComponent implements OnInit {
   }
 
   // Called from the HTML template.
-  androidToCssColor(color: string) {
-    return ColorUtil.androidToCssHexColor(color);
-  }
-
-  // The opaque #rrggbb value fed to the native <input type="color"> swatch
-  // (the native picker has no alpha channel).
-  colorToInputValue(androidColor: string) {
-    const d = ColorUtil.parseAndroidColor(androidColor);
-    if (!d) {
-      return '#000000';
-    }
-    const hex = (n: number) => (n < 16 ? '0' : '') + n.toString(16);
-    return '#' + hex(d.r) + hex(d.g) + hex(d.b);
-  }
-
   // Fill width / handle position (%) for the bold fraction slider.
   fractionPercent(ip: InspectedProperty<any>) {
     const v = typeof ip.value === 'number' ? ip.value : 0;
@@ -406,14 +413,11 @@ export class PropertyInputComponent implements OnInit {
 
   // The color circle was used to pick a new color: apply the chosen rgb while
   // preserving the property's existing alpha.
-  onColorPickerChange(ip: InspectedProperty<any>, event: Event) {
-    const picked = ColorUtil.parseAndroidColor((event.target as HTMLInputElement).value);
-    if (!picked) {
-      return;
-    }
-    const existing = ColorUtil.parseAndroidColor(ip.value);
-    const a = existing ? existing.a : 255;
-    ip.value = ColorUtil.toAndroidString({ r: picked.r, g: picked.g, b: picked.b, a });
+  // Applies a color chosen in the popover picker. An empty string turns the
+  // color off (the model stores undefined).
+  onColorPicked(ip: InspectedProperty<any>, androidColor: string) {
+    ip.editableValue = androidColor;
+    ip.resolveEnteredValue();
   }
 
   // Splits the flat inspected-property list into ordered, labeled sections.
@@ -442,6 +446,79 @@ export class PropertyInputComponent implements OnInit {
   // Friendly per-row label (falls back to the raw property name).
   displayName(ip: InspectedProperty<any>) {
     return PROPERTY_DISPLAY_NAMES[ip.propertyName] || ip.propertyName;
+  }
+
+  onNumberScrubStart(event: PointerEvent, ip: InspectedProperty<number>) {
+    if (!ip.isEditable()) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    this.stopNumberScrub?.();
+    ip.resolveEnteredValue();
+    const startX = event.clientX;
+    const startValue = Number(ip.value) || 0;
+    const step = this.numberScrubStep(ip);
+    const precision = this.numberScrubPrecision(ip);
+    document.body.classList.add('spi-is-number-scrubbing');
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const nextValue = startValue + delta * step;
+      ip.value = Number(nextValue.toFixed(precision));
+    };
+    const onPointerUp = () => {
+      document.body.classList.remove('spi-is-number-scrubbing');
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      this.stopNumberScrub = undefined;
+    };
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+    this.stopNumberScrub = onPointerUp;
+  }
+
+  propertyIcon(ip: InspectedProperty<any>) {
+    const icons: { readonly [propertyName: string]: string } = {
+      rotation: 'rotate_right',
+      scaleX: 'swap_horiz',
+      scaleY: 'swap_vert',
+      pivotX: 'filter_center_focus',
+      pivotY: 'filter_center_focus',
+      translateX: 'east',
+      translateY: 'south',
+      strokeWidth: 'line_weight',
+      strokeMiterLimit: 'join_inner',
+      width: 'straighten',
+      height: 'height',
+    };
+    return icons[ip.propertyName] || 'drag_indicator';
+  }
+
+  private numberScrubStep(ip: InspectedProperty<any>) {
+    switch (ip.propertyName) {
+      case 'scaleX':
+      case 'scaleY':
+        return 0.01;
+      case 'strokeWidth':
+      case 'strokeMiterLimit':
+        return 0.05;
+      default:
+        return 0.1;
+    }
+  }
+
+  private numberScrubPrecision(ip: InspectedProperty<any>) {
+    switch (ip.propertyName) {
+      case 'scaleX':
+      case 'scaleY':
+      case 'strokeWidth':
+      case 'strokeMiterLimit':
+        return 2;
+      default:
+        return 1;
+    }
   }
 
   trackInspectedPropertyFn(index: number, ip: InspectedProperty<any>) {

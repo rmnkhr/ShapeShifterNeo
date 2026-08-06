@@ -1,0 +1,218 @@
+// Checkerboard shown behind transparent colors.
+@mixin scp-checker {
+    background-image: conic-gradient(
+        rgba(127, 127, 127, 0.25) 0 25%,
+        transparent 0 50%,
+        rgba(127, 127, 127, 0.25) 0 75%,
+        transparent 0
+    );
+    background-size: 8px 8px;
+}
+
+:host {
+    display: inline-flex;
+}
+
+// ── Trigger swatch (lives in the property row) ──────────────────────────────
+.scp-trigger {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    background: transparent;
+    @include scp-checker;
+    box-shadow: inset 0 0 0 1px var(--ss-outline-variant);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+
+    &:hover:not([disabled]) {
+        transform: scale(1.12);
+        box-shadow: inset 0 0 0 1px var(--ss-outline-variant),
+            0 0 0 2px var(--ss-outline-variant);
+    }
+
+    &[disabled] {
+        cursor: default;
+        opacity: 0.5;
+    }
+
+    .scp-trigger-swatch {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+    }
+
+    &.is-empty {
+        background: var(--ss-surface-container-lowest);
+    }
+
+    // Sits above the absolutely-positioned swatch fill.
+    .scp-trigger-icon {
+        position: relative;
+        z-index: 1;
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+        line-height: 18px;
+        color: var(--ss-on-surface-variant);
+    }
+}
+
+// ── Popover panel ───────────────────────────────────────────────────────────
+.scp-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 232px;
+    padding: 12px;
+}
+
+.scp-area {
+    position: relative;
+    height: 140px;
+    border-radius: 12px;
+    cursor: crosshair;
+    touch-action: none;
+    // White → hue horizontally, then black vertically (HSV saturation/value).
+    background-image: linear-gradient(to top, #000, transparent),
+        linear-gradient(to right, #fff, transparent);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.scp-area-thumb {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 4px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+}
+
+.scp-slider {
+    position: relative;
+    height: 14px;
+    border-radius: var(--ss-radius-full, 9999px);
+    cursor: ew-resize;
+    touch-action: none;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.scp-hue-slider {
+    background: linear-gradient(
+        to right,
+        #f00 0%,
+        #ff0 17%,
+        #0f0 33%,
+        #0ff 50%,
+        #00f 67%,
+        #f0f 83%,
+        #f00 100%
+    );
+}
+
+.scp-alpha-slider {
+    @include scp-checker;
+    overflow: visible;
+
+    .scp-alpha-gradient {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+}
+
+.scp-slider-thumb {
+    position: absolute;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 4px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+}
+
+.scp-hex-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.scp-hex-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 32px;
+    padding: 4px 10px;
+    border: 0;
+    outline: 0;
+    border-radius: var(--ss-radius-sm, 8px);
+    background-color: var(--ss-surface-container-lowest);
+    box-shadow: 0 0 0 1px var(--ss-outline-variant) inset;
+    color: var(--ss-on-surface);
+    font-family: inherit;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+
+    &:focus {
+        box-shadow: 0 0 0 1px var(--ss-primary) inset;
+    }
+}
+
+.scp-alpha-readout {
+    flex: 0 0 auto;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ss-on-surface-variant);
+}
+
+// "No color" action. mat-menu-item so clicking it also closes the popover.
+// Label on the left, icon pinned to the right, darker filled pill.
+.scp-no-color {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 10px 0 12px;
+    border-radius: var(--ss-radius-sm, 8px);
+    font-size: 13.5px;
+    background-color: var(--ss-surface-container-highest);
+    transition: background-color 120ms ease;
+
+    &:hover {
+        background-color: var(--ss-surface-variant);
+    }
+
+    // mat-menu-item always slots a top-level mat-icon before the text, so the
+    // right-side placement is done with flex order instead of DOM order.
+    .scp-no-color-icon {
+        order: 2;
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        line-height: 20px;
+        margin: 0 0 0 auto;
+        color: var(--ss-on-surface-variant);
+    }
+
+    ::ng-deep .mat-mdc-menu-item-text {
+        order: 1;
+        flex: 0 1 auto;
+    }
+
+    .scp-no-color-label {
+        color: var(--ss-on-surface);
+    }
+}

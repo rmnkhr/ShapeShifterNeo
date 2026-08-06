@@ -55,11 +55,56 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--ss-on-surface-variant);
+    }
 
-        &:not(:first-child) {
-            margin-top: 8px;
-            padding-top: 16px;
-            border-top: 1px solid color-mix(in srgb, var(--ss-outline-variant) 55%, transparent);
+    // Each group is a wrapper div, so the category separator lives on the group
+    // (the header is always the first child within its own group).
+    .spi-property-group:not(:first-child) > .spi-property-group-header {
+        margin-top: 8px;
+        padding-top: 16px;
+        border-top: 1px solid color-mix(in srgb, var(--ss-outline-variant) 55%, transparent);
+    }
+
+    // Transform section: two-column grid with the label stacked above each
+    // input. Rotation spans the full width; the X/Y pairs sit side by side.
+    .spi-property-group.is-transform-group {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 10px;
+        row-gap: 10px;
+        padding: 0 16px 8px;
+
+        .spi-property-group-header,
+        .spi-property.is-rotation-property {
+            grid-column: 1 / -1;
+        }
+
+        .spi-property-group-header {
+            padding-left: 0;
+            padding-right: 0;
+            margin-bottom: 2px;
+        }
+
+        .spi-property {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+            min-height: 0;
+            margin: 0;
+            padding: 0;
+
+            .spi-property-name {
+                flex: none;
+                align-self: stretch;
+                text-align: left;
+                padding-left: 2px;
+                font-size: 12px;
+                line-height: 15px;
+                font-weight: 700;
+                color: color-mix(in srgb, var(--ss-on-surface-variant) 82%, transparent);
+            }
+
         }
     }
 
@@ -151,8 +196,8 @@
         .spi-slider-value {
             flex: 0 0 44px;
             width: 44px;
-            height: 24px;
-            padding: 2px 6px;
+            height: 30px;
+            padding: 4px 6px;
             border: 0;
             outline: 0;
             border-radius: var(--ss-radius, 0.5rem);
@@ -191,15 +236,85 @@
     .spi-property-value-static,
     .spi-property-value-editor input,
     .spi-property-value-menu-target {
+        // Fill the value column so every field ends at the same right edge.
+        width: 100%;
         border: 0;
         border-radius: var(--ss-radius, 0.5rem);
         font-size: 14px;
         line-height: 20px;
-        height: 24px;
+        // All value fields share the number field's 30px height.
+        height: 30px;
         box-sizing: border-box;
-        padding: 2px 6px;
+        padding: 4px 8px;
         outline: 0;
     }
+    // Number field: an icon button on the left acts as a horizontal drag
+    // scrubber; the value itself is edited in the input on the right.
+    .spi-number-field {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 30px;
+        min-width: 0;
+        overflow: hidden;
+        border: 0;
+        border-radius: var(--ss-radius, 0.5rem);
+        transition: box-shadow 120ms ease, background-color 120ms ease;
+
+        .spi-number-scrubber {
+            width: 30px;
+            height: 100%;
+            flex: 0 0 30px;
+            border: 0;
+            border-right: 1px solid transparent;
+            outline: 0;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: var(--ss-on-surface-variant);
+            cursor: ew-resize;
+            touch-action: none;
+            transition: background-color 120ms ease, color 120ms ease;
+
+            mat-icon {
+                width: 16px;
+                height: 16px;
+                font-size: 16px;
+                line-height: 16px;
+            }
+
+            &:hover:not([disabled]) {
+                background-color: var(--ss-surface-container-high);
+                color: var(--ss-on-surface);
+            }
+
+            &[disabled] {
+                cursor: default;
+                opacity: 0.38;
+            }
+        }
+
+        input {
+            height: 100%;
+            min-width: 0;
+            flex: 1 1 auto;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            padding: 2px 10px 2px 8px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+
+            &:focus {
+                outline: 0;
+                box-shadow: none;
+            }
+        }
+    }
+
     .spi-property-value-static {
         overflow-x: scroll;
         white-space: nowrap;
@@ -265,47 +380,11 @@
         }
     }
 
-    .spi-property-color-preview {
-        position: relative;
-        width: 16px;
-        height: 16px;
-        min-width: 16px;
-        min-height: 16px;
-        margin: 4px 8px 4px 4px;
-        border-radius: 50%;
-        // 1px ring so light/white swatches stay visible against the panel.
-        box-shadow: inset 0 0 0 1px var(--ss-outline-variant);
-        cursor: pointer;
-        transition: transform 120ms ease, box-shadow 120ms ease;
-
-        &:hover {
-            transform: scale(1.12);
-            box-shadow: inset 0 0 0 1px var(--ss-outline-variant),
-                0 0 0 2px var(--ss-outline-variant);
-        }
-
-        &.is-disabled {
-            cursor: default;
-            &:hover {
-                transform: none;
-                box-shadow: inset 0 0 0 1px var(--ss-outline-variant);
-            }
-        }
-
-        // The native color picker fills the circle but is invisible — the swatch
-        // background and ring above are the visible UI; clicking anywhere on the
-        // circle opens the OS color picker.
-        .spi-color-picker-input {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            border: 0;
-            opacity: 0;
-            cursor: inherit;
-        }
+    // Popover color picker trigger (30px circle, matches the field height).
+    // Sits to the right of the hex field: label | field | swatch.
+    .spi-property-color-picker {
+        margin-left: 8px;
+        align-self: center;
     }
 }
 

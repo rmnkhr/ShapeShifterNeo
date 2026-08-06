@@ -39,6 +39,18 @@
     }
 }
 
+// Color picker popover: the panel is a single custom surface, so drop the
+// default menu padding and give it a slightly larger radius.
+.ss-color-picker-menu.mat-mdc-menu-panel {
+    border-radius: var(--ss-radius-lg, 1rem);
+    max-width: none;
+
+    .mat-mdc-menu-content {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
 // Frosted-glass dialog surface (same recipe as the menu) — used by the demo
 // picker. Applied via panelClass: 'ss-glass-dialog'.
 .ss-glass-dialog .mat-mdc-dialog-surface {

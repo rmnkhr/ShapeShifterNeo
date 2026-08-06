@@ -53,8 +53,24 @@
                 color: mat.m2-get-color-from-palette($foreground, disabled-text);
             }
         }
-        .spi-property-color-preview {
+        // Number fields carry the ring on the wrapper (icon scrubber + input),
+        // using the exact same colors as the plain value inputs above.
+        .spi-number-field {
+            background-color: mat.m2-get-color-from-palette($background, base);
             box-shadow: 0 0 0 1px mat.m2-get-color-from-palette($foreground, divider) inset;
+            &:focus-within {
+                box-shadow: 0 0 0 1px mat.m2-get-color-from-palette($accent) inset;
+            }
+            .spi-number-scrubber {
+                border-right-color: mat.m2-get-color-from-palette($foreground, divider);
+            }
+            input {
+                background-color: transparent;
+                box-shadow: none;
+                &:focus {
+                    box-shadow: none;
+                }
+            }
         }
     }
     .spi-empty {
