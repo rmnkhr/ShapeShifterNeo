@@ -45,6 +45,7 @@ import {
 import { getAnimatedVectorLayer } from 'app/modules/editor/store/playback/selectors';
 import * as _ from 'lodash';
 import { OutputSelector } from 'reselect';
+import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { LayerTimelineService } from './layertimeline.service';
@@ -52,6 +53,10 @@ import { LayerTimelineService } from './layertimeline.service';
 /** A simple service that provides an interface for making paper.js changes to the store. */
 @Injectable({ providedIn: 'root' })
 export class PaperService {
+  // Whether points drawn/dragged in edit path (vector) mode are magnetized to
+  // the integer grid. UI state only, so it lives here rather than in the store.
+  private readonly snapToGridSubject = new BehaviorSubject<boolean>(false);
+
   constructor(
     private readonly layerTimelineService: LayerTimelineService,
     private readonly store: Store<State>,
@@ -132,6 +137,20 @@ export class PaperService {
   enterCreateEllipseMode() {
     this.setToolMode(ToolMode.Ellipse);
     this.setCursorType(CursorType.Crosshair);
+  }
+
+  observeSnapToGrid() {
+    return this.snapToGridSubject.asObservable();
+  }
+
+  isSnapToGridEnabled() {
+    return this.snapToGridSubject.getValue();
+  }
+
+  // Only affects points placed while enabled — existing points are never
+  // modified by toggling.
+  toggleSnapToGrid() {
+    this.snapToGridSubject.next(!this.snapToGridSubject.getValue());
   }
 
   setVectorLayer(vl: VectorLayer) {

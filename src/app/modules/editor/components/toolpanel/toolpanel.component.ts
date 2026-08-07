@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import { ToolMode } from 'app/modules/editor/model/paper';
 import { PaperService, ShortcutService } from 'app/modules/editor/services';
@@ -8,6 +9,25 @@ import { Observable } from 'rxjs';
   selector: 'app-toolpanel',
   templateUrl: './toolpanel.component.html',
   styleUrls: ['./toolpanel.component.scss'],
+  animations: [
+    // Slide/scale of the contextual subpanel (e.g. the vector tool's grid
+    // magnet) in and out from under the palette.
+    trigger('subpanelInOut', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px) scale(0.85)' }),
+        animate(
+          '180ms cubic-bezier(0.2, 0, 0.13, 1.4)',
+          style({ opacity: 1, transform: 'translateY(0) scale(1)' }),
+        ),
+      ]),
+      transition(':leave', [
+        animate(
+          '140ms ease-in',
+          style({ opacity: 0, transform: 'translateY(-10px) scale(0.85)' }),
+        ),
+      ]),
+    ]),
+  ],
 })
 export class ToolPanelComponent implements OnInit {
   readonly TOOL_MODE_PENCIL = ToolMode.Pencil;
@@ -17,11 +37,18 @@ export class ToolPanelComponent implements OnInit {
 
   // TODO: only enable edit path/rotate/transform in default mode?
   model$: Observable<ToolPanelModel>;
+  snapToGrid$: Observable<boolean>;
 
   constructor(private readonly ps: PaperService) {}
 
   ngOnInit() {
     this.model$ = this.ps.observeToolPanelState();
+    this.snapToGrid$ = this.ps.observeSnapToGrid();
+  }
+
+  onSnapToGridClick(event: Event) {
+    this.ps.toggleSnapToGrid();
+    event.stopPropagation();
   }
 
   onDefaultClick(event: Event) {

@@ -113,6 +113,7 @@ export class EditorModule {
       .addSvgIcon('animation', this.trustUrl('assets/icons/animation.svg'))
       .addSvgIcon('collection', this.trustUrl('assets/icons/collection.svg'))
       .addSvgIcon('animationblock', this.trustUrl('assets/icons/animationblock.svg'))
+      .addSvgIcon('magnet', this.trustUrl('assets/icons/magnet.svg'))
       .addSvgIcon('mask', this.trustUrl('assets/icons/clippathlayer.svg'))
       .addSvgIcon('group', this.trustUrl('assets/icons/grouplayer.svg'))
       .addSvgIcon('path', this.trustUrl('assets/icons/pathlayer.svg'))

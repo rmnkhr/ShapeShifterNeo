@@ -10,8 +10,9 @@
   bottom: 56px;
   z-index: 10;
   display: flex;
-  flex-direction: row;
-  align-items: center; // vertical-center the pill within the editor body
+  flex-direction: column;
+  justify-content: center; // vertical-center the pills within the editor body
+  align-items: flex-start;
   // Let canvas interactions pass through the empty area around the pill.
   pointer-events: none;
 }
@@ -74,4 +75,29 @@
   height: 1px;
   margin: 4px 0;
   background-color: var(--ss-outline-variant);
+}
+
+// Contextual options for the active tool (e.g. the vector tool's grid magnet),
+// shown as a second smaller pill below the main palette.
+// Wrapper that keeps the main palette in place while the subpanel is
+// absolutely positioned below it (so showing/hiding it never shifts layout).
+.tool-panel-stack {
+  position: relative;
+  pointer-events: none;
+}
+
+.tool-subpanel {
+  pointer-events: auto;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background-color: var(--ss-surface-container);
+  border: 1px solid var(--ss-outline-variant);
+  border-radius: var(--ss-radius-full, 9999px);
+  transform-origin: top center;
 }
