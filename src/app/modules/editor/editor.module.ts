@@ -35,6 +35,7 @@ import {
   LayerTimelineGridDirective,
   TimelineAnimationRowComponent,
 } from 'app/modules/editor/components/layertimeline';
+import { ColorPickerComponent } from 'app/modules/editor/components/colorpicker';
 import { PlaybackComponent } from 'app/modules/editor/components/playback';
 import { PropertyInputComponent } from 'app/modules/editor/components/propertyinput';
 import { DropTargetDirective } from 'app/modules/editor/components/root/droptarget.directive';
@@ -57,6 +58,7 @@ import { environment } from 'environments/environment';
     CanvasOverlayDirective,
     CanvasPaperDirective,
     CanvasRulerDirective,
+    ColorPickerComponent,
     ConfirmDialogComponent,
     DemoDialogComponent,
     DropFilesDialogComponent,

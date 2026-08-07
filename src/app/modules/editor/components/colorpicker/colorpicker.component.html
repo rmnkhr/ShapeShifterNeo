@@ -1,0 +1,72 @@
+<button type="button"
+  class="scp-trigger"
+  [class.is-empty]="!this.hasColor"
+  [disabled]="this.disabled"
+  [matMenuTriggerFor]="colorMenu"
+  matTooltip="{{ this.hasColor ? 'Pick a color' : 'No color — click to pick one' }}"
+  matTooltipPosition="below"
+  matTooltipShowDelay="500">
+  <span class="scp-trigger-swatch"
+    *ngIf="this.hasColor"
+    [style.background-color]="this.cssColor()"></span>
+  <mat-icon class="scp-trigger-icon"
+    *ngIf="this.hasColor"
+    [style.color]="this.triggerIconColor()">colorize</mat-icon>
+  <mat-icon class="scp-trigger-icon"
+    *ngIf="!this.hasColor">format_color_reset</mat-icon>
+</button>
+<mat-menu #colorMenu="matMenu"
+  class="ss-glass-menu ss-color-picker-menu">
+  <div class="scp-panel"
+    (click)="$event.stopPropagation()"
+    (keydown)="$event.stopPropagation()">
+    <!-- Saturation (x) / value (y) area. -->
+    <div class="scp-area"
+      #areaTrack
+      [style.background-color]="this.hueCss()"
+      (pointerdown)="this.onAreaPointerDown($event, areaTrack)">
+      <div class="scp-area-thumb"
+        [style.left.%]="this.hsva.s * 100"
+        [style.top.%]="(1 - this.hsva.v) * 100"
+        [style.background-color]="this.opaqueCss()"
+        (pointerdown)="this.onAreaPointerDown($event, areaTrack)"></div>
+    </div>
+    <!-- Hue slider. -->
+    <div class="scp-slider scp-hue-slider"
+      #hueTrack
+      (pointerdown)="this.onHuePointerDown($event, hueTrack)">
+      <div class="scp-slider-thumb"
+        [style.left.%]="this.hsva.h / 360 * 100"
+        [style.background-color]="this.hueCss()"
+        (pointerdown)="this.onHuePointerDown($event, hueTrack)"></div>
+    </div>
+    <!-- Alpha slider. -->
+    <div class="scp-slider scp-alpha-slider"
+      #alphaTrack
+      (pointerdown)="this.onAlphaPointerDown($event, alphaTrack)">
+      <div class="scp-alpha-gradient"
+        [style.background-image]="'linear-gradient(to right, transparent, ' + this.opaqueCss() + ')'"></div>
+      <div class="scp-slider-thumb"
+        [style.left.%]="this.hsva.a * 100"
+        [style.background-color]="this.cssColor()"
+        (pointerdown)="this.onAlphaPointerDown($event, alphaTrack)"></div>
+    </div>
+    <!-- Hex value + alpha readout. -->
+    <div class="scp-hex-row">
+      <input class="scp-hex-input"
+        spellcheck="false"
+        [value]="this.hexText"
+        (change)="this.onHexInputChange($event)"
+        (keydown.enter)="this.onHexInputChange($event)">
+      <span class="scp-alpha-readout">{{ this.alphaPercent() }}%</span>
+    </div>
+    <!-- Turn the color off entirely. -->
+    <button type="button"
+      mat-menu-item
+      class="scp-no-color"
+      (click)="this.onNoColorClick()">
+      <span class="scp-no-color-label">No color</span>
+      <mat-icon class="scp-no-color-icon">format_color_reset</mat-icon>
+    </button>
+  </div>
+</mat-menu>
