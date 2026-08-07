@@ -89,8 +89,8 @@ export class FileImportService {
           importType = ImportType.Svg;
           SvgLoader.loadVectorLayerFromSvgString(text, doesNameExistFn)
             .then(vl => callbackFn(vl))
-            .catch(() => {
-              console.warn('failed to import SVG');
+            .catch(e => {
+              console.warn('failed to import SVG', e);
               callbackFn(undefined);
             });
         } else if (file.type.includes('xml')) {

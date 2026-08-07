@@ -16,8 +16,14 @@
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
-            "assets": ["src/assets", "src/demos", "src/manifest.json"],
-            "styles": ["src/styles.scss"],
+            "assets": [
+              "src/assets",
+              "src/demos",
+              "src/manifest.json"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -64,6 +70,13 @@
                   "with": "src/environments/environment.beta.prod.ts"
                 }
               ]
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "vendorChunk": true
             }
           }
         },
@@ -81,6 +94,9 @@
             },
             "production-beta": {
               "buildTarget": "NeoShapeShifter:build:production-beta"
+            },
+            "development": {
+              "buildTarget": "NeoShapeShifter:build:development"
             }
           }
         },
@@ -98,14 +114,23 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [],
-            "styles": ["src/styles.scss"],
-            "assets": ["src/assets", "src/demos", "src/manifest.json"]
+            "styles": [
+              "src/styles.scss"
+            ],
+            "assets": [
+              "src/assets",
+              "src/demos",
+              "src/manifest.json"
+            ]
           }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
           }
         }
       }
