@@ -22,28 +22,34 @@
     (keydown)="$event.stopPropagation()">
     <!-- Saturation (x) / value (y) area. -->
     <div class="scp-area"
+      #areaTrack
       [style.background-color]="this.hueCss()"
-      (pointerdown)="this.onAreaPointerDown($event)">
+      (pointerdown)="this.onAreaPointerDown($event, areaTrack)">
       <div class="scp-area-thumb"
         [style.left.%]="this.hsva.s * 100"
         [style.top.%]="(1 - this.hsva.v) * 100"
-        [style.background-color]="this.opaqueCss()"></div>
+        [style.background-color]="this.opaqueCss()"
+        (pointerdown)="this.onAreaPointerDown($event, areaTrack)"></div>
     </div>
     <!-- Hue slider. -->
     <div class="scp-slider scp-hue-slider"
-      (pointerdown)="this.onHuePointerDown($event)">
+      #hueTrack
+      (pointerdown)="this.onHuePointerDown($event, hueTrack)">
       <div class="scp-slider-thumb"
         [style.left.%]="this.hsva.h / 360 * 100"
-        [style.background-color]="this.hueCss()"></div>
+        [style.background-color]="this.hueCss()"
+        (pointerdown)="this.onHuePointerDown($event, hueTrack)"></div>
     </div>
     <!-- Alpha slider. -->
     <div class="scp-slider scp-alpha-slider"
-      (pointerdown)="this.onAlphaPointerDown($event)">
+      #alphaTrack
+      (pointerdown)="this.onAlphaPointerDown($event, alphaTrack)">
       <div class="scp-alpha-gradient"
         [style.background-image]="'linear-gradient(to right, transparent, ' + this.opaqueCss() + ')'"></div>
       <div class="scp-slider-thumb"
         [style.left.%]="this.hsva.a * 100"
-        [style.background-color]="this.cssColor()"></div>
+        [style.background-color]="this.cssColor()"
+        (pointerdown)="this.onAlphaPointerDown($event, alphaTrack)"></div>
     </div>
     <!-- Hex value + alpha readout. -->
     <div class="scp-hex-row">

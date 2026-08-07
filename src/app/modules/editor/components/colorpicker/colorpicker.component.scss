@@ -79,7 +79,7 @@
     position: relative;
     height: 140px;
     border-radius: 12px;
-    cursor: crosshair;
+    cursor: pointer;
     touch-action: none;
     // White → hue horizontally, then black vertically (HSV saturation/value).
     background-image: linear-gradient(to top, #000, transparent),
@@ -95,7 +95,10 @@
     border-radius: 50%;
     border: 3px solid #fff;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 4px rgba(0, 0, 0, 0.35);
-    pointer-events: none;
+    // Draggable itself — it overhangs the track, so presses that start on the
+    // circle must not fall through to the panel.
+    cursor: pointer;
+    touch-action: none;
 }
 
 .scp-slider {
@@ -141,7 +144,10 @@
     border-radius: 50%;
     border: 3px solid #fff;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 4px rgba(0, 0, 0, 0.35);
-    pointer-events: none;
+    // Draggable itself — it overhangs the 14px track, so presses that start on
+    // the circle must not fall through to the panel.
+    cursor: ew-resize;
+    touch-action: none;
 }
 
 .scp-hex-row {

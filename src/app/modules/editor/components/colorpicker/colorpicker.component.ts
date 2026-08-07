@@ -104,8 +104,11 @@ export class ColorPickerComponent implements OnDestroy {
 
   // ── Pointer interactions ──────────────────────────────────────────────────
 
-  onAreaPointerDown(event: PointerEvent) {
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  // The track element is passed explicitly (rather than read off the event)
+  // so the drag can also start on the overhanging thumb circle and still
+  // measure against the track.
+  onAreaPointerDown(event: PointerEvent, track: HTMLElement) {
+    const rect = track.getBoundingClientRect();
     this.beginDrag(event, e => {
       const s = _.clamp((e.clientX - rect.left) / rect.width, 0, 1);
       const v = 1 - _.clamp((e.clientY - rect.top) / rect.height, 0, 1);
@@ -114,8 +117,8 @@ export class ColorPickerComponent implements OnDestroy {
     });
   }
 
-  onHuePointerDown(event: PointerEvent) {
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  onHuePointerDown(event: PointerEvent, track: HTMLElement) {
+    const rect = track.getBoundingClientRect();
     this.beginDrag(event, e => {
       const h = _.clamp((e.clientX - rect.left) / rect.width, 0, 1) * 360;
       this.hsva = { ...this.hsva, h };
@@ -123,8 +126,8 @@ export class ColorPickerComponent implements OnDestroy {
     });
   }
 
-  onAlphaPointerDown(event: PointerEvent) {
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  onAlphaPointerDown(event: PointerEvent, track: HTMLElement) {
+    const rect = track.getBoundingClientRect();
     this.beginDrag(event, e => {
       const a = _.clamp((e.clientX - rect.left) / rect.width, 0, 1);
       this.hsva = { ...this.hsva, a };
