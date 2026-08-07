@@ -12,6 +12,13 @@ import { FractionProperty, NameProperty, Option } from 'app/modules/editor/model
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { ModelUtil } from 'app/modules/editor/scripts/common';
 import {
+  CATEGORY_ORDER,
+  filterPropertyNamesByCategory,
+  getCategoryLabel,
+  getPropertyIcon,
+  getPropertyLabel,
+} from 'app/modules/editor/scripts/common/PropertyAnimationMeta';
+import {
   ActionModeService,
   LayerTimelineService,
   PlaybackService,
@@ -101,6 +108,8 @@ export class PropertyInputComponent implements OnInit, OnDestroy {
   private stopNumberScrub?: () => void;
 
   themeState$: Observable<{ prevThemeType: ThemeType; currThemeType: ThemeType }>;
+
+  readonly categoryOrder = CATEGORY_ORDER;
 
   constructor(
     private readonly store: Store<State>,
@@ -193,6 +202,32 @@ export class PropertyInputComponent implements OnInit, OnDestroy {
         currentTime,
       },
     ]);
+  }
+
+  // ── "Add animation" menu helpers (shared with the layer-tree menu) ─────────
+  getLayerTypeLabel(pim: PropertyInputModel) {
+    const type = pim.model && pim.model.type;
+    return type === 'mask' ? 'Clip path' : type;
+  }
+
+  getCategoryLabel(cat: string) {
+    return getCategoryLabel(cat);
+  }
+
+  getPropertyLabel(propertyName: string) {
+    return getPropertyLabel(propertyName);
+  }
+
+  getPropertyIcon(propertyName: string) {
+    return getPropertyIcon(propertyName);
+  }
+
+  getCategoryPropertyNames(pim: PropertyInputModel, cat: string) {
+    return filterPropertyNamesByCategory(pim.availablePropertyNames, cat);
+  }
+
+  trackPropertyNameFn(index: number, propertyName: string) {
+    return propertyName;
   }
 
   shouldShowInvalidPathAnimationBlockMsg(pim: PropertyInputModel) {

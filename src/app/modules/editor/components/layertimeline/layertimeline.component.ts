@@ -800,6 +800,11 @@ export class LayerTimelineComponent extends DestroyableMixin()
   }
 
   // @Override LayerListTreeComponentCallbacks
+  onRemoveTimelinePropertyClick(event: MouseEvent, layer: Layer, propertyName: string) {
+    this.layerTimelineService.removeBlocksForLayerProperty(layer.id, propertyName);
+  }
+
+  // @Override LayerListTreeComponentCallbacks
   onConvertToClipPathClick(event: MouseEvent, layer: Layer) {
     const clipPathLayer = new ClipPathLayer(layer as PathLayer);
     clipPathLayer.id = _.uniqueId();

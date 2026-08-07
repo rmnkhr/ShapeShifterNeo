@@ -33,12 +33,48 @@
           <span class="spi-selection-description">{{ model.description }}</span>
           <span class="spi-selection-sub-description">{{ model.subDescription }}</span>
         </div>
-        <mat-menu #addTimelineBlockMenu="matMenu">
-          <button mat-menu-item
-            *ngFor="let propertyName of model.availablePropertyNames"
-            (click)="this.onAnimateLayerClick(model.model, propertyName)">
-            {{ propertyName }}
-          </button>
+        <mat-menu #addTimelineBlockMenu="matMenu"
+          class="ss-glass-menu ss-add-animation-menu">
+          <div class="slt-add-animation-panel">
+            <div class="slt-add-animation-head">
+              <div class="slt-add-animation-heading-copy">
+                <div class="slt-add-animation-title">
+                  <mat-icon>bolt</mat-icon>
+                  <span>Add animation</span>
+                </div>
+                <div class="slt-add-animation-subtitle">on {{ model.description }} · {{ this.getLayerTypeLabel(model) }}</div>
+              </div>
+              <button mat-icon-button
+                type="button"
+                class="slt-add-animation-close">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <div class="slt-add-animation-body">
+              <ng-container *ngFor="let cat of categoryOrder">
+                <div class="slt-add-animation-category"
+                  *ngIf="this.getCategoryPropertyNames(model, cat).length">
+                  {{ this.getCategoryLabel(cat) }}
+                </div>
+                <button class="slt-add-animation-item"
+                  *ngFor="let propertyName of this.getCategoryPropertyNames(model, cat); trackBy: trackPropertyNameFn"
+                  (click)="this.onAnimateLayerClick(model.model, propertyName)">
+                  <span class="slt-add-animation-icon">
+                    <mat-icon>{{ this.getPropertyIcon(propertyName) }}</mat-icon>
+                  </span>
+                  <span class="slt-add-animation-copy">
+                    <span class="slt-add-animation-label">{{ this.getPropertyLabel(propertyName) }}</span>
+                    <span class="slt-add-animation-key">{{ propertyName }}</span>
+                  </span>
+                  <mat-icon class="slt-add-animation-state">add_circle</mat-icon>
+                </button>
+              </ng-container>
+              <div class="slt-add-animation-empty"
+                *ngIf="!model.availablePropertyNames.length">
+                No animatable properties
+              </div>
+            </div>
+          </div>
         </mat-menu>
         <button mat-icon-button
           class="spi-secondary-icon"
