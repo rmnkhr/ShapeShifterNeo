@@ -28,6 +28,7 @@ import {
   DemoDialogComponent,
   DropFilesDialogComponent,
   HotkeysDialogComponent,
+  ReleaseNotesDialogComponent,
 } from 'app/modules/editor/components/dialogs';
 import {
   LayerListTreeComponent,
@@ -69,6 +70,7 @@ import { environment } from 'environments/environment';
     LayerTimelineGridDirective,
     PlaybackComponent,
     PropertyInputComponent,
+    ReleaseNotesDialogComponent,
     RootComponent,
     ScrollGroupDirective,
     SplashScreenComponent,

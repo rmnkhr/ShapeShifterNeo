@@ -75,6 +75,11 @@ export class ToolbarComponent implements OnInit {
     this.dialogService.showHotkeys().subscribe();
   }
 
+  onReleaseNotesClick() {
+    ga('send', 'event', 'Miscellaneous', 'Release notes');
+    this.dialogService.showReleaseNotes().subscribe();
+  }
+
   ngOnInit() {
     this.animation$ = this.store.select(getAnimation);
     let hasActionModeBeenEnabled = false;

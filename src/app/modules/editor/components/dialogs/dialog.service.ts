@@ -7,6 +7,7 @@ import {
   DropFilesDialogComponent,
 } from 'app/modules/editor/components/dialogs/dropfilesdialog.component';
 import { HotkeysDialogComponent } from 'app/modules/editor/components/dialogs/hotkeysdialog.component';
+import { ReleaseNotesDialogComponent } from 'app/modules/editor/components/dialogs/releasenotesdialog.component';
 import { DemoInfo } from 'app/modules/editor/scripts/demos';
 import { Observable } from 'rxjs';
 
@@ -35,5 +36,11 @@ export class DialogService {
     const config = new MatDialogConfig();
     config.panelClass = 'ss-glass-dialog';
     return this.dialog.open(HotkeysDialogComponent, config).afterClosed();
+  }
+
+  showReleaseNotes(): Observable<void> {
+    const config = new MatDialogConfig();
+    config.panelClass = 'ss-glass-dialog';
+    return this.dialog.open(ReleaseNotesDialogComponent, config).afterClosed();
   }
 }
