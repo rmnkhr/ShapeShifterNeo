@@ -68,7 +68,7 @@ export class BatchSelectItemsGesture extends Gesture {
         new paper.Rectangle(from, to),
         includePartialOverlaps,
       );
-      this.ps.setSelectedLayerIds(new Set(selectedItems.map(i => i.data.id)));
+      this.ps.setSelectedLayerIds(new Set(selectedItems.map(i => i.data.id).filter(id => !!id)));
     }
   }
 }

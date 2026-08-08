@@ -91,8 +91,15 @@ export class PaperLayer extends paper.Layer {
       const localPoint = item.globalToLocal(projPoint).transform(item.matrix);
       let hitItem: paper.Item;
       let children: HitResult[] = [];
-      if (item instanceof paper.Path) {
-        // TODO: figure out what to do with compound paths?
+      if (item instanceof paper.CompoundPath) {
+        // Multi-subpath layers render as CompoundPaths. Report the compound
+        // path itself as the hit item (its children are anonymous subpaths
+        // with no layer id).
+        const res = item.hitTest(localPoint, { fill: true, stroke: true });
+        if (res) {
+          hitItem = item;
+        }
+      } else if (item instanceof paper.Path) {
         const res = item.hitTest(localPoint, { fill: true, stroke: true });
         if (res) {
           hitItem = res.item;
@@ -270,8 +277,10 @@ export class PaperLayer extends paper.Layer {
   private getSelectedItemBounds() {
     const selectedItems = Array.from(this.selectedLayerIds)
       .map(id => this.findItemByLayerId(id))
-      // Filter out any selected empty groups.
-      .filter(i => !(i instanceof paper.Group) || i.children.length);
+      // Filter out ids with no corresponding item (e.g. a transiently stale
+      // selection) — passing undefined into computeBounds() throws and kills
+      // every active store subscription — as well as selected empty groups.
+      .filter(i => !!i && (!(i instanceof paper.Group) || i.children.length));
     if (selectedItems.length === 0) {
       return undefined;
     }
@@ -368,8 +377,11 @@ export class PaperLayer extends paper.Layer {
    */
   findItemsInBounds(vpBounds: paper.Rectangle, includePartialOverlaps: boolean) {
     return this.vectorLayerItem.getItems({
-      // TODO: figure out how to deal with groups and compound paths
-      class: paper.Path,
+      // Match only items that correspond to actual layers (they carry a layer
+      // id): plain paths and compound paths. A CompoundPath's children are
+      // anonymous subpaths without ids and must not be selected directly.
+      match: (item: paper.Item) =>
+        (item instanceof paper.Path || item instanceof paper.CompoundPath) && !!item.data.id,
       overlapping: includePartialOverlaps ? vpBounds : undefined,
       inside: includePartialOverlaps ? undefined : vpBounds,
     });

@@ -38,7 +38,9 @@ export function findFirstHitResult(
   ignoredLayerIds = new Set<string>(),
 ) {
   let firstHitResult: HitResult;
-  _.forEach(hitResults, function recurseFn(hitResult: HitResult) {
+  // Hit results are listed in paint order (bottom-most first), so iterate in
+  // reverse at each level to prefer the top-most item under the cursor.
+  _.forEach([...hitResults].reverse(), function recurseFn(hitResult: HitResult) {
     if (firstHitResult) {
       return false;
     }
@@ -49,7 +51,7 @@ export function findFirstHitResult(
       firstHitResult = hitResult;
       return false;
     }
-    _.forEach(hitResult.children, recurseFn);
+    _.forEach([...hitResult.children].reverse(), recurseFn);
     return true;
   });
   return firstHitResult;
