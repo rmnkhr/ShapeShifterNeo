@@ -10,7 +10,12 @@ import { NameProperty } from 'app/modules/editor/model/properties';
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { DialogService } from 'app/modules/editor/components/dialogs';
 import { ActionModeUtil } from 'app/modules/editor/scripts/actionmode';
-import { ActionModeService, ThemeService } from 'app/modules/editor/services';
+import {
+  ActionModeService,
+  AutosaveService,
+  AutosaveState,
+  ThemeService,
+} from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import { getToolbarState } from 'app/modules/editor/store/actionmode/selectors';
 import { SetAnimation } from 'app/modules/editor/store/timeline/actions';
@@ -46,6 +51,7 @@ export class ToolbarComponent implements OnInit {
 
   // Composition (animation) name + duration, shown as editable bubbles.
   animation$: Observable<Animation>;
+  autosaveState$: Observable<AutosaveState>;
   isEditingName = false;
   isEditingDuration = false;
   nameDraft = '';
@@ -69,6 +75,7 @@ export class ToolbarComponent implements OnInit {
     readonly themeService: ThemeService,
     private readonly store: Store<State>,
     private readonly dialogService: DialogService,
+    private readonly autosaveService: AutosaveService,
   ) {}
 
   onHotkeysClick() {
@@ -82,6 +89,7 @@ export class ToolbarComponent implements OnInit {
 
   ngOnInit() {
     this.animation$ = this.store.select(getAnimation);
+    this.autosaveState$ = this.autosaveService.observeState();
     let hasActionModeBeenEnabled = false;
     let prevThemeType: ThemeType;
     let currThemeType = this.themeService.getThemeType().themeType;

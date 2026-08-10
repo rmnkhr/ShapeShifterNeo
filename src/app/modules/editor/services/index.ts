@@ -1,4 +1,5 @@
 export { ActionModeService } from './actionmode.service';
+export { AutosaveService, AutosaveState } from './autosave.service';
 export { ClipboardService } from './clipboard.service';
 export { FileExportService } from './fileexport.service';
 export { FileImportService } from './fileimport.service';

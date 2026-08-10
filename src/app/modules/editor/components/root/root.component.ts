@@ -17,6 +17,7 @@ import { bugsnagClient } from 'app/modules/editor/scripts/bugsnag';
 import { DestroyableMixin } from 'app/modules/editor/scripts/mixins';
 import {
   ActionModeService,
+  AutosaveService,
   ClipboardService,
   FileImportService,
   LayerTimelineService,
@@ -76,6 +77,7 @@ export class RootComponent extends DestroyableMixin() implements OnInit, AfterVi
     private readonly layerTimelineService: LayerTimelineService,
     readonly themeService: ThemeService,
     private readonly overlayContainer: OverlayContainer,
+    private readonly autosaveService: AutosaveService,
   ) {
     super();
   }
@@ -83,6 +85,7 @@ export class RootComponent extends DestroyableMixin() implements OnInit, AfterVi
   ngOnInit() {
     this.shortcutService.init();
     this.clipboardService.init();
+    this.autosaveService.init();
 
     this.registerSubscription(
       this.themeService.asObservable().subscribe(t => {

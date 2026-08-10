@@ -17,6 +17,10 @@ export class ReleaseNotesDialogComponent {
   readonly entries: ReadonlyArray<ReleaseEntry> = [
     {
       title: 'August 8, 2026',
+      added: [
+        'Autosave — your workspace is continuously saved in the browser and restored on the next visit, with a status indicator in the top bar',
+        'Property icons in the timeline layer list (rotation, path data, …)',
+      ],
       fixed: [
         'SVG import was failing for every file with "Couldn\'t import layers from file"',
         'Icons with holes (multiple subpaths) could not be clicked or moved on the canvas',
