@@ -133,6 +133,7 @@
       fxLayout="row"
       fxLayoutAlign="start center"
       *ngFor="let propertyName of model.existingPropertyNames">
+      <mat-icon class="slt-property-icon">{{ this.getPropertyIcon(propertyName) }}</mat-icon>
       <span class="slt-property-name">{{ propertyName }}</span>
       <button mat-icon-button
         class="slt-property-add-timeline-block-button"
