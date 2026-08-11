@@ -5,10 +5,11 @@ import {
   Selection,
   SelectionType,
 } from 'app/modules/editor/model/actionmode';
-import { MorphableLayer } from 'app/modules/editor/model/layers';
+import { LayerUtil, MorphableLayer } from 'app/modules/editor/model/layers';
 import { NameProperty } from 'app/modules/editor/model/properties';
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { DialogService } from 'app/modules/editor/components/dialogs';
+import { ProjectService } from 'app/modules/editor/components/project/project.service';
 import { ActionModeUtil } from 'app/modules/editor/scripts/actionmode';
 import {
   ActionModeService,
@@ -16,15 +17,17 @@ import {
   AutosaveState,
   ThemeService,
 } from 'app/modules/editor/services';
+import { Duration, SnackBarService } from 'app/modules/editor/services/snackbar.service';
 import { State, Store } from 'app/modules/editor/store';
 import { getToolbarState } from 'app/modules/editor/store/actionmode/selectors';
+import { ResetWorkspace } from 'app/modules/editor/store/reset/actions';
 import { SetAnimation } from 'app/modules/editor/store/timeline/actions';
 import { getAnimation } from 'app/modules/editor/store/timeline/selectors';
 import { ThemeType } from 'app/modules/editor/store/theme/reducer';
 import { environment } from 'environments/environment';
 import * as _ from 'lodash';
 import { Observable, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 declare const ga: Function;
 
@@ -76,6 +79,8 @@ export class ToolbarComponent implements OnInit {
     private readonly store: Store<State>,
     private readonly dialogService: DialogService,
     private readonly autosaveService: AutosaveService,
+    private readonly projectService: ProjectService,
+    private readonly snackBarService: SnackBarService,
   ) {}
 
   onHotkeysClick() {
@@ -85,6 +90,27 @@ export class ToolbarComponent implements OnInit {
   onReleaseNotesClick() {
     ga('send', 'event', 'Miscellaneous', 'Release notes');
     this.dialogService.showReleaseNotes().subscribe();
+  }
+
+  onIconLibraryClick() {
+    ga('send', 'event', 'File', 'Icon library');
+    this.dialogService
+      .pickLibraryIcon()
+      .pipe(filter(icon => !!icon))
+      .subscribe(icon => {
+        ga('send', 'event', 'Icon library', 'Icon selected', icon.name);
+        this.projectService
+          .getProject(icon.url)
+          .then(({ vectorLayer, animation, hiddenLayerIds }) => {
+            // Library icons open normalized for editing: all paints black on
+            // the editor's plain white canvas.
+            const recolored = LayerUtil.recolorVectorLayerPaints(vectorLayer, '#000000');
+            this.store.dispatch(new ResetWorkspace(recolored, animation, hiddenLayerIds));
+          })
+          .catch(() => {
+            this.snackBarService.show(`Couldn't load '${icon.name}'`, 'Dismiss', Duration.Long);
+          });
+      });
   }
 
   ngOnInit() {

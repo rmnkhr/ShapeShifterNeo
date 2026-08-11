@@ -1,0 +1,27 @@
+<h2 matDialogTitle
+  class="il-title">Icon library</h2>
+<div class="il-subtitle">From vectormotionkit.web.app — hover to preview, click to open</div>
+<mat-dialog-content class="il-content">
+  <div class="il-loading"
+    *ngIf="isLoading">Loading icons…</div>
+  <div class="il-error"
+    *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="il-grid"
+    *ngIf="!isLoading && !errorMessage">
+    <button type="button"
+      class="il-item"
+      *ngFor="let icon of icons; trackBy: trackByFn"
+      [disabled]="icon.loadFailed"
+      (mouseenter)="startPreview(icon)"
+      (mouseleave)="stopPreview(icon)"
+      (click)="onIconClick(icon)">
+      <div class="il-preview"
+        [innerHTML]="icon.currentSvg"></div>
+      <span class="il-name">{{ icon.name }}</span>
+    </button>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button
+    matDialogClose>Cancel</button>
+</mat-dialog-actions>

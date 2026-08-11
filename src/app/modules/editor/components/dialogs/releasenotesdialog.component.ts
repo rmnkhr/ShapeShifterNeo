@@ -16,6 +16,12 @@ interface ReleaseEntry {
 export class ReleaseNotesDialogComponent {
   readonly entries: ReadonlyArray<ReleaseEntry> = [
     {
+      title: 'August 10, 2026',
+      added: [
+        'Icon library — browse animated icons from vectormotionkit.web.app, hover to preview the animation, click to open (normalized to black on white for editing)',
+      ],
+    },
+    {
       title: 'August 8, 2026',
       added: [
         'Autosave — your workspace is continuously saved in the browser and restored on the next visit, with a status indicator in the top bar',

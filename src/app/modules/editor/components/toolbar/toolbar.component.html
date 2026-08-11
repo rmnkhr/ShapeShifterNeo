@@ -247,6 +247,11 @@
           <span>Dark theme</span>
         </div>
         <button mat-menu-item
+          (click)="this.onIconLibraryClick()">
+          <mat-icon>apps</mat-icon>
+          <span>Icon library</span>
+        </button>
+        <button mat-menu-item
           (click)="this.onHotkeysClick()">
           <mat-icon>keyboard</mat-icon>
           <span>Keyboard shortcuts</span>

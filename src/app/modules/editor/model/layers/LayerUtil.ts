@@ -349,6 +349,27 @@ export function toStrokeDashOffset(
  * it did before. Intended for freshly imported layers, whose transforms have
  * already been baked into their path data (i.e. groups are untransformed).
  */
+/**
+ * Returns a copy of the vector layer with every path's existing fill/stroke
+ * paints replaced by the given color (paths without a paint keep none).
+ */
+export function recolorVectorLayerPaints(vl: VectorLayer, androidColor: string) {
+  const recolored = vl.deepClone();
+  const recurseFn = (layer: Layer) => {
+    if (layer instanceof PathLayer) {
+      if (layer.fillColor) {
+        layer.fillColor = androidColor;
+      }
+      if (layer.strokeColor) {
+        layer.strokeColor = androidColor;
+      }
+    }
+    layer.children.forEach(recurseFn);
+  };
+  recolored.children.forEach(recurseFn);
+  return recolored;
+}
+
 export function scaleVectorLayer(vl: VectorLayer, targetWidth: number, targetHeight: number) {
   const sx = targetWidth / vl.width;
   const sy = targetHeight / vl.height;

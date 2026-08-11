@@ -28,6 +28,7 @@ import {
   DemoDialogComponent,
   DropFilesDialogComponent,
   HotkeysDialogComponent,
+  IconLibraryDialogComponent,
   ReleaseNotesDialogComponent,
 } from 'app/modules/editor/components/dialogs';
 import {
@@ -65,6 +66,7 @@ import { environment } from 'environments/environment';
     DropFilesDialogComponent,
     HotkeysDialogComponent,
     DropTargetDirective,
+    IconLibraryDialogComponent,
     LayerListTreeComponent,
     LayerTimelineComponent,
     LayerTimelineGridDirective,
