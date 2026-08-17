@@ -112,7 +112,11 @@ export class SelectDragDrawSegmentsGesture extends Gesture {
       // Otherwise, we are either (1) extending an existing open path (beginning
       // at one of its selected end points), or (2) beginning to create a new path
       // from scratch.
-      const localPoint = editPath.globalToLocal(event.point);
+      let localPoint = editPath.globalToLocal(event.point);
+      if (this.ps.isSnapToGridEnabled()) {
+        // Grid magnet: new points land exactly on integer grid coordinates.
+        localPoint = localPoint.round();
+      }
       let addedSegment: paper.Segment;
       if (editPath.segments.length === 0) {
         addedSegment = editPath.add(localPoint);
@@ -168,11 +172,20 @@ export class SelectDragDrawSegmentsGesture extends Gesture {
       const nonSelectedSegmentIndices = editPath.segments
         .map((s, i) => i)
         .filter((s, i) => !selectedSegmentIndices.has(i));
+      const isSnapToGridEnabled = this.ps.isSnapToGridEnabled();
       this.selectedSegmentIndexToInitialLocationMap.forEach((initialSegmentPoint, i) => {
         const segment = editPath.segments[i];
-        segment.point = event.modifiers.shift
-          ? initialSegmentPoint.add(localSnappedDownPointDelta)
-          : segment.point.add(localLastPointDelta);
+        if (isSnapToGridEnabled) {
+          // Grid magnet: dragged points stick to integer grid coordinates.
+          // Computed from the initial point plus the total drag delta (rather
+          // than incrementally) so rounding can't swallow small movements.
+          const delta = event.modifiers.shift ? localSnappedDownPointDelta : localDownPointDelta;
+          segment.point = initialSegmentPoint.add(delta).round();
+        } else {
+          segment.point = event.modifiers.shift
+            ? initialSegmentPoint.add(localSnappedDownPointDelta)
+            : segment.point.add(localLastPointDelta);
+        }
       });
       const draggedSegmentIndex = this.hitSegmentInfo
         ? this.hitSegmentInfo.segmentIndex

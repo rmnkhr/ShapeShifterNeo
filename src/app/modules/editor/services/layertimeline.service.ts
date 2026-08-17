@@ -540,6 +540,24 @@ export class LayerTimelineService {
     this.store.dispatch(new SetAnimation(animation));
   }
 
+  removeBlocksForLayerProperty(layerId: string, propertyName: string) {
+    const animation = this.getAnimation().clone();
+    const removedBlockIds = new Set(
+      animation.blocks
+        .filter(block => block.layerId === layerId && block.propertyName === propertyName)
+        .map(block => block.id),
+    );
+    if (!removedBlockIds.size) {
+      return;
+    }
+    animation.blocks = animation.blocks.filter(block => !removedBlockIds.has(block.id));
+    const selectedBlockIds = this.getSelectedBlockIds();
+    removedBlockIds.forEach(id => selectedBlockIds.delete(id));
+    this.store.dispatch(
+      new BatchAction(new SetAnimation(animation), new SetSelectedBlocks(selectedBlockIds)),
+    );
+  }
+
   addBlocks(
     blocks: Array<{
       id?: string;

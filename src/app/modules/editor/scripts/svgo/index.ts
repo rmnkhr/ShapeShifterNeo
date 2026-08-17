@@ -4,9 +4,14 @@
 // TODO: make sure error handling works properly w/ the new promise architecture
 // TODO: re-enable no implicit any and/or no implicit nulls?
 
-import * as js2svg from 'svgo/lib/svgo/js2svg';
-import * as executePlugins from 'svgo/lib/svgo/plugins';
-import * as svg2js from 'svgo/lib/svgo/svg2js';
+// These three svgo internals are CommonJS modules whose module.exports IS a
+// function. Under webpack's strict ESM interop, `import * as X` yields a
+// non-callable namespace object ("X is not a function" at runtime), so they
+// must be loaded with require() instead.
+declare const require: (id: string) => any;
+const js2svg = require('svgo/lib/svgo/js2svg');
+const executePlugins = require('svgo/lib/svgo/plugins');
+const svg2js = require('svgo/lib/svgo/svg2js');
 import * as cleanupAttrs from 'svgo/plugins/cleanupAttrs';
 import * as cleanupIDs from 'svgo/plugins/cleanupIDs';
 import * as cleanupNumericValues from 'svgo/plugins/cleanupNumericValues';

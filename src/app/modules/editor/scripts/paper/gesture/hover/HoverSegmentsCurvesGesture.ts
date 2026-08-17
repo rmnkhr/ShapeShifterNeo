@@ -1,6 +1,6 @@
 import { CursorType } from 'app/modules/editor/model/paper';
 import { Gesture } from 'app/modules/editor/scripts/paper/gesture';
-import { HitTests, PaperLayer } from 'app/modules/editor/scripts/paper/item';
+import { EditPathRaster, HitTests, PaperLayer } from 'app/modules/editor/scripts/paper/item';
 import { PaperUtil } from 'app/modules/editor/scripts/paper/util';
 import { PaperService } from 'app/modules/editor/services';
 import { Action } from 'app/modules/editor/store';
@@ -39,8 +39,15 @@ export class HoverSegmentsCurvesGesture extends Gesture {
     const segmentsAndHandlesHitResult = HitTests.editPathModeSegmentsAndHandles(event.point);
     if (segmentsAndHandlesHitResult) {
       // If we are hovering over a segment or a handle, then show a point select
-      // cursor and return.
-      this.ps.setCursorType(CursorType.PointSelect);
+      // cursor and return. If the hovered segment is the opposite end point of
+      // the open path being extended, show a pen close cursor instead to
+      // signal that clicking it will finish the shape.
+      const raster = segmentsAndHandlesHitResult.item as EditPathRaster;
+      this.ps.setCursorType(
+        raster.type === 'segment' && this.isClosingEndSegment(editPath, raster.segmentIndex)
+          ? CursorType.PenClose
+          : CursorType.PointSelect,
+      );
       return;
     }
 
@@ -117,6 +124,23 @@ export class HoverSegmentsCurvesGesture extends Gesture {
     const vpPoint = this.localToVpPoint(localItem, localPoint);
     const vpHandle = this.localToVpPoint(localItem, localPoint.add(localHandle));
     return vpHandle.subtract(vpPoint);
+  }
+
+  /**
+   * Returns true if the given segment index is the opposite end point of an
+   * open path whose other end point is currently selected — i.e. clicking it
+   * would close and finish the shape.
+   */
+  private isClosingEndSegment(path: paper.Path, segmentIndex: number) {
+    if (path.segments.length < 2) {
+      return false;
+    }
+    const selectedEndSegmentIndex = this.findSingleSelectedEndSegmentIndex(path);
+    if (selectedEndSegmentIndex === undefined) {
+      return false;
+    }
+    const isEndPoint = segmentIndex === 0 || segmentIndex === path.segments.length - 1;
+    return isEndPoint && segmentIndex !== selectedEndSegmentIndex;
   }
 
   /**

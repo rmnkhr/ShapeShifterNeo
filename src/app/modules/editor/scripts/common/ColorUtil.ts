@@ -1,5 +1,10 @@
 import { bugsnagClient } from 'app/modules/editor/scripts/bugsnag';
+// The namespace import is kept for its types only. tinycolor2's module.exports
+// IS a function, and under webpack's strict ESM interop a namespace import of
+// it is not callable — so the callable instance is loaded with require().
 import * as tinycolor from 'tinycolor2';
+declare const require: (id: string) => any;
+const tinycolorFn: typeof tinycolor = require('tinycolor2');
 
 export function parseAndroidColor(val: string): tinycolor.ColorFormats.RGBA | undefined {
   if (typeof val !== 'string') {
@@ -60,7 +65,7 @@ export function svgToAndroidColor(color: string): string | undefined {
   if (color === 'none') {
     return undefined;
   }
-  const colorInstance = tinycolor(color);
+  const colorInstance = tinycolorFn(color);
   const colorHex = colorInstance.toHex();
   const alphaHex = colorInstance.toHex8().substr(6);
   return '#' + (alphaHex !== 'ff' ? alphaHex : '') + colorHex;

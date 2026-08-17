@@ -1,0 +1,24 @@
+<h2 matDialogTitle
+  class="rn-title">Release notes</h2>
+<mat-dialog-content class="rn-content">
+  <div class="rn-entry"
+    *ngFor="let entry of entries">
+    <div class="rn-entry-title">{{ entry.title }}</div>
+    <ng-container *ngIf="entry.added?.length">
+      <div class="rn-section">
+        <span class="rn-badge is-added">Added</span>
+      </div>
+      <ul class="rn-list">
+        <li *ngFor="let item of entry.added">{{ item }}</li>
+      </ul>
+    </ng-container>
+    <ng-container *ngIf="entry.fixed?.length">
+      <div class="rn-section">
+        <span class="rn-badge is-fixed">Fixed</span>
+      </div>
+      <ul class="rn-list">
+        <li *ngFor="let item of entry.fixed">{{ item }}</li>
+      </ul>
+    </ng-container>
+  </div>
+</mat-dialog-content>

@@ -349,6 +349,27 @@ export function toStrokeDashOffset(
  * it did before. Intended for freshly imported layers, whose transforms have
  * already been baked into their path data (i.e. groups are untransformed).
  */
+/**
+ * Returns a copy of the vector layer with every path's existing fill/stroke
+ * paints replaced by the given color (paths without a paint keep none).
+ */
+export function recolorVectorLayerPaints(vl: VectorLayer, androidColor: string) {
+  const recolored = vl.deepClone();
+  const recurseFn = (layer: Layer) => {
+    if (layer instanceof PathLayer) {
+      if (layer.fillColor) {
+        layer.fillColor = androidColor;
+      }
+      if (layer.strokeColor) {
+        layer.strokeColor = androidColor;
+      }
+    }
+    layer.children.forEach(recurseFn);
+  };
+  recolored.children.forEach(recurseFn);
+  return recolored;
+}
+
 export function scaleVectorLayer(vl: VectorLayer, targetWidth: number, targetHeight: number) {
   const sx = targetWidth / vl.width;
   const sy = targetHeight / vl.height;
@@ -373,28 +394,4 @@ export function scaleVectorLayer(vl: VectorLayer, targetWidth: number, targetHei
   scaled.width = targetWidth;
   scaled.height = targetHeight;
   return scaled;
-}
-
-/**
- * Returns a copy of the vector layer with every descendant path's coordinates
- * rounded to the nearest integer (i.e. snapped to the pixel grid). Command
- * types and point counts are preserved, so path-morph compatibility is
- * unaffected — only the numeric values change (e.g. 4.022 → 4).
- */
-export function snapVectorLayerToGrid(vl: VectorLayer) {
-  const roundPathFn = (path: Path) =>
-    new Path(
-      path
-        .getPathString()
-        .replace(/-?\d*\.?\d+(?:[eE][-+]?\d+)?/g, n => `${Math.round(Number(n))}`),
-    );
-  const snapped = vl.deepClone();
-  const snapLayerFn = (layer: Layer) => {
-    if ((layer instanceof PathLayer || layer instanceof ClipPathLayer) && layer.pathData) {
-      layer.pathData = roundPathFn(layer.pathData);
-    }
-    (layer.children || []).forEach(snapLayerFn);
-  };
-  snapped.children.forEach(snapLayerFn);
-  return snapped;
 }

@@ -1,5 +1,6 @@
 <div *ngIf="(this.model$ | async) as model"
-  class="tool-panel">
+  class="tool-panel-stack">
+<div class="tool-panel">
   <button class="tool-button"
     matTooltip="Select"
     matTooltipPosition="right"
@@ -68,4 +69,18 @@
     (click)="onZoomPanClick($event)">
     <mat-icon>zoom_in</mat-icon>
   </button>
+</div>
+<!-- Extra options for the vector (edit path) tool. -->
+<div class="tool-subpanel"
+  *ngIf="model.isEditPathChecked"
+  [@subpanelInOut]>
+  <button class="tool-button"
+    matTooltip="{{ (this.snapToGrid$ | async) ? 'Grid magnet: on' : 'Grid magnet: off' }}"
+    matTooltipPosition="right"
+    matTooltipShowDelay="500"
+    [class.is-checked]="this.snapToGrid$ | async"
+    (click)="onSnapToGridClick($event)">
+    <mat-icon svgIcon="magnet"></mat-icon>
+  </button>
+</div>
 </div>

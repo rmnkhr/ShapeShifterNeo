@@ -65,7 +65,25 @@ function loadVectorLayerFromSvgStringInternal(
     return infos.map(info => info.path);
   });
 
-  const nodeToLayerFn = (node: Element, transforms: ReadonlyArray<Matrix>): Layer => {
+  // Paint attributes that cascade from ancestor groups down to paths (e.g.
+  // <g fill="#E3E3E3"> — SVGO also hoists identical child fills onto groups).
+  const INHERITABLE_ATTRS = [
+    'fill',
+    'fill-opacity',
+    'fill-rule',
+    'stroke',
+    'stroke-width',
+    'stroke-opacity',
+    'stroke-linecap',
+    'stroke-linejoin',
+    'stroke-miterlimit',
+  ];
+
+  const nodeToLayerFn = (
+    node: Element,
+    transforms: ReadonlyArray<Matrix>,
+    inheritedAttrs: Dictionary<string> = {},
+  ): Layer => {
     if (
       !node ||
       node.nodeType === Node.TEXT_NODE ||
@@ -120,6 +138,8 @@ function loadVectorLayerFromSvgStringInternal(
       const simpleAttrFn = (nodeAttr: string, contextAttr: string) => {
         if (node.hasAttribute(nodeAttr)) {
           attrMap[contextAttr] = node.getAttribute(nodeAttr);
+        } else if (nodeAttr in inheritedAttrs) {
+          attrMap[contextAttr] = inheritedAttrs[nodeAttr];
         }
       };
 
@@ -187,10 +207,18 @@ function loadVectorLayerFromSvgStringInternal(
 
     // TODO: we should *not* iterate over a clip path's children here...
     if (node.childNodes) {
+      // Merge this container's paint attributes into the inherited set so
+      // descendant paths pick them up.
+      const childInheritedAttrs: Dictionary<string> = { ...inheritedAttrs };
+      INHERITABLE_ATTRS.forEach(attr => {
+        if (node.getAttribute && node.hasAttribute(attr)) {
+          childInheritedAttrs[attr] = node.getAttribute(attr);
+        }
+      });
       const children: Layer[] = [];
       for (let i = 0; i < node.childNodes.length; i++) {
         const child = node.childNodes.item(i) as Element;
-        const layer = nodeToLayerFn(child, transforms);
+        const layer = nodeToLayerFn(child, transforms, childInheritedAttrs);
         if (layer) {
           children.push(layer);
         }

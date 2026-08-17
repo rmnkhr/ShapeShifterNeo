@@ -28,6 +28,8 @@ import {
   DemoDialogComponent,
   DropFilesDialogComponent,
   HotkeysDialogComponent,
+  IconLibraryDialogComponent,
+  ReleaseNotesDialogComponent,
 } from 'app/modules/editor/components/dialogs';
 import {
   LayerListTreeComponent,
@@ -64,11 +66,13 @@ import { environment } from 'environments/environment';
     DropFilesDialogComponent,
     HotkeysDialogComponent,
     DropTargetDirective,
+    IconLibraryDialogComponent,
     LayerListTreeComponent,
     LayerTimelineComponent,
     LayerTimelineGridDirective,
     PlaybackComponent,
     PropertyInputComponent,
+    ReleaseNotesDialogComponent,
     RootComponent,
     ScrollGroupDirective,
     SplashScreenComponent,
@@ -113,6 +117,7 @@ export class EditorModule {
       .addSvgIcon('animation', this.trustUrl('assets/icons/animation.svg'))
       .addSvgIcon('collection', this.trustUrl('assets/icons/collection.svg'))
       .addSvgIcon('animationblock', this.trustUrl('assets/icons/animationblock.svg'))
+      .addSvgIcon('magnet', this.trustUrl('assets/icons/magnet.svg'))
       .addSvgIcon('mask', this.trustUrl('assets/icons/clippathlayer.svg'))
       .addSvgIcon('group', this.trustUrl('assets/icons/grouplayer.svg'))
       .addSvgIcon('path', this.trustUrl('assets/icons/pathlayer.svg'))

@@ -90,6 +90,22 @@
             <span class="comp-unit">ms</span>
           </ng-container>
         </div>
+
+        <!-- Autosave status indicator. -->
+        <div class="topbar-pill topbar-autosave"
+          *ngIf="(autosaveState$ | async) as autosave"
+          matTooltip="{{ autosave.status === 'saving'
+            ? 'Saving…'
+            : autosave.lastSavedAt
+              ? 'Autosaved at ' + (autosave.lastSavedAt | date: 'HH:mm:ss')
+              : 'Autosave is on' }}"
+          matTooltipPosition="below"
+          matTooltipShowDelay="300">
+          <mat-icon class="autosave-icon"
+            [class.is-saving]="autosave.status === 'saving'">
+            {{ autosave.status === 'saving' ? 'sync' : 'cloud_done' }}
+          </mat-icon>
+        </div>
       </ng-container>
 
       <!-- Actions pill: contextual action buttons grouped with the menu. -->
@@ -231,14 +247,19 @@
           <span>Dark theme</span>
         </div>
         <button mat-menu-item
-          (click)="this.onSnapToGridClick()">
-          <mat-icon>grid_on</mat-icon>
-          <span>Snap points to grid</span>
+          (click)="this.onIconLibraryClick()">
+          <mat-icon>apps</mat-icon>
+          <span>Icon library</span>
         </button>
         <button mat-menu-item
           (click)="this.onHotkeysClick()">
           <mat-icon>keyboard</mat-icon>
           <span>Keyboard shortcuts</span>
+        </button>
+        <button mat-menu-item
+          (click)="this.onReleaseNotesClick()">
+          <mat-icon>new_releases</mat-icon>
+          <span>Release notes</span>
         </button>
         <a href="http://www.androiddesignpatterns.com/2016/11/introduction-to-icon-animation-techniques.html"
           target="_blank"

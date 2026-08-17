@@ -9,6 +9,14 @@ import {
 import { ClipPathLayer, GroupLayer, Layer, PathLayer, VectorLayer } from 'app/modules/editor/model/layers';
 import { Animation, PathAnimationBlock } from 'app/modules/editor/model/timeline';
 import { ModelUtil } from 'app/modules/editor/scripts/common';
+import {
+  CATEGORY_ORDER,
+  filterPropertyNamesByCategory,
+  getCategoryLabel,
+  getPropertyCategory,
+  getPropertyIcon,
+  getPropertyLabel,
+} from 'app/modules/editor/scripts/common/PropertyAnimationMeta';
 import { ActionModeService } from 'app/modules/editor/services';
 import { State, Store } from 'app/modules/editor/store';
 import { getLayerListTreeState } from 'app/modules/editor/store/common/selectors';
@@ -37,9 +45,12 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
   @Output() layerToggleExpanded = new EventEmitter<LayerEvent>();
   @Output() layerToggleVisibility = new EventEmitter<LayerEvent>();
   @Output() addTimelineBlockClick = new EventEmitter<TimelineBlockEvent>();
+  @Output() removeTimelinePropertyClick = new EventEmitter<TimelineBlockEvent>();
   @Output() convertToClipPathClick = new EventEmitter<LayerEvent>();
   @Output() convertToPathClick = new EventEmitter<LayerEvent>();
   @Output() flattenGroupClick = new EventEmitter<LayerEvent>();
+
+  readonly categoryOrder = CATEGORY_ORDER;
 
   constructor(
     private readonly store: Store<State>,
@@ -65,6 +76,16 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
             return _.keys(ModelUtil.getOrderedBlocksByPropertyByLayer(animation)[layerId]);
           };
           const existingPropertyNames = getExistingPropertyNamesFn(this.layer.id);
+          // Everything the animate menu lists: properties that can still be
+          // animated plus the ones that already have blocks (shown checked),
+          // ordered by category and label.
+          const allPropertyNames = _.sortBy(
+            _.uniq([...availablePropertyNames, ...existingPropertyNames]),
+            propertyName =>
+              `${CATEGORY_ORDER.indexOf(getPropertyCategory(propertyName))}:${getPropertyLabel(
+                propertyName,
+              )}`,
+          );
           const canBeConvertedToPath = this.layer instanceof ClipPathLayer;
           // We can't convert a path into a clip path if it has incompatible animation blocks.
           const canBeConvertedToClipPath =
@@ -93,6 +114,7 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
             isVisible: !hiddenLayerIds.has(this.layer.id),
             availablePropertyNames,
             existingPropertyNames,
+            allPropertyNames,
             isActionMode,
             canBeConvertedToClipPath,
             canBeConvertedToPath,
@@ -135,9 +157,19 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
   }
 
   // @Override
+  // Stops propagation so the menu stays open — several properties can be
+  // toggled in one visit; the X button or backdrop closes it.
   onAddTimelineBlockClick(event: MouseEvent, layer: Layer, propertyName: string) {
+    event.stopPropagation();
     if (!this.actionModeService.isActionMode()) {
       this.addTimelineBlockClick.emit({ event, layer, propertyName });
+    }
+  }
+
+  onRemoveTimelinePropertyClick(event: MouseEvent, layer: Layer, propertyName: string) {
+    event.stopPropagation();
+    if (!this.actionModeService.isActionMode()) {
+      this.removeTimelinePropertyClick.emit({ event, layer, propertyName });
     }
   }
 
@@ -167,6 +199,30 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
     return layer.id;
   }
 
+  trackPropertyNameFn(index: number, propertyName: string) {
+    return propertyName;
+  }
+
+  getLayerTypeLabel() {
+    return this.layer.type === 'mask' ? 'Clip path' : this.layer.type;
+  }
+
+  getPropertyLabel(propertyName: string) {
+    return getPropertyLabel(propertyName);
+  }
+
+  getPropertyIcon(propertyName: string) {
+    return getPropertyIcon(propertyName);
+  }
+
+  getCategoryLabel(cat: string) {
+    return getCategoryLabel(cat);
+  }
+
+  getCategoryPropertyNames(model: LayerModel, cat: string) {
+    return filterPropertyNamesByCategory(model.allPropertyNames, cat);
+  }
+
   private isLayerExpandable() {
     return this.layer instanceof VectorLayer || this.layer instanceof GroupLayer;
   }
@@ -178,6 +234,7 @@ export interface Callbacks {
   onLayerToggleExpanded(event: MouseEvent, layer: Layer): void;
   onLayerToggleVisibility(event: MouseEvent, layer: Layer): void;
   onAddTimelineBlockClick(event: MouseEvent, layer: Layer, propertyName: string): void;
+  onRemoveTimelinePropertyClick(event: MouseEvent, layer: Layer, propertyName: string): void;
   onConvertToClipPathClick(event: MouseEvent, layer: Layer): void;
   onConvertToPathClick(event: MouseEvent, layer: Layer): void;
   onFlattenGroupClick(event: MouseEvent, layer: Layer): void;
@@ -203,6 +260,7 @@ interface LayerModel {
   readonly isVisible: boolean;
   readonly availablePropertyNames: ReadonlyArray<string>;
   readonly existingPropertyNames: ReadonlyArray<string>;
+  readonly allPropertyNames: ReadonlyArray<string>;
   readonly isActionMode: boolean;
   readonly canBeConvertedToPath: boolean;
   readonly canBeConvertedToClipPath: boolean;

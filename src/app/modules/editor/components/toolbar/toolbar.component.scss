@@ -61,6 +61,40 @@
     }
 }
 
+// Autosave status indicator: a circle (same diameter as the pill height)
+// with a cloud/sync icon centered inside.
+.topbar-autosave {
+    width: 56px;
+    min-width: 56px;
+    height: 56px;
+    padding: 0;
+    justify-content: center;
+    margin-left: 8px;
+    cursor: default;
+
+    .autosave-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+        line-height: 18px;
+        color: var(--ss-on-surface-variant);
+
+        &.is-saving {
+            animation: autosave-spin 1s linear infinite;
+        }
+    }
+}
+
+@keyframes autosave-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        // The sync glyph's arrows read as counter-clockwise, so spin that way.
+        transform: rotate(-360deg);
+    }
+}
+
 // Composition (animation) name + duration bubbles — clickable text pills.
 .topbar-comp {
     padding: 0 16px;

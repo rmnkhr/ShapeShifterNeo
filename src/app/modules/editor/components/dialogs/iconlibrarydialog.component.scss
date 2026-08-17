@@ -1,0 +1,80 @@
+.il-title {
+    margin: 0;
+    padding: 4px 4px 0;
+    color: var(--ss-on-surface);
+}
+
+.il-subtitle {
+    padding: 2px 4px 10px;
+    font-size: 12px;
+    color: var(--ss-on-surface-variant);
+}
+
+.il-content {
+    min-width: 384px;
+    max-width: 440px;
+    max-height: 56vh;
+    padding: 2px 4px 6px;
+}
+
+.il-loading,
+.il-error {
+    padding: 24px 8px;
+    font-size: 13.5px;
+    text-align: center;
+    color: var(--ss-on-surface-variant);
+}
+
+.il-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.il-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 6px 8px;
+    border: 1px solid transparent;
+    border-radius: var(--ss-radius, 12px);
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease;
+
+    &:hover:not([disabled]) {
+        background-color: var(--ss-surface-container-high);
+        border-color: var(--ss-outline-variant);
+    }
+
+    &[disabled] {
+        opacity: 0.4;
+        cursor: default;
+    }
+}
+
+.il-preview {
+    width: 48px;
+    height: 48px;
+    // No tile — the recolored icon sits directly on the dialog surface.
+    overflow: hidden;
+    // Clicks must always land on the button, never the inline SVG content.
+    pointer-events: none;
+
+    ::ng-deep svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.il-name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11.5px;
+    line-height: 14px;
+    color: var(--ss-on-surface);
+}

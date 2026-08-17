@@ -177,6 +177,18 @@ mat-menu {
 .slt-property {
   padding-left: 8px;
   font-size: 12px;
+  // Small icon identifying the animated property (matches the icons used in
+  // the "Add animation" menu).
+  .slt-property-icon {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    font-size: 14px;
+    line-height: 14px;
+    margin-right: 5px;
+    color: var(--ss-on-surface-variant);
+    opacity: 0.85;
+  }
   .slt-property-name {
     flex: 1 1 0;
     min-width: 0;
