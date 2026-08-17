@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "shapeshifter-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start", "--", "--configuration", "development"],
+      "port": 4200
+    },
+    {
+      "name": "shapeshifter-readme-branch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "port": 4200
+    }
+  ]
+}
