@@ -3,6 +3,8 @@
   [class.is-empty]="!this.hasColor"
   [disabled]="this.disabled"
   [matMenuTriggerFor]="colorMenu"
+  (menuOpened)="this.opened.emit()"
+  (menuClosed)="this.closed.emit()"
   matTooltip="{{ this.hasColor ? 'Pick a color' : 'No color — click to pick one' }}"
   matTooltipPosition="below"
   matTooltipShowDelay="500">

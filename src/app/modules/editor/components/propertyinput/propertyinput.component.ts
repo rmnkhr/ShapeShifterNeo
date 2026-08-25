@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { ActionMode } from 'app/modules/editor/model/actionmode';
 import {
   ClipPathLayer,
@@ -111,12 +117,22 @@ export class PropertyInputComponent implements OnInit, OnDestroy {
 
   readonly categoryOrder = CATEGORY_ORDER;
 
+  // Property whose swatch was just given its first color (from the 'no color'
+  // state); used to play a one-shot pop animation on the color button.
+  recentlyColoredPropertyName: string | undefined;
+  // The color property whose picker popup is currently open, and where its
+  // trigger button lives. While open, the button stays mounted in place even
+  // if the color value changes (so the popup isn't destroyed mid-interaction).
+  private openColorPickerPropertyName: string | undefined;
+  private openColorPickerLocation: 'header' | 'row' | undefined;
+
   constructor(
     private readonly store: Store<State>,
     private readonly actionModeService: ActionModeService,
     private readonly playbackService: PlaybackService,
     private readonly layerTimelineService: LayerTimelineService,
     readonly themeService: ThemeService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -451,8 +467,93 @@ export class PropertyInputComponent implements OnInit, OnDestroy {
   // Applies a color chosen in the popover picker. An empty string turns the
   // color off (the model stores undefined).
   onColorPicked(ip: InspectedProperty<any>, androidColor: string) {
+    const hadNoColor = !ip.value;
     ip.editableValue = androidColor;
     ip.resolveEnteredValue();
+    if (hadNoColor && androidColor) {
+      // First color picked from the 'no color' state: pop the swatch while
+      // the collapsed sibling rows expand.
+      this.popColorSwatch(ip.propertyName);
+    }
+  }
+
+  private popColorSwatch(propertyName: string) {
+    this.recentlyColoredPropertyName = propertyName;
+    setTimeout(() => {
+      this.recentlyColoredPropertyName = undefined;
+      this.changeDetectorRef.markForCheck();
+    }, 700);
+  }
+
+  // Groups whose non-color rows collapse while the group's color is 'no color'.
+  isColorGatedGroup(group: PropertyGroup) {
+    return group.label === 'Fill' || group.label === 'Stroke';
+  }
+
+  isPropertyCollapsed(group: PropertyGroup, ip: InspectedProperty<any>) {
+    const colorIp = this.getGroupColorProperty(group);
+    if (!colorIp) {
+      return false;
+    }
+    // Keep the rows expanded while their row picker's popup is open, so
+    // clearing the color doesn't yank the open picker out from under the user.
+    if (this.isPickerOpenFor(colorIp, 'row')) {
+      return false;
+    }
+    return !colorIp.value;
+  }
+
+  // Returns the group's color property while its button should be shown in the
+  // group header: when the color is 'no color', or while the header picker's
+  // popup is still open (so picking a color doesn't destroy the open popup).
+  getHeaderColorProperty(group: PropertyGroup): InspectedProperty<any> | undefined {
+    const colorIp = this.getGroupColorProperty(group);
+    if (!colorIp) {
+      return undefined;
+    }
+    if (this.openColorPickerPropertyName === colorIp.propertyName) {
+      return this.openColorPickerLocation === 'header' ? colorIp : undefined;
+    }
+    return !colorIp.value ? colorIp : undefined;
+  }
+
+  // The row's picker is hidden while the header instance of the same picker is
+  // still open (avoids showing two swatches for the same property).
+  isRowColorPickerHidden(ip: InspectedProperty<any>) {
+    return (
+      ip.propertyName === this.openColorPickerPropertyName &&
+      this.openColorPickerLocation === 'header'
+    );
+  }
+
+  onColorPickerToggled(ip: InspectedProperty<any>, location: 'header' | 'row', isOpen: boolean) {
+    if (isOpen) {
+      this.openColorPickerPropertyName = ip.propertyName;
+      this.openColorPickerLocation = location;
+    } else if (this.openColorPickerPropertyName === ip.propertyName) {
+      this.openColorPickerPropertyName = undefined;
+      this.openColorPickerLocation = undefined;
+      if (location === 'header' && ip.value) {
+        // The header picker closed with a color chosen: the button moves down
+        // into the Color row, popping as it lands.
+        this.popColorSwatch(ip.propertyName);
+      }
+    }
+    this.changeDetectorRef.markForCheck();
+  }
+
+  private isPickerOpenFor(ip: InspectedProperty<any>, location: 'header' | 'row') {
+    return (
+      ip.propertyName === this.openColorPickerPropertyName &&
+      this.openColorPickerLocation === location
+    );
+  }
+
+  private getGroupColorProperty(group: PropertyGroup): InspectedProperty<any> | undefined {
+    if (!this.isColorGatedGroup(group)) {
+      return undefined;
+    }
+    return group.inspectedProperties.find(p => p.typeName === 'ColorProperty');
   }
 
   // Splits the flat inspected-property list into ordered, labeled sections.
