@@ -405,11 +405,14 @@
     .spi-property.is-collapsible {
         overflow: hidden;
         max-height: 56px;
-        transition: max-height 240ms ease, opacity 200ms ease, padding 240ms ease,
-            margin 240ms ease;
+        transition: max-height 240ms ease, min-height 240ms ease, opacity 200ms ease,
+            padding 240ms ease, margin 240ms ease;
     }
     .spi-property.is-collapsed {
         max-height: 0;
+        // The base row rule sets min-height: 24px, and min-height wins over
+        // max-height — without this the collapsed rows still hold empty space.
+        min-height: 0;
         opacity: 0;
         padding-top: 0;
         padding-bottom: 0;
