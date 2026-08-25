@@ -189,7 +189,8 @@
     <!-- Animation timeline. -->
     <div #timeline
       class="slt-timeline"
-      (mousewheel)="this.onWheelEvent($event)">
+      (mousewheel)="this.onWheelEvent($event)"
+      (mousedown)="this.onTimelineMouseDown($event, model)">
       <div #timelineAnimation
         *ngIf="{ horizZoom: (this.horizZoomObservable | async) } as animationData"
         class="slt-timeline-animation is-active"
@@ -230,6 +231,18 @@
               (timelineBlockDoubleClick)="this.onTimelineBlockDoubleClick($event.event, $event.block)">
             </app-timelineanimationrow>
           </div>
+        </div>
+
+        <!-- Marquee (rubber band) block selection rectangle. -->
+        <div *ngIf="(this.marqueeObservable | async) as marquee"
+          class="slt-timeline-marquee"
+          [ngStyle]="{
+            'display': marquee.isVisible ? 'block' : 'none',
+            'left': marquee.left + 'px',
+            'top': marquee.top + 'px',
+            'width': marquee.width + 'px',
+            'height': marquee.height + 'px'
+          }">
         </div>
       </div>
     </div>

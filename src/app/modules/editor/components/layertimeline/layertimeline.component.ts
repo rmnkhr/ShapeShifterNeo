@@ -99,6 +99,14 @@ export class LayerTimelineComponent extends DestroyableMixin()
     top: 0,
   });
   dragIndicatorObservable = this.dragIndicatorSubject.asObservable();
+  private readonly marqueeSubject = new BehaviorSubject<MarqueeInfo>({
+    isVisible: false,
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+  });
+  marqueeObservable = this.marqueeSubject.asObservable();
   private readonly horizZoomSubject = new BehaviorSubject<number>(DEFAULT_HORIZ_ZOOM);
   horizZoomObservable = this.horizZoomSubject.asObservable();
   private currentTime_ = 0;
@@ -380,6 +388,63 @@ export class LayerTimelineComponent extends DestroyableMixin()
         const layer = new GroupLayer({ name, children: [] });
         this.layerTimelineService.addLayer(layer);
       });
+  }
+
+  // Called from the LayerTimelineComponent template. Starts a marquee
+  // (rubber band) gesture that selects every block intersecting the
+  // dragged rectangle. Holding shift/meta adds to the existing selection.
+  onTimelineMouseDown(mouseDownEvent: MouseEvent, model: LayerTimelineModel) {
+    if (model.isActionMode || mouseDownEvent.button !== 0) {
+      return;
+    }
+    const target = mouseDownEvent.target as Element;
+    // Blocks and the scrubbing time ruler handle their own mouse gestures.
+    if (target.closest('.slt-timeline-block') || target.closest('.slt-header')) {
+      return;
+    }
+    const timelineAnimationEl = this.timelineAnimationRef.nativeElement as Element;
+    const isAdditive =
+      mouseDownEvent.shiftKey || ShortcutService.isOsDependentModifierKey(mouseDownEvent);
+    const initialBlockIds = isAdditive
+      ? new Set<string>(this.selectedBlockIds)
+      : new Set<string>();
+
+    // tslint:disable-next-line: no-unused-expression
+    new Dragger({
+      direction: 'both',
+      downX: mouseDownEvent.clientX,
+      downY: mouseDownEvent.clientY,
+      draggingCursor: 'crosshair',
+      onDragFn: event => {
+        const left = Math.min(mouseDownEvent.clientX, event.clientX);
+        const top = Math.min(mouseDownEvent.clientY, event.clientY);
+        const right = Math.max(mouseDownEvent.clientX, event.clientX);
+        const bottom = Math.max(mouseDownEvent.clientY, event.clientY);
+        const contentRect = timelineAnimationEl.getBoundingClientRect();
+        this.marqueeSubject.next({
+          isVisible: true,
+          left: left - contentRect.left,
+          top: top - contentRect.top,
+          width: right - left,
+          height: bottom - top,
+        });
+        const selectedBlockIds = new Set<string>(initialBlockIds);
+        timelineAnimationEl.querySelectorAll('.slt-timeline-block').forEach(blockEl => {
+          const rect = blockEl.getBoundingClientRect();
+          if (rect.left <= right && rect.right >= left && rect.top <= bottom && rect.bottom >= top) {
+            const blockId = blockEl.getAttribute('data-block-id');
+            if (blockId) {
+              selectedBlockIds.add(blockId);
+            }
+          }
+        });
+        // The service only dispatches when the selection actually changes.
+        this.layerTimelineService.selectBlocks(selectedBlockIds, true);
+      },
+      onDropFn: () => {
+        this.marqueeSubject.next({ isVisible: false, left: 0, top: 0, width: 0, height: 0 });
+      },
+    });
   }
 
   // @Override TimelineAnimationRowCallbacks
@@ -1228,4 +1293,12 @@ interface DragIndicatorInfo {
   left?: number;
   top?: number;
   isVisible?: boolean;
+}
+
+interface MarqueeInfo {
+  readonly isVisible: boolean;
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
 }
