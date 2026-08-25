@@ -118,7 +118,9 @@
             class="spi-header-color-picker"
             [value]="headerIp.value"
             [disabled]="!headerIp.isEditable()"
-            (valueChange)="this.onColorPicked(headerIp, $event)">
+            (valueChange)="this.onColorPicked(headerIp, $event)"
+            (opened)="this.onColorPickerToggled(headerIp, 'header', true)"
+            (closed)="this.onColorPickerToggled(headerIp, 'header', false)">
           </app-color-picker>
         </div>
         <div class="spi-property"
@@ -229,9 +231,12 @@
             <app-color-picker *ngIf="ip.typeName === 'ColorProperty'"
               class="spi-property-color-picker"
               [class.spi-color-pop]="this.recentlyColoredPropertyName === ip.propertyName"
+              [class.is-hidden]="this.isRowColorPickerHidden(ip)"
               [value]="ip.value"
               [disabled]="!ip.isEditable()"
-              (valueChange)="this.onColorPicked(ip, $event)">
+              (valueChange)="this.onColorPicked(ip, $event)"
+              (opened)="this.onColorPickerToggled(ip, 'row', true)"
+              (closed)="this.onColorPickerToggled(ip, 'row', false)">
             </app-color-picker>
           </div>
         </div>

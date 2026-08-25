@@ -394,6 +394,12 @@
         margin-left: 8px;
         align-self: center;
 
+        // Hidden (but keeping its space) while the header instance of the same
+        // picker is still open, so the same property never shows two swatches.
+        &.is-hidden {
+            visibility: hidden;
+        }
+
         // One-shot pop when a color is first picked from the 'no color' state.
         &.spi-color-pop {
             animation: spi-color-pop 500ms cubic-bezier(0.2, 0.8, 0.3, 1.2);

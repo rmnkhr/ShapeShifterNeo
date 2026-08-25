@@ -34,6 +34,10 @@ interface Hsva {
 export class ColorPickerComponent implements OnDestroy {
   @Input() disabled = false;
   @Output() valueChange = new EventEmitter<string>();
+  // Fired when the picker popup menu opens/closes, so hosts can keep the
+  // trigger button mounted while the user is still interacting with it.
+  @Output() opened = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
 
   hsva: Hsva = { h: 0, s: 1, v: 1, a: 1 };
   hasColor = false;
