@@ -8,6 +8,7 @@
       *ngFor="let blocks of model.blocksByPropertyNameValues">
       <div class="slt-timeline-block"
         *ngFor="let block of blocks"
+        [attr.data-block-id]="block.id"
         (dblclick)="this.onTimelineBlockDoubleClick($event, block, this.layer)"
         (click)="this.onTimelineBlockClick($event, block, this.layer)"
         (mousedown)="this.onTimelineBlockMouseDown($event, block, this.layer)"

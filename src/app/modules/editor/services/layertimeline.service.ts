@@ -76,6 +76,16 @@ export class LayerTimelineService {
   }
 
   /**
+   * Selects the specified block IDs, either replacing the current block
+   * selection or adding to it. Used by the timeline's marquee selection.
+   */
+  selectBlocks(blockIds: ReadonlySet<string>, clearExisting: boolean) {
+    const selectedBlockIds = clearExisting ? new Set<string>() : this.getSelectedBlockIds();
+    blockIds.forEach(id => selectedBlockIds.add(id));
+    this.updateSelections(false, selectedBlockIds, new Set());
+  }
+
+  /**
    * Selects or deselects the specified layer ID.
    */
   selectLayer(layerId: string, clearExisting: boolean) {
