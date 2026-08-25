@@ -112,6 +112,8 @@
           *ngIf="group.label">{{ group.label }}</div>
         <div class="spi-property"
           [class.is-rotation-property]="ip.propertyName === 'rotation'"
+          [class.is-collapsible]="this.isColorGatedGroup(group)"
+          [class.is-collapsed]="this.isPropertyCollapsed(group, ip)"
           *ngFor="let ip of group.inspectedProperties; trackBy: trackInspectedPropertyFn">
           <div class="spi-property-name">{{ this.displayName(ip) }}</div>
           <div class="spi-property-value"
@@ -215,6 +217,7 @@
             </div>
             <app-color-picker *ngIf="ip.typeName === 'ColorProperty'"
               class="spi-property-color-picker"
+              [class.spi-color-pop]="this.recentlyColoredPropertyName === ip.propertyName"
               [value]="ip.value"
               [disabled]="!ip.isEditable()"
               (valueChange)="this.onColorPicked(ip, $event)">

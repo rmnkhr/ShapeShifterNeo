@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { ActionMode } from 'app/modules/editor/model/actionmode';
 import {
   ClipPathLayer,
@@ -111,12 +117,17 @@ export class PropertyInputComponent implements OnInit, OnDestroy {
 
   readonly categoryOrder = CATEGORY_ORDER;
 
+  // Property whose swatch was just given its first color (from the 'no color'
+  // state); used to play a one-shot pop animation on the color button.
+  recentlyColoredPropertyName: string | undefined;
+
   constructor(
     private readonly store: Store<State>,
     private readonly actionModeService: ActionModeService,
     private readonly playbackService: PlaybackService,
     private readonly layerTimelineService: LayerTimelineService,
     readonly themeService: ThemeService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -451,8 +462,31 @@ export class PropertyInputComponent implements OnInit, OnDestroy {
   // Applies a color chosen in the popover picker. An empty string turns the
   // color off (the model stores undefined).
   onColorPicked(ip: InspectedProperty<any>, androidColor: string) {
+    const hadNoColor = !ip.value;
     ip.editableValue = androidColor;
     ip.resolveEnteredValue();
+    if (hadNoColor && androidColor) {
+      // First color picked from the 'no color' state: pop the swatch while
+      // the collapsed sibling rows expand.
+      this.recentlyColoredPropertyName = ip.propertyName;
+      setTimeout(() => {
+        this.recentlyColoredPropertyName = undefined;
+        this.changeDetectorRef.markForCheck();
+      }, 700);
+    }
+  }
+
+  // Groups whose non-color rows collapse while the group's color is 'no color'.
+  isColorGatedGroup(group: PropertyGroup) {
+    return group.label === 'Fill' || group.label === 'Stroke';
+  }
+
+  isPropertyCollapsed(group: PropertyGroup, ip: InspectedProperty<any>) {
+    if (!this.isColorGatedGroup(group) || ip.typeName === 'ColorProperty') {
+      return false;
+    }
+    const colorIp = group.inspectedProperties.find(p => p.typeName === 'ColorProperty');
+    return !!colorIp && !colorIp.value;
   }
 
   // Splits the flat inspected-property list into ordered, labeled sections.
