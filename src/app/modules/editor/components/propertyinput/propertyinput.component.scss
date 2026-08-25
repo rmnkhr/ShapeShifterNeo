@@ -48,6 +48,8 @@
     // Section header for grouped properties (Fill / Stroke / Trim Path), with a
     // separator line between categories (skipped on the first header).
     .spi-property-group-header {
+        display: flex;
+        align-items: center;
         padding: 14px 16px 4px;
         font-size: 11px;
         font-weight: 600;
@@ -55,6 +57,12 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--ss-on-surface-variant);
+    }
+
+    // Color button shown next to the group title while the color is 'no color'.
+    .spi-header-color-picker {
+        margin-left: auto;
+        animation: spi-fade-slide-in 200ms ease;
     }
 
     // Each group is a wrapper div, so the category separator lives on the group
@@ -407,6 +415,17 @@
         padding-bottom: 0;
         margin: 0;
         pointer-events: none;
+    }
+}
+
+@keyframes spi-fade-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
     }
 }
 

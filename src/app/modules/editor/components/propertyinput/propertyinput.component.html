@@ -109,7 +109,18 @@
           [class.is-ungrouped]="!group.label"
           *ngFor="let group of model.propertyGroups; trackBy: trackPropertyGroupFn">
         <div class="spi-property-group-header"
-          *ngIf="group.label">{{ group.label }}</div>
+          *ngIf="group.label">
+          <span class="spi-property-group-title">{{ group.label }}</span>
+          <!-- While the group's color is 'no color', its rows are collapsed and
+               the color button lives up here next to the title. Picking a color
+               moves it back down into the expanded Color row. -->
+          <app-color-picker *ngIf="this.getHeaderColorProperty(group) as headerIp"
+            class="spi-header-color-picker"
+            [value]="headerIp.value"
+            [disabled]="!headerIp.isEditable()"
+            (valueChange)="this.onColorPicked(headerIp, $event)">
+          </app-color-picker>
+        </div>
         <div class="spi-property"
           [class.is-rotation-property]="ip.propertyName === 'rotation'"
           [class.is-collapsible]="this.isColorGatedGroup(group)"

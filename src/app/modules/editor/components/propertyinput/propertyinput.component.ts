@@ -482,11 +482,17 @@ export class PropertyInputComponent implements OnInit, OnDestroy {
   }
 
   isPropertyCollapsed(group: PropertyGroup, ip: InspectedProperty<any>) {
-    if (!this.isColorGatedGroup(group) || ip.typeName === 'ColorProperty') {
-      return false;
+    return !!this.getHeaderColorProperty(group);
+  }
+
+  // Returns the group's color property while it is 'no color' (the state in
+  // which the color button is shown in the group header instead of its row).
+  getHeaderColorProperty(group: PropertyGroup): InspectedProperty<any> | undefined {
+    if (!this.isColorGatedGroup(group)) {
+      return undefined;
     }
     const colorIp = group.inspectedProperties.find(p => p.typeName === 'ColorProperty');
-    return !!colorIp && !colorIp.value;
+    return colorIp && !colorIp.value ? colorIp : undefined;
   }
 
   // Splits the flat inspected-property list into ordered, labeled sections.
