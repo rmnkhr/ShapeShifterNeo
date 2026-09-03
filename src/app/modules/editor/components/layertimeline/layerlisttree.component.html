@@ -39,6 +39,11 @@
         mat-menu-item>
         Convert to path
       </button>
+      <button *ngIf="model.canBeConvertedToStrokedPaths"
+        (click)="this.onConvertToStrokedPathsClick($event, layer)"
+        mat-menu-item>
+        Convert to stroked paths
+      </button>
       <button *ngIf="model.canBeFlattened"
         (click)="this.onFlattenGroupClick($event, layer)"
         mat-menu-item>
@@ -46,7 +51,7 @@
       </button>
     </mat-menu>
     <button mat-icon-button
-      *ngIf="model.canBeConvertedToClipPath || model.canBeConvertedToPath || model.canBeFlattened"
+      *ngIf="model.canBeConvertedToClipPath || model.canBeConvertedToPath || model.canBeConvertedToStrokedPaths || model.canBeFlattened"
       class="slt-layer-action-button slt-layer-more-actions"
       (click)="$event.stopPropagation()"
       [disabled]="model.isActionMode"
@@ -161,6 +166,7 @@
         (addTimelineBlockClick)="this.onAddTimelineBlockClick($event.event, $event.layer, $event.propertyName)"
         (convertToClipPathClick)="this.onConvertToClipPathClick($event.event, $event.layer)"
         (convertToPathClick)="this.onConvertToPathClick($event.event, $event.layer)"
+        (convertToStrokedPathsClick)="this.onConvertToStrokedPathsClick($event.event, $event.layer)"
         (flattenGroupClick)="this.onFlattenGroupClick($event.event, $event.layer)">
       </app-layerlisttree>
     </li>

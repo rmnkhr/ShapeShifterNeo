@@ -48,6 +48,7 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
   @Output() removeTimelinePropertyClick = new EventEmitter<TimelineBlockEvent>();
   @Output() convertToClipPathClick = new EventEmitter<LayerEvent>();
   @Output() convertToPathClick = new EventEmitter<LayerEvent>();
+  @Output() convertToStrokedPathsClick = new EventEmitter<LayerEvent>();
   @Output() flattenGroupClick = new EventEmitter<LayerEvent>();
 
   readonly categoryOrder = CATEGORY_ORDER;
@@ -92,6 +93,11 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
             this.layer instanceof PathLayer &&
             // TODO: comparing the sets of all animatable properties for each layer type would be more robust
             !animation.blocks.some(b => !(b instanceof PathAnimationBlock));
+          const canBeConvertedToStrokedPaths =
+            this.layer instanceof PathLayer &&
+            !!this.layer.pathData &&
+            this.layer.isFilled() &&
+            !this.layer.isStroked();
           const canBeFlattened =
             this.layer instanceof GroupLayer &&
             this.layer.children.length > 0 &&
@@ -118,6 +124,7 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
             isActionMode,
             canBeConvertedToClipPath,
             canBeConvertedToPath,
+            canBeConvertedToStrokedPaths,
             canBeFlattened,
           };
         },
@@ -188,6 +195,13 @@ export class LayerListTreeComponent implements OnInit, Callbacks {
   }
 
   // @Override
+  onConvertToStrokedPathsClick(event: MouseEvent, layer: Layer) {
+    if (!this.actionModeService.isActionMode()) {
+      this.convertToStrokedPathsClick.emit({ event, layer });
+    }
+  }
+
+  // @Override
   onFlattenGroupClick(event: MouseEvent, layer: Layer) {
     if (!this.actionModeService.isActionMode()) {
       this.flattenGroupClick.emit({ event, layer });
@@ -237,6 +251,7 @@ export interface Callbacks {
   onRemoveTimelinePropertyClick(event: MouseEvent, layer: Layer, propertyName: string): void;
   onConvertToClipPathClick(event: MouseEvent, layer: Layer): void;
   onConvertToPathClick(event: MouseEvent, layer: Layer): void;
+  onConvertToStrokedPathsClick(event: MouseEvent, layer: Layer): void;
   onFlattenGroupClick(event: MouseEvent, layer: Layer): void;
 }
 
@@ -264,5 +279,6 @@ interface LayerModel {
   readonly isActionMode: boolean;
   readonly canBeConvertedToPath: boolean;
   readonly canBeConvertedToClipPath: boolean;
+  readonly canBeConvertedToStrokedPaths: boolean;
   readonly canBeFlattened: boolean;
 }

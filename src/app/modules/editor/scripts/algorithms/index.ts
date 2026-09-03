@@ -1,2 +1,3 @@
 import * as AutoAwesome from './AutoAwesome';
-export { AutoAwesome };
+import * as StrokeTracer from './StrokeTracer';
+export { AutoAwesome, StrokeTracer };
