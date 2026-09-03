@@ -8,7 +8,9 @@ import {
   PathLayer,
   VectorLayer,
 } from 'app/modules/editor/model/layers';
+import { Path } from 'app/modules/editor/model/paths';
 import { Animation, AnimationBlock, PathAnimationBlock } from 'app/modules/editor/model/timeline';
+import { StrokeTracer } from 'app/modules/editor/scripts/algorithms';
 import { MathUtil, Matrix, ModelUtil } from 'app/modules/editor/scripts/common';
 import { Action, State, Store } from 'app/modules/editor/store';
 import { BatchAction } from 'app/modules/editor/store/batch/actions';
@@ -294,6 +296,59 @@ export class LayerTimelineService {
     ];
     actions.push(new SetAnimation(newAnimation));
     this.store.dispatch(new BatchAction(...actions));
+  }
+
+  /**
+   * Converts a filled path layer (e.g. an imported Google Material icon)
+   * into a group of stroked centerline path layers, one per visual stroke.
+   * Returns false if no centerlines could be recovered.
+   */
+  convertToStrokedPaths(layerId: string) {
+    const vl = this.getVectorLayer();
+    const layer = vl.findLayerById(layerId);
+    if (!(layer instanceof PathLayer) || !layer.pathData) {
+      return false;
+    }
+    const result = StrokeTracer.traceFilledPath(layer.pathData, layer.fillType);
+    if (!result || !result.strokes.length) {
+      return false;
+    }
+    const color = layer.fillColor || '#000000';
+    const usedNames = new Set<string>();
+    vl.walk(l => usedNames.add(l.name));
+    const nameFn = (prefix: string) => {
+      const name = LayerUtil.getUniqueName(prefix, s => (usedNames.has(s) ? s : undefined));
+      usedNames.add(name);
+      return name;
+    };
+    const children: Layer[] = result.strokes.map(
+      stroke =>
+        new PathLayer({
+          name: nameFn(`${layer.name}_stroke`),
+          children: [],
+          pathData: new Path(stroke.pathString),
+          strokeColor: color,
+          strokeAlpha: layer.fillAlpha,
+          strokeWidth: result.strokeWidth,
+          strokeLinecap: stroke.strokeLinecap,
+          strokeLinejoin: 'round',
+        }),
+    );
+    result.residualFills.forEach(fill => {
+      children.push(
+        new PathLayer({
+          name: nameFn(`${layer.name}_fill`),
+          children: [],
+          pathData: new Path(fill),
+          fillColor: color,
+          fillAlpha: layer.fillAlpha,
+          fillType: layer.fillType,
+        }),
+      );
+    });
+    const group = new GroupLayer({ name: nameFn(layer.name), children });
+    this.swapLayers(layer.id, group);
+    return true;
   }
 
   /**

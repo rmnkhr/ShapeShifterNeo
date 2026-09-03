@@ -884,6 +884,17 @@ export class LayerTimelineComponent extends DestroyableMixin()
   }
 
   // @Override LayerListTreeComponentCallbacks
+  onConvertToStrokedPathsClick(event: MouseEvent, layer: Layer) {
+    if (!this.layerTimelineService.convertToStrokedPaths(layer.id)) {
+      this.snackBarService.show(
+        `Couldn't recover any strokes from '${layer.name}'`,
+        'Dismiss',
+        Duration.Long,
+      );
+    }
+  }
+
+  // @Override LayerListTreeComponentCallbacks
   onFlattenGroupClick(event: MouseEvent, layer: Layer) {
     this.layerTimelineService.flattenGroupLayer(layer.id);
   }
